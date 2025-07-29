@@ -76,24 +76,130 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Bienvenidos al Portal de Padre de Familia</h1>
-                        <ol class="breadcrumb mb-4">
+                        <h1 class="mt-4 text-center">Bienvenidos al Portal de Padre de Familia</h1>
+                        <ol class="breadcrumb mb-4 justify-content-center">
                             <li class="breadcrumb-item active">Resumen de datos</li>
                         </ol>
-                        
-                            
-                        <div class="row">
-                            <div class="col-xl-6">
+                        <div class="row justify-content-center">
+                            <div class="col-xl-6 col-lg-8">
                                 <div class="card mb-4">
-                                    <div class="card-header">
+                                    <div class="card-header text-center">
                                         <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
+                                        Vista en tiempo real de la buseta
                                     </div>
+                                    <div class="card-body">
+                                        <div id="map" style="height: 350px; width: 100%;"></div>
+                                    </div>
+                                    <div class="card card-primary mt-3">
+                                        <div class="card-body text-center">
+                                            <button class="btn btn-primary">
+                                                <i class="fas fa-envelope"></i> Mensaje al Conductor
+                                            </button>
+                                        </div>
                                     </div>
                             </div>
-                           
-                            
                         </div>
+                        <!-- Tabla de información general -->
+                        <div class="row justify-content-center mt-4">
+                            <div class="col-xl-6 col-lg-8">
+                                <div class="card mb-4">
+                                    <div class="card-header text-center">
+                                        Información General
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Nombre del Conductor</th>
+                                                    <td>Juan Pérez</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Estudiante Transportado</th>
+                                                    <td>María Rodríguez</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Resumen de horario semanal -->
+                        <div class="row justify-content-center">
+                            <div class="col-xl-6 col-lg-8">
+                                <div class="card mb-4">
+                                    <div class="card-header text-center">
+                                        Horario Semanal
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Día</th>
+                                                    <th>Hora de Salida</th>
+                                                    <th>Hora de Entrega</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Lunes</td>
+                                                    <td>7:00 am</td>
+                                                    <td>3:00 pm</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Martes</td>
+                                                    <td>7:00 am</td>
+                                                    <td>3:00 pm</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Miércoles</td>
+                                                    <td>7:00 am</td>
+                                                    <td>3:00 pm</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Jueves</td>
+                                                    <td>7:00 am</td>
+                                                    <td>3:00 pm</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Viernes</td>
+                                                    <td>7:00 am</td>
+                                                    <td>3:00 pm</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="card card-primary mt-3">
+                                        <div class="card-body text-center">
+                                             <button class="btn btn-sm"><i class="fas fa-plus"></i> Modificar Horario</button>
+                                        </div>
+                                    </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                var map = L.map('map').setView([9.9281, -84.0907], 13); 
+                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                    maxZoom: 19,
+                                    attribution: '© OpenStreetMap'
+                                }).addTo(map);
+
+                                var busMarker = L.marker([9.9281, -84.0907]).addTo(map)
+                                    .bindPopup('En Camino, ETA: 10 minutos')
+                                    .openPopup();
+
+                                var lat = 9.9281, lng = -84.0907;
+                                setInterval(function () {
+                                    lat += (Math.random() - 0.5) * 0.001;
+                                    lng += (Math.random() - 0.5) * 0.001;
+                                    busMarker.setLatLng([lat, lng]);
+                                    map.panTo([lat, lng]);
+                                }, 2000);
+                            });
+                        </script>
                     </div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">
