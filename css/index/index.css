@@ -1,0 +1,150 @@
+/* === COLORES PASTEL === */
+:root {
+    --pastel-purple: #cbb4d4;
+    --pastel-blue: #b8d8e3;
+    --pastel-pink: #fcd5ce;
+    --pastel-green: #c8e6c9;
+    --pastel-gray: #f1f1f1;
+    --pastel-accent: #726cf8;
+}
+
+/* === SIDEBAR === */
+.pastel-sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background-color: #fff;
+    font-size: 0.95rem;
+}
+
+.sidebar-heading {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #6c757d;
+    padding: 1rem 1rem 0.5rem;
+}
+
+/* Sidebar base */
+#sidebar-wrapper {
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+/* Ocultar el sidebar cuando está toggled */
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px;
+}
+
+.pastel-link {
+    color: #333;
+    background-color: transparent;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pastel-link i {
+    font-size: 1.1rem;
+    color: #666;
+    width: 20px;
+    text-align: center;
+}
+
+.pastel-link:hover {
+    background-color: var(--pastel-blue);
+    color: #000;
+}
+
+.pastel-link:hover i {
+    color: #000;
+}
+
+.pastel-link.active {
+    background-color: var(--pastel-accent);
+    color: #fff !important;
+    font-weight: 600;
+    border-left: 3px solid var(--pastel-purple);
+}
+
+.pastel-link.active i {
+    color: #fff;
+}
+
+.navbar {
+  z-index: 1040;
+  position: relative;
+}
+
+.pastel-sublink {
+    font-size: 0.9rem;
+    background-color: var(--pastel-gray);
+    color: #555;
+    padding: 0.5rem 1.5rem;
+    display: block;
+}
+
+.pastel-sublink:hover {
+    background-color: var(--pastel-green);
+    color: #000;
+}
+
+.pastel-sublink.active {
+    background-color: var(--pastel-accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.pastel-sublink.active:hover {
+    background-color: var(--pastel-accent);
+    color: #fff;
+}
+
+/* Botón genérico */
+.pastel-btn {
+    background-color: var(--pastel-purple);
+    color: white;
+    border: none;
+}
+
+.pastel-btn:hover {
+    background-color: #a58eaf;
+}
+
+/* Input genérico */
+.pastel-input {
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+/* Sidebar responsive */
+@media (max-width: 768px) {
+
+  #sidebarToggle {
+  z-index: 1050;
+}
+
+  #sidebarToggle:hover {
+    background-color: #a58eaf;
+  }
+
+    #sidebar-wrapper {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100%;
+        z-index: 1030;
+        margin-left: 0 !important;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        left: 0;
+    }
+
+    #page-content-wrapper {
+        width: 100%;
+    }
+}

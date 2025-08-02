@@ -1,0 +1,100 @@
+/* === TARJETAS === */
+.card {
+  border-radius: 0.75rem;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+}
+
+.card-header.bg-info {
+  background-color: var(--pastel-blue) !important;
+  font-weight: 600;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* === BOTÓN AGREGAR === */
+.btn-jump {
+  background-color: var(--pastel-purple);
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-jump:hover {
+  background-color: #a58eaf;
+  color: white;
+}
+
+/* === BREADCRUMBS === */
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #aaa;
+}
+
+/* === TABLA === */
+table.dataTable thead,
+table.pastel-table th {
+  background-color: var(--pastel-gray);
+  color: #333;
+  font-weight: 600;
+}
+
+table.dataTable tfoot {
+  background-color: var(--pastel-gray);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+table.dataTable tbody tr:hover,
+table.pastel-table tr:hover {
+  background-color: var(--pastel-green);
+}
+
+table.pastel-table td {
+  vertical-align: middle;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+table.pastel-table td a i {
+  font-size: 1rem;
+}
+
+table.pastel-table td a:hover {
+  opacity: 0.8;
+}
+
+/* Iconos en tabla */
+table i.fas {
+  font-size: 1rem;
+}
+
+a.text-primary:hover {
+  color: #4a00e0 !important;
+}
+
+a.text-danger:hover {
+  color: #ff5252 !important;
+}
+
+/* Forzar color negro en headers de tarjetas si usan pastel-blue */
+.card-header.bg-info i,
+.card-header.bg-info span {
+  color: #000 !important;
+}
+
+/* Título principal Asistentes */
+h1.text-dark {
+  color: #000 !important;
+}
