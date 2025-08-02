@@ -52,7 +52,8 @@
                     <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Busetas</a>
                     <a href="Asistentes/gestion-asistentes.html"
                         class="list-group-item list-group-item-action pastel-sublink ps-5 active">Asistentes</a>
-                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
+                    <a href="../Alertas/gestion-alertas.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
                 </div>
                 <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
                     data-bs-toggle="collapse" href="#viajesMenu" role="button">
@@ -209,21 +210,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/scripts.js"></script>
 
-    <!-- DataTables Init -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            $('#datatablesSimple').DataTable({
-                responsive: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/2.3.2/i18n/es-ES.json'
-                },
-                lengthMenu: [[5, 10, 20, 50], [5, 10, 20, 50]],
-                columnDefs: [
-                    { targets: 6, orderable: false }
-                ]
-            });
-        });
-    </script>
+    <script src="../js/utilitarios/utilitarios.js"></script>
+    <script src="../js/asistentes/gestion-asistentes.js"></script>
+
+
 </body>
 
 </html>

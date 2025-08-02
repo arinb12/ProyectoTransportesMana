@@ -42,51 +42,6 @@
   color: #aaa;
 }
 
-/* === TABLA === */
-table.dataTable thead,
-table.pastel-table th {
-  background-color: var(--pastel-gray);
-  color: #333;
-  font-weight: 600;
-}
-
-table.dataTable tfoot {
-  background-color: var(--pastel-gray);
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-table.dataTable tbody tr:hover,
-table.pastel-table tr:hover {
-  background-color: var(--pastel-green);
-}
-
-table.pastel-table td {
-  vertical-align: middle;
-  color: #444;
-  font-size: 0.95rem;
-}
-
-table.pastel-table td a i {
-  font-size: 1rem;
-}
-
-table.pastel-table td a:hover {
-  opacity: 0.8;
-}
-
-/* Iconos en tabla */
-table i.fas {
-  font-size: 1rem;
-}
-
-a.text-primary:hover {
-  color: #4a00e0 !important;
-}
-
-a.text-danger:hover {
-  color: #ff5252 !important;
-}
 
 /* Forzar color negro en headers de tarjetas si usan pastel-blue */
 .card-header.bg-info i,
