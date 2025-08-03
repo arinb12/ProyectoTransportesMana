@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Transportes Maná - Gestión Asistentes</title>
+    <title>Transportes Maná - Gestión Busetas</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -26,7 +26,9 @@
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/index/index.css" />
+    <link rel="stylesheet" href="../css/index/index.css" />
+    <!-- Custom CSS for Busetas -->
+    <link rel="stylesheet" href="../css/busetas/gestion-busetas.css" />
 </head>
 
 <body>
@@ -35,7 +37,7 @@
         <nav class="bg-white pastel-sidebar border-end" id="sidebar-wrapper">
             <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
             <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action pastel-link active">
+                <a href="../index.html" class="list-group-item list-group-item-action pastel-link">
                     <i class="bi bi-house-door me-2"></i>Inicio
                 </a>
                 <a href="#" class="list-group-item list-group-item-action pastel-link">
@@ -49,10 +51,10 @@
                 <div class="collapse" id="gestionMenu">
                     <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Estudiantes</a>
                     <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Padres</a>
-                    <a href="Busetas/gestion-busetas.html" class="list-group-item list-group-item-action pastel-sublink ps-5">Busetas</a>
-                    <a href="Asistentes/gestion-asistentes.html"
+                    <a href="gestion-busetas.html" class="list-group-item list-group-item-action pastel-sublink ps-5 active">Busetas</a>
+                    <a href="../Asistentes/gestion-asistentes.html"
                         class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
-                    <a href="Alertas/gestion-alertas.html"
+                    <a href="../Alertas/gestion-alertas.html"
                         class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
                 </div>
                 <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
@@ -106,15 +108,98 @@
             </nav>
 
             <!-- Main Content Placeholder -->
-            <div class="container-fluid p-4">
-                <!-- Content here -->
-            </div>
-        </div>
+             <div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="text-dark">Gestión de Busetas</h1>
+      <button class="btn pastel-btn" id="btnNuevaBuseta" data-bs-toggle="modal" data-bs-target="#modalBuseta">
+        <i class="bi bi-bus-front-fill me-1"></i>Nueva Buseta
+      </button>
     </div>
 
+    <div id="alertaEliminado" class="alert alert-success d-none" role="alert">
+      Buseta eliminada exitosamente.
+    </div>
+
+    <div class="card mb-4 shadow">
+      <div class="card-header bg-info text-dark fw-bold">
+        <i class="fas fa-table me-2"></i>Listado de Busetas
+      </div>
+      <div class="card-body">
+        <table id="tablaBusetas" class="table table-hover table-bordered pastel-table">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Conductor</th>
+              <th>Capacidad</th>
+              <th>Jornada</th>
+              <th>Horario</th>
+              <th>Estudiantes</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ABC123</td>
+              <td>Juan Pérez</td>
+              <td>40</td>
+              <td>Mañana</td>
+              <td>07:00</td>
+              <td>20</td>
+              <td>
+                <a href="#" class="text-primary ms-2" title="Editar" onclick="editarBuseta(0)">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarBuseta(0)">
+                  <i class="fas fa-trash-alt"></i>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Registro/Edición -->
+  <div class="modal fade" id="modalBuseta" tabindex="-1" aria-labelledby="modalBusetaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <div class="modal-header bg-info">
+          <h5 class="modal-title text-dark fw-bold" id="modalBusetaLabel">
+            <i class="fas fa-bus me-2"></i>Registrar Buseta
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="busetaForm" class="row g-3 needs-validation" novalidate>
+            <input type="hidden" id="editIndex" value="">
+            <div class="col-md-3"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control" required></div>
+            <div class="col-md-3"><label class="form-label">Conductor</label><input type="text" id="conductor" class="form-control" required></div>
+            <div class="col-md-3"><label class="form-label">Capacidad</label><input type="number" id="capacidad" class="form-control" required></div>
+            <div class="col-md-3"><label class="form-label">Jornada</label><select id="jornada" class="form-select" required>
+              <option value="">Selecciona</option><option>Mañana</option><option>Tarde</option><option>Ambas</option>
+            </select></div>
+            <div class="col-md-3"><label class="form-label">Horario Salida</label><input type="time" id="horario" class="form-control" required></div>
+            <div class="col-md-9"><label class="form-label">Estudiantes asignados</label><input type="text" id="estudiantes" class="form-control" placeholder="Ej: Juan, Ana" required></div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn pastel-btn me-2">Guardar</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+        </div>
+    </div>
+    <!-- JS Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/scripts.js"></script>
-    <script src="js/utilitarios/utilitarios.js"></script>
+    <script src="../js/scripts.js"></script>
+    <!-- Custom JS for Busetas -->
+    <script src="../js/utilitarios/utilitarios.js"></script>
+    <script src="../js/busetas/gestion-busetas.js"></script>
+
+
 </body>
 
 </html>
