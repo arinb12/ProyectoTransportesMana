@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión Estudiantes – Transportes Maná</title>
+
+    <!-- Bootstrap CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/index/index.css" />
+    <link rel="stylesheet" href="../css/estudiantes/gestion-estudiantes.css" />
+</head>
+
+<body>
+
+    <div class="d-flex" id="wrapper">
+        <nav class="bg-white pastel-sidebar border-end" id="sidebar-wrapper">
+            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+            <div class="list-group list-group-flush">
+                <a href="../index.html" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-house-door me-2"></i>Inicio
+                </a>
+                <a href="#" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-journal-text me-2"></i>Comunicados
+                </a>
+                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                    data-bs-toggle="collapse" href="#gestionMenu" role="button">
+                    <div><i class="bi bi-sliders me-2"></i>Gestión</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" id="gestionMenu">
+                    <a href="gestion-estudiantes.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5 active">Estudiantes</a>
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Padres</a>
+                    <a href="../Busetas/gestion-busetas.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Busetas</a>
+                    <a href="../Asistentes/gestion-asistentes.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
+                    <a href="../Alertas/gestion-alertas.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
+                </div>
+                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                    data-bs-toggle="collapse" href="#viajesMenu" role="button">
+                    <div><i class="bi bi-scissors me-2"></i>Viajes</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" id="viajesMenu">
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Control de
+                        Asistencia</a>
+                </div>
+            </div>
+
+            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Portal de Padres</div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-person me-2"></i>Gestionar Hijos
+                </a>
+                <a href="#" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-journal-text me-2"></i>Historial de Asistencia
+                </a>
+            </div>
+        </nav>
+
+
+        <div id="page-content-wrapper" class="w-100">
+
+            <nav class="navbar navbar-expand-lg navbar-light pastel-bg border-bottom px-4">
+                <button class="btn pastel-btn" id="sidebarToggle">☰</button>
+                <div class="ms-auto dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://randomuser.me/api/portraits/women/75.jpg" class="rounded-circle me-2"
+                            width="36" height="36" />
+                        <span class="d-none d-md-inline text-dark">Julia Morales</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
+                        <li>
+                            <h6 class="dropdown-header">Administrador</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                        <li>
+                            <hr class="dropdown-divider" />
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="text-dark">Gestión de Estudiantes</h1>
+                    <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEstudiante">
+                        <i class="bi bi-person-plus me-1"></i>Nuevo Estudiante
+                    </button>
+                </div>
+
+                <div id="alertaEstudiante" class="alert alert-success d-none" role="alert">
+                    Estudiante guardado correctamente.
+                </div>
+
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-info text-dark fw-bold">
+                        <i class="fas fa-users me-2"></i>Listado de Estudiantes
+                    </div>
+                    <div class="card-body">
+                        <table id="tablaEstudiantes" class="table pastel-table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellidos</th>
+                                    <th>Encargado Legal</th>
+                                    <th>Institución</th>
+                                    <th>Maestra</th>
+                                    <th>Sección</th>
+                                    <th>Activo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Camila</td>
+                                    <td>Ramírez Soto</td>
+                                    <td>María Soto</td>
+                                    <td>Escuela San Pedro</td>
+                                    <td>Profa. López</td>
+                                    <td>3°A</td>
+                                    <td class="text-center">
+                                        <input type="checkbox" checked>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="text-primary ms-2" title="Editar"
+                                            onclick="editarEstudiante(0)">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Camila</td>
+                                    <td>Ramírez Soto</td>
+                                    <td>María Soto</td>
+                                    <td>Escuela San Pedro</td>
+                                    <td>Profa. López</td>
+                                    <td>3°A</td>
+                                    <td class="text-center">
+                                        <input type="checkbox" checked>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="text-primary ms-2" title="Editar"
+                                            onclick="editarEstudiante(0)">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Registro/Edición -->
+            <div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content rounded-4">
+                        <div class="modal-header bg-info">
+                            <h5 class="modal-title text-dark fw-bold" id="modalEstudianteLabel">
+                                <i class="fas fa-user-graduate me-2"></i>Registrar Estudiante
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="estudianteForm" class="row g-3 needs-validation" novalidate>
+                                <input type="hidden" id="editIndex" value="">
+                                <div class="col-md-6"><label class="form-label">Nombre</label><input type="text"
+                                        id="nombre" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Apellidos</label><input type="text"
+                                        id="apellidos" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Encargado Legal</label><input
+                                        type="text" id="encargado" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Institución</label><input type="text"
+                                        id="institucion" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Maestra</label><input type="text"
+                                        id="maestra" class="form-control" required></div>
+                                <div class="col-md-3"><label class="form-label">Sección</label><input type="text"
+                                        id="seccion" class="form-control" required></div>
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <label class="form-check-label me-2">Activo</label>
+                                    <input type="checkbox" id="activo" class="form-check-input">
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn pastel-btn me-2">Guardar</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../js/scripts.js"></script>
+        <script src="../js/utilitarios/utilitarios.js"></script>
+        <script src="../js/estudiantes/gestion-estudiantes.js"></script>
+</body>
+
+</html>
