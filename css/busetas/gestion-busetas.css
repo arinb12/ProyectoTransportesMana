@@ -1,0 +1,43 @@
+.card-header.bg-info {
+  background-color: var(--pastel-blue) !important;
+  font-weight: 600;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-header.bg-info i,
+.card-header.bg-info span {
+  color: #000 !important;
+}
+
+/* === MODAL === */
+.modal-header {
+  background-color: var(--pastel-blue) !important;
+}
+
+.modal-title i {
+  color: var(--pastel-accent);
+}
+
+#formAlerta input,
+#formAlerta select,
+#formAlerta textarea {
+  border-radius: 0.5rem;
+}
+
+table.pastel-table td {
+  vertical-align: middle;
+}
+
+table.pastel-table tr:hover {
+  background-color: var(--pastel-green);
+}
+
+#grupoRuta select,
+#grupoBuseta select,
+#grupoEncargado select {
+  border-color: var(--pastel-purple);
+}

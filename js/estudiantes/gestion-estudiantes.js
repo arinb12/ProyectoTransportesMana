@@ -1,0 +1,1 @@
+initDataTable('tablaEstudiantes', [7]);
