@@ -110,6 +110,15 @@
     border: none;
 }
 
+.bg-pastel-verde {
+    background-color: #d7f0dd;
+}
+
+.bg-pastel-azul {
+    background-color: #dceeff;
+}
+
+
 .pastel-btn:hover {
     background-color: #a58eaf;
 }
