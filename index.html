@@ -43,7 +43,7 @@
                         class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
                     <a href="../Alertas/gestion-alertas.html"
                         class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
-                 </div>
+                </div>
                 <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
                     data-bs-toggle="collapse" href="#viajesMenu" role="button">
                     <div><i class="bi bi-scissors me-2"></i>Viajes</div>
@@ -52,7 +52,8 @@
                 <div class="collapse" id="viajesMenu">
                     <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
                     <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
-                    <a href="../Viajes/control-asistencia.html" class="list-group-item list-group-item-action pastel-sublink ps-5">Control de
+                    <a href="../Viajes/control-asistencia.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Control de
                         Asistencia</a>
                 </div>
             </div>
@@ -80,9 +81,13 @@
                         <span class="d-none d-md-inline text-dark">Julia Morales</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
-                        <li><h6 class="dropdown-header">Administrador</h6></li>
+                        <li>
+                            <h6 class="dropdown-header">Administrador</h6>
+                        </li>
                         <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
-                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <hr class="dropdown-divider" />
+                        </li>
                         <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
                     </ul>
                 </div>
@@ -126,8 +131,8 @@
                                             <a href="#" title="Editar" onclick="editarHorario(this)">
                                                 <i class="fas fa-edit text-primary me-2"></i>
                                             </a>
-                                            
-                                             <a href="#" title="Guardar" onclick="guardarHorario(this)">
+
+                                            <a href="#" title="Guardar" onclick="guardarHorario(this)">
                                                 <i class="fas fa-save" style="color:gold;"></i>
                                             </a>
                                         </td>
@@ -144,7 +149,7 @@
                                             <a href="#" title="Editar" onclick="editarHorario(this)">
                                                 <i class="fas fa-edit text-primary me-2"></i>
                                             </a>
-                                             <a href="#" title="Guardar" onclick="guardarHorario(this)">
+                                            <a href="#" title="Guardar" onclick="guardarHorario(this)">
                                                 <i class="fas fa-save" style="color:gold;"></i>
                                             </a>
                                         </td>
@@ -188,7 +193,7 @@
                                             <a href="#" title="Editar" onclick="editarHorario(this)">
                                                 <i class="fas fa-edit text-primary me-2"></i>
                                             </a>
-                                             <a href="#" title="Guardar" onclick="guardarHorario(this)">
+                                            <a href="#" title="Guardar" onclick="guardarHorario(this)">
                                                 <i class="fas fa-save" style="color:gold;"></i>
                                             </a>
                                         </td>
@@ -205,7 +210,7 @@
                                             <a href="#" title="Editar" onclick="editarHorario(this)">
                                                 <i class="fas fa-edit text-primary me-2"></i>
                                             </a>
-                                             <a href="#" title="Guardar" onclick="guardarHorario(this)">
+                                            <a href="#" title="Guardar" onclick="guardarHorario(this)">
                                                 <i class="fas fa-save" style="color:gold;"></i>
                                             </a>
                                         </td>
@@ -221,6 +226,7 @@
     </div>
 
     <!-- Scripts -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function editarHorario(elemento) {
@@ -243,7 +249,12 @@
             if (ap.toLowerCase() === 'am' && horas === 12) horas = 0;
             return `${horas.toString().padStart(2, '0')}:${m}`;
         }
+
+
     </script>
+
+    <script src="js/scripts.js"></script>
+    <script src="js/utilitarios/utilitarios.js"></script>
 </body>
 
 </html>
