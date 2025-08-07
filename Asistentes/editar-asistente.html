@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editar Asistente</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="../css/index/index.css" />
+  <link rel="stylesheet" href="../css/asistentes/asistentes.css" />
+</head>
+
+<body>
+  <!-- Modal Editar Asistente -->
+  <div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <!-- Cabecera estilo pastel -->
+        <div class="modal-header" style="background-color: #cbe6f4;">
+          <h5 class="modal-title fw-bold" id="modalAsistenteLabel">
+            <i class="fas fa-user-edit me-2"></i>Editar Asistente
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="asistenteForm" class="row g-3 needs-validation" novalidate>
+            <input type="hidden" id="editAsistenteId" value="">
+
+            <!-- Nombre completo -->
+            <div class="col-md-6">
+              <label for="nombre" class="form-label">Nombre completo</label>
+              <input type="text" class="form-control" id="nombre" required>
+              <div class="invalid-feedback">Ingrese el nombre completo.</div>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="col-md-6">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input type="tel" class="form-control" id="telefono" pattern="[0-9]{8}" required>
+              <div class="invalid-feedback">Debe tener 8 dígitos.</div>
+            </div>
+
+            <!-- Cédula -->
+            <div class="col-md-6">
+              <label for="cedula" class="form-label">Cédula</label>
+              <input type="text" class="form-control" id="cedula" pattern="[0-9]{9}" required>
+              <div class="invalid-feedback">Solo se permiten 9 números.</div>
+            </div>
+
+            <!-- Correo -->
+            <div class="col-md-6">
+              <label for="correo" class="form-label">Correo electrónico</label>
+              <input type="email" class="form-control" id="correo">
+              <div class="invalid-feedback">Ingrese un correo válido.</div>
+            </div>
+
+            <!-- Salario -->
+            <div class="col-md-6">
+              <label for="salario" class="form-label">Salario</label>
+              <input type="number" class="form-control" id="salario" required>
+              <div class="invalid-feedback">Ingrese un salario válido.</div>
+            </div>
+
+            <!-- Asignar Buseta -->
+            <div class="col-md-6">
+              <label for="buseta" class="form-label">Asignar Buseta</label>
+              <select class="form-select" id="buseta" required>
+                <option value="" disabled selected>Seleccione una buseta</option>
+                <option value="1">Buseta 1 - ABC123</option>
+                <option value="2">Buseta 2 - DEF456</option>
+                <option value="3">Buseta 3 - GHI789</option>
+              </select>
+              <div class="invalid-feedback">Debe seleccionar una buseta.</div>
+            </div>
+
+            <!-- Botones -->
+            <div class="col-12 text-end pt-3">
+              <button type="submit" class="btn" style="background-color: #e0c9e6; color: white;">
+                <i class="fas fa-save me-1"></i> Guardar
+              </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script para mostrar automáticamente el modal -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = new bootstrap.Modal(document.getElementById("modalAsistente"));
+      modal.show();
+    });
+  </script>
+</body>
+</html>
