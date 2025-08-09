@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transportes Maná - Gestión Asistentes</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/index/index.css" />
+    <link rel="stylesheet" href="../css/asistentes/asistentes.css">
+
+    <style>
+        /* Validación visual personalizada */
+        .form-control:valid {
+            border-color: #198754;
+            padding-right: 2.25rem;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23198754' viewBox='0 0 16 16'%3e%3cpath d='M16 2.3L6 15.3 0 8.6l1.5-1.4L6 12.2 14.5 1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .form-control:invalid {
+            border-color: #dc3545;
+            padding-right: 2.25rem;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23dc3545' viewBox='0 0 16 16'%3e%3cpath d='M16 14L2 0 0 2l14 14zM2 14L16 0l-2-2L0 12z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="d-flex" id="wrapper">
+        <nav class="bg-white pastel-sidebar border-end" id="sidebar-wrapper">
+            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+            <div class="list-group list-group-flush">
+                <a href="../index.html" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-house-door me-2"></i>Inicio
+                </a>
+                <a href="#" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-journal-text me-2"></i>Comunicados
+                </a>
+                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                    data-bs-toggle="collapse" href="#gestionMenu" role="button">
+                    <div><i class="bi bi-sliders me-2"></i>Gestión</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" id="gestionMenu">
+                    <a href="../Estudiantes/gestion-estudiantes.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Estudiantes</a>
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Padres</a>
+                    <a href="../Busetas/gestion-busetas.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Busetas</a>
+                    <a href="../Asistentes/gestion-asistentes.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5 active">Asistentes</a>
+                    <a href="../Alertas/gestion-alertas.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
+                </div>
+                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                    data-bs-toggle="collapse" href="#viajesMenu" role="button">
+                    <div><i class="bi bi-scissors me-2"></i>Viajes</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" id="viajesMenu">
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
+                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Control de
+                        Asistencia</a>
+                </div>
+
+                <a href="gestion-reportes.html" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-clipboard-data me-2"></i>Reportes
+                </a>
+            </div>
+
+            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Portal de Padres</div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-person me-2"></i>Gestionar Hijos
+                </a>
+                <a href="#" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-journal-text me-2"></i>Historial de Asistencia
+                </a>
+            </div>
+        </nav>
+
+        <!-- Page content wrapper -->
+        <div id="page-content-wrapper" class="w-100">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light pastel-bg border-bottom px-4">
+                <button class="btn pastel-btn" id="sidebarToggle">☰</button>
+                <div class="ms-auto dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://randomuser.me/api/portraits/women/75.jpg" class="rounded-circle me-2"
+                            width="36" height="36" />
+                        <span class="d-none d-md-inline text-dark">Julia Morales</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
+                        <li>
+                            <h6 class="dropdown-header">Administrador</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                        <li>
+                            <hr class="dropdown-divider" />
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="container mt-4">
+                <h3 class="mb-4"><i class="bi bi-bar-chart-fill me-2"></i>Panel de Reportes</h3>
+
+                <!-- Reportes de Asistencia -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-success bg-opacity-25 text-dark fw-bold">
+                        <i class="bi bi-clipboard-data me-2"></i>Asistencia por Buseta
+                    </div>
+                    <div class="card-body">
+                        <canvas id="asistenciaChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart.js CDN -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                const ctx = document.getElementById('asistenciaChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Buseta 1', 'Buseta 2', 'Buseta 3', 'Buseta 4'],
+                        datasets: [{
+                            label: 'Estudiantes presentes',
+                            data: [22, 19, 25, 20],
+                            backgroundColor: ['#A2D2FF', '#CDB4DB', '#BDE0FE', '#FFC8DD'],
+                            borderRadius: 5,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 5 }
+                            }
+                        }
+                    }
+                });
+            </script>
+
+
+            <!-- Notificaciones -->
+            <!-- Notificaciones -->
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-warning bg-opacity-25 text-dark fw-bold">
+                    <i class="bi bi-bell-fill me-2"></i>Notificaciones a Padres
+                </div>
+                <div class="card-body">
+                    <canvas id="notificacionesChart" height="100"></canvas>
+
+                    <!-- Tabla de ejemplo con estilo pastel -->
+                    <div class="table-responsive mt-4">
+                        <table class="table table-hover table-bordered pastel-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Estudiante</th>
+                                    <th>Motivo</th>
+                                    <th>Buseta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-08-20</td>
+                                    <td>Laura Campos</td>
+                                    <td>Ausencia</td>
+                                    <td>Buseta 2</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-08-20</td>
+                                    <td>José Ramírez</td>
+                                    <td>Llegada Tardía</td>
+                                    <td>Buseta 4</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-08-21</td>
+                                    <td>Sofía Martínez</td>
+                                    <td>Cambio de Ruta</td>
+                                    <td>Buseta 1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart.js -->
+            <script>
+                const ctxNotif = document.getElementById('notificacionesChart').getContext('2d');
+                new Chart(ctxNotif, {
+                    type: 'line',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+                        datasets: [{
+                            label: 'Notificaciones Enviadas',
+                            data: [3, 6, 4, 7, 5],
+                            fill: true,
+                            backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                            borderColor: '#f0ad4e',
+                            tension: 0.4,
+                            pointBackgroundColor: '#f0ad4e'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 2 }
+                            }
+                        }
+                    }
+                });
+            </script>
+
+
+            <!-- Estadísticas -->
+            <!-- Estadísticas - Uso del Servicio -->
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-info bg-opacity-25 text-dark fw-bold">
+                    <i class="bi bi-graph-up-arrow me-2"></i>Uso del Servicio
+                </div>
+                <div class="card-body text-center">
+                    <div class="mx-auto" style="max-width: 300px;">
+                        <canvas id="usoChart" height="200"></canvas>
+                    </div>
+
+                    <!-- Tabla resumen -->
+                    <div class="table-responsive mt-4">
+                        <table class="table table-hover table-bordered pastel-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ruta</th>
+                                    <th>Institución</th>
+                                    <th>Estudiantes</th>
+                                    <th>Ingreso Diario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Ruta A</td>
+                                    <td>Esc. Central</td>
+                                    <td>32</td>
+                                    <td>₡48,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Ruta B</td>
+                                    <td>San José Norte</td>
+                                    <td>27</td>
+                                    <td>₡40,500</td>
+                                </tr>
+                                <tr>
+                                    <td>Ruta C</td>
+                                    <td>Los Ángeles</td>
+                                    <td>18</td>
+                                    <td>₡27,000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Chart.js -->
+            <script>
+                const ctxUso = document.getElementById('usoChart').getContext('2d');
+                new Chart(ctxUso, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Ruta A', 'Ruta B', 'Ruta C'],
+                        datasets: [{
+                            label: 'Estudiantes por Ruta',
+                            data: [32, 27, 18],
+                            backgroundColor: ['#B5EAD7', '#C7CEEA', '#FFDAC1'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            </script>
+
+
+
+            <!-- Exportaciones -->
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-primary bg-opacity-25 text-dark fw-bold">
+                    <i class="bi bi-file-earmark-arrow-down-fill me-2"></i>Exportaciones
+                </div>
+                <div class="card-body text-center">
+                    <i class="bi bi-download fs-2 text-primary mb-3"></i>
+                    <br>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-filetype-pdf me-1"></i>Descargar PDF
+                    </button>
+                </div>
+            </div>
+
+
+
+            <!-- Bootstrap Bundle -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="../js/scripts.js"></script>
+
+            <script>
+                (() => {
+                    'use strict';
+                    const forms = document.querySelectorAll('.needs-validation');
+                    Array.from(forms).forEach(form => {
+                        form.addEventListener('submit', event => {
+                            if (!form.checkValidity()) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                })();
+            </script>
+</body>
+
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transportes Maná - Gestión Asistentes</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+
+    <!-- jQuery (required by DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/index/index.css">
+    <link rel="stylesheet" href="../css/asistentes/asistentes.css">
+</head>
+
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
+        <nav class="bg-white pastel-sidebar border-end" id="sidebar-wrapper">
+            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+            <div class="list-group list-group-flush">
+                <a href="../portal-padre.html" class="list-group-item list-group-item-action pastel-link active">
+                    <i class="bi bi-house-door me-2"></i>Inicio
+                </a>
+                <a href="comunicados.html" class="list-group-item list-group-item-action pastel-link">
+                    <i class="bi bi-journal-text me-2"></i>Comunicados
+                </a>
+                <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Portal de Padres</div>
+                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                    data-bs-toggle="collapse" href="#gestionMenu" role="button">
+                    <div><i class="bi bi-sliders me-2"></i>Gestión</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse" id="gestionMenu">
+                    <a href="gestion-horario.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Horario de
+                        Estudiante</a>
+                    <a href="gestion-contrato.html"
+                        class="list-group-item list-group-item-action pastel-sublink ps-5">Contrato</a>
+
+                </div>
+
+            </div>
+
+
+
+        </nav>
+
+
+        <!-- Page content wrapper -->
+        <div id="page-content-wrapper" class="w-100">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light pastel-bg border-bottom px-4">
+                <button class="btn pastel-btn" id="sidebarToggle">☰</button>
+                <div class="ms-auto dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://randomuser.me/api/portraits/women/75.jpg" class="rounded-circle me-2"
+                            width="36" height="36" />
+                        <span class="d-none d-md-inline text-dark">Julia Morales</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
+                        <li>
+                            <h6 class="dropdown-header">Administrador</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                        <li>
+                            <hr class="dropdown-divider" />
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content Placeholder -->
+            <div class="container-fluid p-4">
+                <div id="layoutSidenav_content">
+                    <main>
+                        <div class="container-fluid px-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h1 class="text-dark">Bienvenidos al Portal de Padre de Familia</h1>
+                                <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEstudiante">
+                                    <i class="bi bi-person-plus me-1"></i>Nuevo Horario
+                                </button>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div>
+                                    <div class="card mb-4 shadow">
+                                        <div class="card-header bg-pastel-azul text-dark fw-bold">
+                                            Kinder Fidel
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table pastel-table table-hover table-bordered mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Sección</th>
+                                                            <th>Estudiante</th>
+                                                            <th>Fecha</th>
+                                                            <th>Lunes</th>
+                                                            <th>Martes</th>
+                                                            <th>Miércoles</th>
+                                                            <th>Jueves</th>
+                                                            <th>Viernes</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>1-1</td>
+                                                            <td>Camila</td>
+                                                            <td>2023-10-01</td>
+                                                            <td>11:00am</td>
+                                                            <td>12:30am</td>
+                                                            <td>4:30pm</td>
+                                                            <td>11:00am</td>
+                                                            <td>10:00am</td>
+                                                            <td class="text-center">
+                                                                <a href="#" title="Editar"
+                                                                    onclick="editarHorario(this)">
+                                                                    <i class="fas fa-edit text-primary me-2"></i>
+                                                                </a>
+
+                                                                <a href="#" title="Guardar"
+                                                                    onclick="guardarHorario(this)">
+                                                                    <i class="fas fa-save" style="color:gold;"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                    </main>
+                    <footer class="py-4 bg-light mt-auto">
+                        <div class="container-fluid px-4">
+                            <div class="d-flex align-items-center justify-content-between small">
+                                <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                                <div>
+                                    <a href="#">Privacy Policy</a>
+                                    &middot;
+                                    <a href="#">Terms &amp; Conditions</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"
+                crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+                crossorigin="anonymous"></script>
+
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="js/scripts.js"></script>
+            <script src="js/utilitarios/utilitarios.js"></script>
+            <script>
+                function editarHorario(elemento) {
+                    const filas = document.querySelectorAll('#datatablesSimple tbody tr');
+                    filas.forEach(fila => {
+                        const salida = fila.children[1];
+                        const entrega = fila.children[2];
+
+                        salida.innerHTML = `<input type="time" class="form-control form-control-sm" value="${convertirHora(salida.innerText)}">`;
+                        entrega.innerHTML = `<input type="time" class="form-control form-control-sm" value="${convertirHora(entrega.innerText)}">`;
+                    });
+
+                    elemento.style.display = "none";
+                    document.getElementById("btnGuardarHorario").style.display = "inline-block";
+                }
+
+                function convertirHora(hora) {
+                    // Convertidor básico para formato 12h a 24h si lo deseas
+                    const [h, m, ap] = hora.replace(/ /g, '').match(/(\d+):(\d+)(am|pm)/i).slice(1);
+                    let horas = parseInt(h);
+                    if (ap.toLowerCase() === 'pm' && horas !== 12) horas += 12;
+                    if (ap.toLowerCase() === 'am' && horas === 12) horas = 0;
+                    return `${horas.toString().padStart(2, '0')}:${m}`;
+                }
+
+                function guardarHorario() {
+                    const filas = document.querySelectorAll('#datatablesSimple tbody tr');
+                    filas.forEach(fila => {
+                        const salida = fila.children[1];
+                        const entrega = fila.children[2];
+
+                        const salidaInput = salida.querySelector('input');
+                        const entregaInput = entrega.querySelector('input');
+
+                        if (salidaInput && entregaInput) {
+                            salida.innerText = convertirHora12h(salidaInput.value);
+                            entrega.innerText = convertirHora12h(entregaInput.value);
+                        }
+                    });
+
+                    document.getElementById("btnEditarHorario").style.display = "inline-block";
+                    document.getElementById("btnGuardarHorario").style.display = "none";
+                }
+
+                // Convierte de 24h a 12h
+                function convertirHora12h(hora24) {
+                    const [h, m] = hora24.split(':');
+                    let horas = parseInt(h);
+                    const ampm = horas >= 12 ? 'pm' : 'am';
+                    horas = horas % 12 || 12;
+                    return `${horas}:${m} ${ampm}`;
+                }
+
+                function abrirChatModal() {
+                    var chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+                    chatModal.show();
+                }
+
+                function enviarMensaje() {
+                    const input = document.getElementById('chatInput');
+                    const mensajes = document.getElementById('chatMensajes');
+                    if (input.value.trim() !== "") {
+                        mensajes.innerHTML += `<div class="mb-2"><strong>Tú:</strong> ${input.value}</div>`;
+                        input.value = "";
+                        mensajes.scrollTop = mensajes.scrollHeight;
+                    }
+                }
+            </script>
+            <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="chatModalLabel">Chat con el Conductor</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body" style="max-height:300px;overflow-y:auto;">
+                            <div id="chatMensajes" style="font-size: 0.95em;">
+                                <!-- Mensajes de ejemplo -->
+                                <div class="mb-2"><strong>Tú:</strong> Hola, ¿a qué hora llega la buseta?</div>
+                                <div class="mb-2"><strong>Conductor:</strong> Llegamos en 10 minutos.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex flex-row gap-2 w-100">
+                            <input type="text" id="chatInput" class="form-control form-control-sm flex-grow-1"
+                                placeholder="Escribe tu mensaje...">
+
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="enviarMensaje()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Registro/Edición -->
+        <div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4">
+                    <div class="modal-header bg-info">
+                        <h5 class="modal-title text-dark fw-bold" id="modalEstudianteLabel">
+                            <i class="fas fa-user-graduate me-2"></i>Registrar Horario
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="estudianteForm" class="row g-3 needs-validation" novalidate>
+                            <input type="hidden" id="editIndex" value="">
+                            <div class="col-md-6"><label class="form-label">Seccion</label><input type="text"
+                                    id="nombre" class="form-control" required></div>
+                            <div class="col-md-6"><label class="form-label">Estudiante</label><input type="text"
+                                    id="apellidos" class="form-control" required></div>
+                            <div class="col-md-6"><label class="form-label">Fecha</label><input type="text"
+                                    id="encargado" class="form-control" required></div>
+                            <div class="col-md-6"><label class="form-label">Lunes</label><input type="text"
+                                    id="institucion" class="form-control" required></div>
+                            <div class="col-md-6"><label class="form-label">Martes</label><input type="text"
+                                    id="maestra" class="form-control" required></div>
+                            <div class="col-md-3"><label class="form-label">Miércoles</label><input type="text"
+                                    id="seccion" class="form-control" required></div>
+                            <div class="col-md-3"><label class="form-label">Jueves</label><input type="text"
+                                    id="telefono" class="form-control" required></div>
+                            <div class="col-md-3"><label class="form-label">Viernes</label><input type="text"
+                                    id="telefono" class="form-control" required></div>
+                            <div class="col-md-3 d-flex align-items-center">
+                                <label class="form-check-label me-2">Activo</label>
+                                <input type="checkbox" id="activo" class="form-check-input">
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn pastel-btn me-2">Guardar</button>
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>

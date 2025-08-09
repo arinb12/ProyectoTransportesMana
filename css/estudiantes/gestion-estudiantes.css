@@ -26,6 +26,17 @@ table.pastel-table tbody tr:hover {
   background-color: var(--pastel-green);
 }
 
+.pastel-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.pastel-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
 /* Móvil: cambia tabla a cards */
 @media (max-width: 768px) {
   table.pastel-table, thead, tbody, th, td, tr {
