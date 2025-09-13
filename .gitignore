@@ -1,0 +1,63 @@
+# --- Archivos de usuario y configuración de VS ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- Salida de compilación ---
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+# --- Paquetes NuGet ---
+*.nupkg
+*.snupkg
+# Carpetas de paquetes descargados
+**/[Pp]ackages/*
+# Permitir que el archivo de config de paquetes se mantenga
+!**/[Pp]ackages/build/
+
+# --- Archivos de publicación ---
+publish/
+out/
+
+# --- Archivos temporales ---
+*.tmp
+*.temp
+*.bak
+*.swp
+*.lock
+
+# --- Archivos generados por cobertura o análisis ---
+*.coverage
+*.coveragexml
+*.TestResult.xml
+TestResults/
+CoverageResults/
+
+# --- Archivos de dependencias locales ---
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# --- Archivos de sistema ---
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# --- Archivos de Rider/JetBrains (si usas) ---
+.idea/
+*.DotSettings.user
+
+# --- Secretos de usuario ---
+appsettings.Development.json
+appsettings.Local.json
+*.secrets.json
+
+# --- Otros ---
+# Logs de IIS Express
+iisexpress/
