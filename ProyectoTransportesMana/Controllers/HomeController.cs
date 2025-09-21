@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoTransportesMana.Models;
+using System.Diagnostics;
 
 namespace ProyectoTransportesMana.Controllers
 {
@@ -27,6 +27,23 @@ namespace ProyectoTransportesMana.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+
+        public IActionResult RecoverPassword()
+        {
+            return View();
+        }
+
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+
+
+        public IActionResult Principal()
+        {
+            return View();
         }
     }
 }

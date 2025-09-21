@@ -1,8 +1,36 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = "_LayoutExterno";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="login-card">
+    <div class="login-header">
+        <h2>TRANSPORTE ESCOLAR MANÁ</h2>
+    </div>
+    <div class="login-body">
+        <h3>¡Hola de nuevo! 🚌 👋</h3>
+        <p>Por favor, inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
+
+        <form class="login-form">
+            <input type="email" placeholder="Correo electrónico" required />
+            <input type="password" placeholder="Contraseña" required />
+
+            <div class="remember-section">
+                <input type="checkbox" id="remember" />
+                <label for="remember">Recuérdame</label>
+            </div>
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+
+        <!-- Password recovery link -->
+        <p class="forgot-password">
+            <a href="recover-password.html">¿Olvidaste tu contraseña?</a>
+        </p>
+    </div>
+</div>
+
+<div class="login-info">
+    <img src="https://cdn-icons-png.flaticon.com/512/0/308.png" alt="Bus illustration" />
+    <h2>Organiza tu <br /> transporte escolar</h2>
+    <p>Gestiona rutas, horarios y puntos de abordaje de forma rápida y segura.</p>
 </div>
