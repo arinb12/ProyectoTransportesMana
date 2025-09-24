@@ -1,0 +1,107 @@
+﻿@{
+    ViewData["Title"] = "Consultar Asistente";
+    Layout = "_LayoutInterno";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/asistentes/asistentes.css" />
+    <style>
+        /* Validación visual (check rojo/verde) opcional */
+        .form-control:valid {
+            border-color: #198754;
+            padding-right: 2.25rem;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23198754' viewBox='0 0 16 16'%3e%3cpath d='M16 2.3L6 15.3 0 8.6l1.5-1.4L6 12.2 14.5 1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .form-control:invalid {
+            border-color: #dc3545;
+            padding-right: 2.25rem;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23dc3545' viewBox='0 0 16 16'%3e%3cpath d='M16 14L2 0 0 2l14 14zM2 14L16 0l-2-2L0 12z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+    </style>
+}
+
+<h1 class="mt-4">Gestión Asistentes</h1>
+
+<div class="text-end mb-3">
+    <!-- Antes hacía redirect; ahora abre el modal -->
+    <button class="btn-jump text-white"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#modalAsistente">
+        Agregar
+    </button>
+</div>
+
+<div class="card mb-4 shadow">
+    <div class="card-header bg-info d-flex align-items-center">
+        <i class="fas fa-table me-2 text-dark"></i>
+        <span class="text-dark fw-bold">Listado Asistentes</span>
+    </div>
+    <div class="card-body">
+        <table id="datatablesSimple" class="table table-hover table-bordered pastel-table">
+            <thead>
+                <tr>
+                    <th>Nombre completo</th>
+                    <th>Teléfono</th>
+                    <th>Cédula</th>
+                    <th>Correo</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Buseta Asignada</th>
+                    <th>Salario</th>
+                    <th>Editar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sonia Rodríguez</td>
+                    <td>88113322</td>
+                    <td>123456789</td>
+                    <td>ssro@gmail.com</td>
+                    <td>2011/04/25</td>
+                    <td>N/A</td>
+                    <td>$5000</td>
+                    <td>
+                        <!-- Ejemplo: abrir el mismo modal en modo edición -->
+                        <a href="#" class="text-primary ms-2" data-bs-toggle="modal" data-bs-target="#modalAsistente" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="#" class="text-danger ms-2" title="Eliminar"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laura Moncado</td>
+                    <td>12345678</td>
+                    <td>987654321</td>
+                    <td>lau@gmail.com</td>
+                    <td>2012/07/24</td>
+                    <td>N/A</td>
+                    <td>$5000</td>
+                    <td>
+                        <a href="#" class="text-primary ms-2" data-bs-toggle="modal" data-bs-target="#modalAsistente" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="#" class="text-danger ms-2" title="Eliminar"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+                            <script>
+                                document.addEventListener('click', (e) => {
+                                  const t = e.target.closest('[data-bs-target="#modalAsistente"]');
+                                  if (!t) return;
+                                  e.preventDefault();
+                                  window.location.href = '@Url.Action("RegistrarAsistente", "Asistente")?openModal=true#modalAsistente';
+                                });
+                            </script>
+}

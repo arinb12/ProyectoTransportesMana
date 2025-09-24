@@ -3219,7 +3219,7 @@ textarea.form-control-lg {
   left: 0;
   z-index: -1;
   transition: all 0.4s;
-  background-color: #fff;
+  background-color: #ffffff;
 }
 
 .btn-jump:hover::after {

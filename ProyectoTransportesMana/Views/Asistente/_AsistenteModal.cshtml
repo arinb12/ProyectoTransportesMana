@@ -1,0 +1,61 @@
+﻿@* NO uses @section aquí *@
+<div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark fw-bold" id="modalAsistenteLabel">
+                    <i class="fas fa-user me-2"></i>Registrar Asistente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAsistente" class="row g-3 needs-validation" novalidate>
+                    <input type="hidden" id="asistenteId" value="" />
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre completo</label>
+                        <input type="text" class="form-control" id="nombre" required minlength="3" />
+                        <div class="invalid-feedback">Ingrese al menos 3 caracteres.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono (8 dígitos)</label>
+                        <input type="tel" class="form-control" id="telefono" pattern="^\d{8}$" required />
+                        <div class="invalid-feedback">Teléfono inválido. Debe tener 8 dígitos.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="cedula" class="form-label">Cédula</label>
+                        <input type="text" class="form-control" id="cedula" pattern="^\d{9}$" required />
+                        <div class="invalid-feedback">La cédula debe tener exactamente 9 números.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="correo" class="form-label">Correo electrónico (opcional)</label>
+                        <input type="email" class="form-control" id="correo" placeholder="ejemplo@correo.com" />
+                        <div class="invalid-feedback">Correo inválido.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="salario" class="form-label">Salario</label>
+                        <input type="number" class="form-control" id="salario" step="0.01" min="0" required />
+                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="buseta" class="form-label">Asignar buseta</label>
+                        <select class="form-select" id="buseta" required>
+                            <option selected disabled value="">Seleccione una buseta</option>
+                            <option value="1">Buseta 1 - ABC123</option>
+                            <option value="2">Buseta 2 - DEF456</option>
+                            <option value="3">Buseta 3 - GHI789</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione una buseta.</div>
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <input type="checkbox" id="activo" class="form-check-input me-2" checked />
+                        <label class="form-check-label" for="activo">Activo</label>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn pastel-btn me-2"><i class="fas fa-save me-1"></i> Guardar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
