@@ -1,0 +1,25 @@
+﻿@model ProyectoTransportesMana.Models.Buseta
+
+@{
+    ViewData["Title"] = "Nueva Buseta";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+<h1 class="mb-4">Registrar Buseta</h1>
+
+<form asp-action="Create">
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Placa" class="form-label"></label>
+        <input asp-for="Placa" class="form-control" />
+        <span asp-validation-for="Placa" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-success">
+        <i class="bi bi-check-circle"></i> Guardar
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
