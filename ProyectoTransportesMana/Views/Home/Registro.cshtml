@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Iniciar Sesión";
+    ViewData["Title"] = "Registrarse";
     Layout = "_LayoutExterno";
 }
 
@@ -8,27 +8,35 @@
         <h2>TRANSPORTE ESCOLAR MANÁ</h2>
     </div>
     <div class="login-body">
-        <h3>¡Hola de nuevo! 🚌 👋</h3>
-        <p>Por favor, inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
+        <h3>¡Hola! 🚌 👋</h3>
+        <p>Por favor, Registrate en la plataforma.</p>
 
         <form class="login-form">
+
+            <input type="text" placeholder="Nombre completo" required />
+
+            <input type="text" placeholder="Nombre de usuario" required />
+
+            <input type="text" placeholder="Número de teléfono" required />
+
+            <input type="text" placeholder="Número de Cédula" required />
             <input type="email" placeholder="Correo electrónico" required />
+
             <input type="password" placeholder="Contraseña" required />
 
             <div class="remember-section">
                 <input type="checkbox" id="remember" />
                 <label for="remember">Recuérdame</label>
             </div>
-            <button type="submit">Iniciar Sesión</button>
+            <button type="submit">Registrarse</button>
         </form>
-        <
 
         <!-- Password recovery link -->
         <p class="forgot-password">
             <a asp-controller="Home" asp-action="RecoverPassword">¿Olvidaste tu contraseña?</a>
         </p>
         <p class="forgot-password">
-            <a asp-controller="Home" asp-action="Registro">Crear Cuenta</a>
+            <a asp-controller="Home" asp-action="Index">Iniciar Sesión</a>
         </p>
     </div>
 </div>

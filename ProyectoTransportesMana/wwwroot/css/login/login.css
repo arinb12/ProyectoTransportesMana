@@ -72,13 +72,14 @@ body {
   gap: 15px;
 }
 
-.login-form input[type="email"],
-.login-form input[type="password"] {
-  padding: 12px 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
+    .login-form input[type="email"],
+    .login-form input[type="password"],
+    .login-form input[type="text"] {
+        padding: 12px 16px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
 
 .remember-section {
   display: flex;
