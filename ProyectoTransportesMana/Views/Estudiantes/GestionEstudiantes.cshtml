@@ -1,4 +1,6 @@
-﻿@{
+﻿@model EstudianteModel
+
+@{
     ViewData["Title"] = "Gestión Estudiantes";
     Layout = "_LayoutInterno";
 }
@@ -140,65 +142,74 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="estudianteForm" class="row g-3 needs-validation" novalidate>
-                    <input type="hidden" id="editIndex" value="">
+                <form id="estudianteForm"
+                      asp-action="RegistrarEstudiante"
+                      asp-controller="Estudiantes"
+                      method="post"
+                      class="row g-3 needs-validation">
+
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                     <div class="col-md-6">
-                        <label class="form-label">Nombre</label><input type="text"
-                                                                       id="nombre" class="form-control" required>
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Apellidos</label><input type="text"
-                                                                          id="apellidos" class="form-control" required>
+
+                    <div class="col-md-3">
+                        <label asp-for="PrimerApellido" class="form-label"></label>
+                        <input asp-for="PrimerApellido" class="form-control" />
+                        <span asp-validation-for="PrimerApellido" class="text-danger"></span>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="encargado">Encargado Legal</label>
-                        <select id="encargado" class="form-select" required>
-                            <option value="">-- Seleccione un encargado --</option>
-                            <option value="maria_soto">María Soto</option>
-                            <option value="ana_leiva">Ana Leiva</option>
-                            <option value="fernando_acuna">Fernando Acuña</option>
-                            <option value="mario_marin">Mario Marín</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="institucion">Institución</label>
-                        <select id="institucion" class="form-select" required>
-                            <option value="">-- Seleccione una institucion --</option>
-                            <option value="escuela_nacional">Escuela Nacional</option>
-                            <option value="colegio_central">Colegio Central</option>
-                            <option value="liceo_moderno">Liceo Moderno</option>
-                            <option value="instituto_bilingue">Instituto Bilingüe</option>
-                        </select>
+
+                    <div class="col-md-3">
+                        <label asp-for="SegundoApellido" class="form-label"></label>
+                        <input asp-for="SegundoApellido" class="form-control" />
+                        <span asp-validation-for="SegundoApellido" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label" for="maestra">Maestra</label>
-                        <select id="maestra" class="form-select" required>
-                            <option value="">-- Seleccione una maestra --</option>
-                            <option value="lopez">Profa. López</option>
-                            <option value="marta">Profa. Marta</option>
-                            <option value="susana">Profa. Susana</option>
-                            <option value="paula">Profa. Paula</option>
+                        <label asp-for="IdEncargado" class="form-label"></label>
+                        <select asp-for="IdEncargado" class="form-select" asp-items="ViewBag.Encargados">
+                            <option value="">-- Seleccione un encargado --</option>
                         </select>
+                        <span asp-validation-for="IdEncargado" class="text-danger"></span>
                     </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IdInstitucion" class="form-label"></label>
+                        <select asp-for="IdInstitucion" class="form-select" asp-items="ViewBag.Instituciones">
+                            <option value="">-- Seleccione una institución --</option>
+                        </select>
+                        <span asp-validation-for="IdInstitucion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IdMaestra" class="form-label"></label>
+                        <select asp-for="IdMaestra" class="form-select" asp-items="ViewBag.Maestras">
+                            <option value="">-- Seleccione una maestra --</option>
+                        </select>
+                        <span asp-validation-for="IdMaestra" class="text-danger"></span>
+                    </div>
+
                     <div class="col-md-3">
-                        <label class="form-label">Sección</label><input type="text"
-                                                                        id="seccion" class="form-control" required>
+                        <label asp-for="Seccion" class="form-label"></label>
+                        <input asp-for="Seccion" class="form-control" />
+                        <span asp-validation-for="Seccion" class="text-danger"></span>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Teléfono</label><input type="text" id="telefono" class="form-control"
-                                                                         placeholder="8754-7654" required />
-                    </div>
+
                     <div class="col-md-3 d-flex align-items-center">
-                        <label class="form-check-label me-2">Activo</label>
-                        <input type="checkbox" id="activo" class="form-check-input">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" asp-for="Activo" />
+                            <label class="form-check-label" asp-for="Activo"></label>
+                        </div>
+                        <span asp-validation-for="Activo" class="text-danger"></span>
                     </div>
+
                     <div class="col-12 text-end">
                         <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <button type="button" class="btn btn-secondary"
-                                data-bs-dismiss="modal">
-                            Cancelar
-                        </button>
+                        <a asp-action="Index" asp-controller="Estudiantes" class="btn btn-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>
