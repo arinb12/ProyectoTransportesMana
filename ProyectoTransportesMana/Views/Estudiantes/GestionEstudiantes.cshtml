@@ -1,9 +1,26 @@
-﻿@model EstudianteModel
+﻿@using System
+@model EstudianteModel
 
 @{
     ViewData["Title"] = "Gestión Estudiantes";
     Layout = "_LayoutInterno";
+    var lista = ViewBag.Estudiantes as List<ProyectoTransportesMana.Contracts.Estudiantes.EstudianteListItemResponse>;
 }
+
+@functions {
+    public (string Nombres, string Apellidos) PartirNombre(string? full)
+    {
+        if (string.IsNullOrWhiteSpace(full)) return ("", "");
+        var parts = full.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return (parts[0], "");
+        if (parts.Length == 2) return (parts[0], parts[1]);
+
+        var apellidos = parts[^2] + " " + parts[^1];
+        var nombres = string.Join(" ", parts, 0, parts.Length - 2);
+        return (nombres, apellidos);
+    }
+}
+
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
@@ -21,6 +38,7 @@
     Estudiante guardado correctamente.
 </div>
 
+
 <div class="card mb-4 shadow">
     <div class="card-header bg-info text-dark fw-bold">
         <i class="fas fa-users me-2"></i>Listado de Estudiantes
@@ -35,96 +53,37 @@
                     <th>Institución</th>
                     <th>Maestra</th>
                     <th>Sección</th>
-                    <th>Teléfono</th>
                     <th>Activo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Camila</td>
-                    <td>Ramírez Soto</td>
-                    <td>María Soto</td>
-                    <td>Escuela Fidel</td>
-                    <td>Profa. López</td>
-                    <td>1-1</td>
-                    <td>88773045</td>
-                    <td class="text-center">
-                        <input type="checkbox" checked>
-                    </td>
-                    <td>
-                        <a href="#" class="text-primary ms-2" title="Editar" onclick="editarEstudiante(0)">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(0)">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Mateo</td>
-                    <td>Pérez Leiva</td>
-                    <td>Ana Leiva</td>
-                    <td>Escuela Fidel</td>
-                    <td>Profa. Marta</td>
-                    <td>1-5</td>
-                    <td>60148922</td>
-                    <td class="text-center">
-                        <input type="checkbox" checked>
-                    </td>
-                    <td>
-                        <a href="#" class="text-primary ms-2" title="Editar"
-                           onclick="editarEstudiante(0)">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(0)">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Felipe</td>
-                    <td>Acuña Mora</td>
-                    <td>Fernando Acuña</td>
-                    <td>Escuela España</td>
-                    <td>Profa. Susana</td>
-                    <td>M-4</td>
-                    <td>70204773</td>
-                    <td class="text-center">
-                        <input type="checkbox" checked>
-                    </td>
-                    <td>
-                        <a href="#" class="text-primary ms-2" title="Editar"
-                           onclick="editarEstudiante(0)">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(0)">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Alana</td>
-                    <td>Marin Mora</td>
-                    <td>Mario Marin</td>
-                    <td>Escuela España</td>
-                    <td>Profa. Paula</td>
-                    <td>T-2</td>
-                    <td>83505460</td>
-                    <td class="text-center">
-                        <input type="checkbox" checked>
-                    </td>
-                    <td>
-                        <a href="#" class="text-primary ms-2" title="Editar"
-                           onclick="editarEstudiante(0)">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(0)">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-
+                @if (lista != null && lista.Count > 0)
+                {
+                    foreach (var e in lista)
+                    {
+                        var split = PartirNombre(e.NombreCompletoEstudiante);
+                        <tr>
+                            <td>@split.Nombres</td>
+                            <td>@split.Apellidos</td>
+                            <td>@e.Encargado</td>
+                            <td>@e.Institucion</td>
+                            <td>@e.Maestra</td>
+                            <td>@e.Seccion</td>
+                            <td class="text-center">
+                                <input type="checkbox" @(e.Activo ? "checked" : null) />
+                            </td>
+                            <td>
+                                <a href="#" class="text-primary ms-2" title="Editar" onclick="editarEstudiante(@e.Id)">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(@e.Id)">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
     </div>
@@ -171,24 +130,33 @@
 
                     <div class="col-md-6">
                         <label asp-for="IdEncargado" class="form-label"></label>
-                        <select asp-for="IdEncargado" class="form-select" asp-items="ViewBag.Encargados">
-                            <option value="">-- Seleccione un encargado --</option>
+                        <select asp-for="IdEncargado"
+                                class="form-select select2"
+                                asp-items="ViewBag.Encargados"
+                                data-placeholder="-- Seleccione un encargado --">
+                            <option value=""></option>
                         </select>
                         <span asp-validation-for="IdEncargado" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="IdInstitucion" class="form-label"></label>
-                        <select asp-for="IdInstitucion" class="form-select" asp-items="ViewBag.Instituciones">
-                            <option value="">-- Seleccione una institución --</option>
+                        <select asp-for="IdInstitucion"
+                                class="form-select select2"
+                                asp-items="ViewBag.Instituciones"
+                                data-placeholder="-- Seleccione una institución --">
+                            <option value=""></option>
                         </select>
                         <span asp-validation-for="IdInstitucion" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="IdMaestra" class="form-label"></label>
-                        <select asp-for="IdMaestra" class="form-select" asp-items="ViewBag.Maestras">
-                            <option value="">-- Seleccione una maestra --</option>
+                        <select asp-for="IdMaestra"
+                                class="form-select select2"
+                                asp-items="ViewBag.Maestras"
+                                data-placeholder="-- Seleccione una maestra --">
+                            <option value=""></option>
                         </select>
                         <span asp-validation-for="IdMaestra" class="text-danger"></span>
                     </div>
@@ -209,7 +177,7 @@
 
                     <div class="col-12 text-end">
                         <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <a asp-action="Index" asp-controller="Estudiantes" class="btn btn-secondary">Cancelar</a>
+                        <a asp-action="GestionEstudiantes" asp-controller="Estudiantes" class="btn btn-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>

@@ -15,7 +15,7 @@ namespace ProyectoTransportesMana.Models
 
         [Display(Name = "Segundo apellido")]
         public string? SegundoApellido { get; set; }
-        public string Correo { get; set; } = "";
+        public string? Correo { get; set; }
         public string ContrasenaHash { get; set; } = "";
         public DateTime FechaRegistro { get; set; }
         [Display(Name = "Activo")]

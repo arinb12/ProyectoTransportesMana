@@ -4,54 +4,45 @@ $(function () {
         initDataTable('tablaEstudiantes', [7]);
     }
 
-    // 2) Select2 dentro del modal
+    // 2) Select2 dentro del modal (usar IDs reales generados por asp-for)
     const $modal = $('#modalEstudiante');
-    const $encargado = $('#encargado');
-    const $maestra = $('#maestra');
-    const $institucion = $('#institucion');
+    const $encargado = $('#IdEncargado');
+    const $maestra = $('#IdMaestra');
+    const $institucion = $('#IdInstitucion');
 
-
-    if ($encargado.length && $.fn.select2) {
-        $encargado.select2({
-            placeholder: "-- Seleccione un encargado --",
+    function initSelect2($el) {
+        if (!$el.length || !$.fn.select2) return;
+        $el.select2({
+            placeholder: $el.data('placeholder') || '',
             allowClear: true,
-            width: '100%',
+            width: 'resolve',
             dropdownParent: $modal
-        });
+        })
+            // Mantener validación unobtrusive en selects ocultos por Select2
+            .on('change.select2', function () {
+                $(this).trigger('input').valid && $(this).valid();
+            });
     }
 
-    if ($maestra.length && $.fn.select2) {
-        $maestra.select2({
-            placeholder: "-- Seleccione una maestra --",
-            allowClear: true,
-            width: '100%',
-            dropdownParent: $modal
-        });
-    }
-
-    if ($institucion.length && $.fn.select2) {
-        $institucion.select2({
-            placeholder: "-- Seleccione una institucion --",
-            allowClear: true,
-            width: '100%',
-            dropdownParent: $modal
-        });
-    }
-
-    // 3) IMask para teléfono
-    const telInput = document.getElementById('telefono');
-    if (window.IMask && telInput) {
-        IMask(telInput, {
-            mask: '0000-0000',
-            lazy: true,
-            placeholderChar: '_'
-        });
-    }
-
-    // 4) Reset de Select2 al cerrar modal
-    $modal.on('hidden.bs.modal', function () {
-        $encargado.val(null).trigger('change');
-        $maestra.val(null).trigger('change');
-        $institucion.val(null).trigger('change');
+    // Inicializar cuando el modal esté visible (para calcular bien el ancho)
+    $modal.on('shown.bs.modal', function () {
+        initSelect2($encargado);
+        initSelect2($maestra);
+        initSelect2($institucion);
     });
+
+    // Reset limpio al cerrar (sin romper edición si precargas valores)
+    $modal.on('hidden.bs.modal', function () {
+        [$encargado, $maestra, $institucion].forEach($s => {
+            $s.val('').trigger('change');
+            $s.removeClass('is-invalid');
+        });
+        $('#estudianteForm')[0]?.reset();
+    });
+
+
+    const $form = $('#estudianteForm');
+    if ($form.length && $form.data('validator')) {
+        $form.data('validator').settings.ignore = ':hidden:not(.select2-hidden-accessible)';
+    }
 });
