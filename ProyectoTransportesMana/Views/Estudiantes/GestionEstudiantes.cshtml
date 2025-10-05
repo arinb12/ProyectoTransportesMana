@@ -34,10 +34,6 @@
     </button>
 </div>
 
-<div id="alertaEstudiante" class="alert alert-success d-none" role="alert">
-    Estudiante guardado correctamente.
-</div>
-
 <div class="card mb-4 shadow">
     <div class="card-header bg-info text-dark fw-bold">
         <i class="fas fa-users me-2"></i>Listado de Estudiantes
@@ -186,5 +182,14 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        window.__swalPayload = {
+            type: '@(TempData["SwalType"] ?? ViewData["SwalType"] ?? "")',
+            title: '@(TempData["SwalTitle"] ?? ViewData["SwalTitle"] ?? "")',
+            text: '@(TempData["SwalText"] ?? ViewData["SwalText"] ?? "")'
+        };
+    </script>
+
     <script src="~/js/estudiantes/gestion-estudiantes.js" asp-append-version="true"></script>
 }

@@ -2,16 +2,17 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public sealed record EstudianteCreateRequest(
-    [property: Required, MinLength(1)] string Nombre,
-    [property: Required, MinLength(1)] string PrimerApellido,
-    string? SegundoApellido,
-    [property: Required] bool Activo,
-    [property: Range(1, int.MaxValue)] int IdEncargado,
-    [property: Range(1, int.MaxValue)] int IdInstitucion,
-    string? Seccion,
-    [property: Range(1, int.MaxValue)] int IdMaestra
-);
+public sealed record class EstudianteCreateRequest
+{
+    [Required, MinLength(1)] public string Nombre { get; init; } = default!;
+    [Required, MinLength(1)] public string PrimerApellido { get; init; } = default!;
+    public string? SegundoApellido { get; init; }
+    [Required] public bool Activo { get; init; }
+    [Range(1, int.MaxValue)] public int IdEncargado { get; init; }
+    [Range(1, int.MaxValue)] public int IdInstitucion { get; init; }
+    public string? Seccion { get; init; }
+    [Range(1, int.MaxValue)] public int IdMaestra { get; init; }
+}
 
 public sealed record EstudianteResponse(
     int Id,

@@ -1,6 +1,7 @@
 $(function () {
     // 1) DataTable
     if (typeof initDataTable === "function") {
+        // OJO: asegúrate que el índice de la columna de acciones (7) sea correcto
         initDataTable('tablaEstudiantes', [7]);
     }
 
@@ -20,7 +21,8 @@ $(function () {
         })
             // Mantener validación unobtrusive en selects ocultos por Select2
             .on('change.select2', function () {
-                $(this).trigger('input').valid && $(this).valid();
+                $(this).trigger('input');
+                if ($(this).valid) { $(this).valid(); }
             });
     }
 
@@ -37,12 +39,55 @@ $(function () {
             $s.val('').trigger('change');
             $s.removeClass('is-invalid');
         });
-        $('#estudianteForm')[0]?.reset();
+        const form = $('#estudianteForm')[0];
+        if (form) form.reset();
     });
-
 
     const $form = $('#estudianteForm');
     if ($form.length && $form.data('validator')) {
         $form.data('validator').settings.ignore = ':hidden:not(.select2-hidden-accessible)';
     }
 });
+
+
+(function () {
+    function ensureSwalReady(callback) {
+        if (window.Swal && typeof window.Swal.fire === "function") {
+            callback();
+            return;
+        }
+        var script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/sweetalert2@11";
+        script.async = true;
+        script.onload = callback;
+        document.head.appendChild(script);
+    }
+    function toOptions(arg1, arg2, arg3) {
+        if (typeof arg1 === "object" && arg1 !== null) {
+            return Object.assign({ confirmButtonText: "OK" }, arg1);
+        }
+        return {
+            icon: arg1 || "info", 
+            title: arg2 || "",
+            text: arg3 || "",
+            confirmButtonText: "OK"
+        };
+    }
+
+    function SwalNotify(arg1, arg2, arg3) {
+        var opts = toOptions(arg1, arg2, arg3);
+        ensureSwalReady(function () { window.Swal.fire(opts); });
+    }
+
+    // Expone global para que puedas llamarlo cuando quieras: SwalNotify('success','...','...')
+    window.SwalNotify = SwalNotify;
+
+    $(function () {
+        var p = window.__swalPayload;
+        if (p && (p.type || p.icon)) {
+            var icon = p.icon || p.type;
+            SwalNotify({ icon: icon, title: p.title || "", text: p.text || "" });
+            try { delete window.__swalPayload; } catch { window.__swalPayload = null; }
+        }
+    });
+})();
