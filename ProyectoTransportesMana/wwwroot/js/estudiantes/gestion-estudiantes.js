@@ -79,7 +79,6 @@ $(function () {
         ensureSwalReady(function () { window.Swal.fire(opts); });
     }
 
-    // Expone global para que puedas llamarlo cuando quieras: SwalNotify('success','...','...')
     window.SwalNotify = SwalNotify;
 
     $(function () {
