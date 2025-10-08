@@ -6,7 +6,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/asistentes/asistentes.css" />
     <style>
-        /* Validación visual (check rojo/verde) opcional */
+        /* Validación check rojo/verde (si usas formularios aquí) */
         .form-control:valid {
             border-color: #198754;
             padding-right: 2.25rem;
@@ -30,7 +30,7 @@
 <h1 class="mt-4">Gestión Asistentes</h1>
 
 <div class="text-end mb-3">
-    <!-- Antes hacía redirect; ahora abre el modal -->
+    <!-- Agregar (redirige a RegistrarAsistente y allá abre el modal) -->
     <button class="btn-jump text-white"
             type="button"
             data-bs-toggle="modal"
@@ -55,10 +55,11 @@
                     <th>Fecha de Inicio</th>
                     <th>Buseta Asignada</th>
                     <th>Salario</th>
-                    <th>Editar</th>
+                    <th class="text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Fila de ejemplo; reemplaza por tu foreach -->
                 <tr>
                     <td>Sonia Rodríguez</td>
                     <td>88113322</td>
@@ -67,41 +68,62 @@
                     <td>2011/04/25</td>
                     <td>N/A</td>
                     <td>$5000</td>
-                    <td>
-                        <!-- Ejemplo: abrir el mismo modal en modo edición -->
-                        <a href="#" class="text-primary ms-2" data-bs-toggle="modal" data-bs-target="#modalAsistente" title="Editar">
+                    <td class="text-center">
+                        <!-- Editar -> ActualizarAsistente (abre modal allá). data-edit-id es el ID real. -->
+                        <a href="#"
+                           class="text-primary mx-1"
+                           title="Editar"
+                           data-edit-id="1"
+                           data-role="edit-asistente">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <a href="#" class="text-danger ms-2" title="Eliminar"><i class="fas fa-trash-alt"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Laura Moncado</td>
-                    <td>12345678</td>
-                    <td>987654321</td>
-                    <td>lau@gmail.com</td>
-                    <td>2012/07/24</td>
-                    <td>N/A</td>
-                    <td>$5000</td>
-                    <td>
-                        <a href="#" class="text-primary ms-2" data-bs-toggle="modal" data-bs-target="#modalAsistente" title="Editar">
-                            <i class="fas fa-edit"></i>
+                        <!-- Eliminar -> EliminarAsistente (abre modal allá). data-delete-id es el ID real. -->
+                        <a href="#"
+                           class="text-danger mx-1"
+                           title="Eliminar"
+                           data-delete-id="1"
+                           data-role="delete-asistente">
+                            <i class="fas fa-trash-alt"></i>
                         </a>
-                        <a href="#" class="text-danger ms-2" title="Eliminar"><i class="fas fa-trash-alt"></i></a>
                     </td>
                 </tr>
+                <!-- /fila ejemplo -->
             </tbody>
         </table>
     </div>
 </div>
 
 @section Scripts {
-                            <script>
-                                document.addEventListener('click', (e) => {
-                                  const t = e.target.closest('[data-bs-target="#modalAsistente"]');
-                                  if (!t) return;
-                                  e.preventDefault();
-                                  window.location.href = '@Url.Action("RegistrarAsistente", "Asistente")?openModal=true#modalAsistente';
-                                });
-                            </script>
+    <script>
+        document.addEventListener('click', (e) => {
+            // Agregar -> RegistrarAsistente (modal auto-open)
+            const addTrigger = e.target.closest('[data-bs-target="#modalAsistente"]');
+            if (addTrigger) {
+                e.preventDefault();
+                window.location.href =
+                    '@Url.Action("RegistrarAsistente", "Asistente")?openModal=true#modalAsistente';
+                return;
+            }
+
+            // Editar (lápiz) -> ActualizarAsistente?id=... (modal auto-open)
+            const editTrigger = e.target.closest('[data-role="edit-asistente"]');
+            if (editTrigger) {
+                e.preventDefault();
+                const id = editTrigger.getAttribute('data-edit-id');
+                window.location.href =
+                    '@Url.Action("ActualizarAsistente", "Asistente")' + `?id=${id}&openModal=true#modalAsistente`;
+                return;
+            }
+
+            // Eliminar (papelera) -> EliminarAsistente?id=... (modal auto-open)
+            const delTrigger = e.target.closest('[data-role="delete-asistente"]');
+            if (delTrigger) {
+                e.preventDefault();
+                const id = delTrigger.getAttribute('data-delete-id');
+                window.location.href =
+                    '@Url.Action("EliminarAsistente", "Asistente")' + `?id=${id}&openModal=true#modalEliminar`;
+                return;
+            }
+        });
+    </script>
 }

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model ProyectoTransportesMana.Models.AsistenteModel
+
+@{
     ViewData["Title"] = "Registrar Asistente";
     Layout = "_LayoutInterno";
     var open = (bool?)ViewBag.OpenModal ?? false;
@@ -29,7 +31,7 @@
 
 <h1 class="mt-4">Registrar Asistente</h1>
 
-<!-- MODAL REGISTRO ASISTENTE  -->
+<!-- ===================== MODAL REGISTRO ASISTENTE ===================== -->
 <div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4">
@@ -41,60 +43,69 @@
             </div>
 
             <div class="modal-body">
-                <form id="formAsistente" class="row g-3 needs-validation" novalidate>
-                    <input type="hidden" id="asistenteId" value="" />
+                <form id="formAsistente"
+                      class="row g-3 needs-validation"
+                      asp-action="RegistrarAsistente"
+                      asp-controller="Asistente"
+                      method="post"
+                      novalidate>
+                    @Html.AntiForgeryToken()
 
-               
-                    <div class="col-md-6">
-                        <label for="nombre" class="form-label">Nombre completo</label>
-                        <input type="text" class="form-control" id="nombre" required minlength="3" />
-                        <div class="invalid-feedback">Ingrese al menos 3 caracteres.</div>
+                    <div class="col-12">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
                     </div>
 
-               
+                    <input type="hidden" asp-for="Id" />
+
+                    <!-- Nombre -->
                     <div class="col-md-6">
-                        <label for="telefono" class="form-label">Teléfono (8 dígitos)</label>
-                        <input type="tel" class="form-control" id="telefono" pattern="^\d{8}$" required />
-                        <div class="invalid-feedback">Teléfono inválido. Debe tener 8 dígitos.</div>
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" minlength="3" required />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
                     </div>
 
-              
+                    <!-- Teléfono -->
                     <div class="col-md-6">
-                        <label for="cedula" class="form-label">Cédula</label>
-                        <input type="text" class="form-control" id="cedula" pattern="^\d{9}$" required />
-                        <div class="invalid-feedback">La cédula debe tener exactamente 9 números.</div>
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono" class="form-control" pattern="^\d{8}$" required />
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
                     </div>
 
-                 
+                    <!-- Cédula -->
                     <div class="col-md-6">
-                        <label for="correo" class="form-label">Correo electrónico (opcional)</label>
-                        <input type="email" class="form-control" id="correo" placeholder="ejemplo@correo.com" />
-                        <div class="invalid-feedback">Correo inválido.</div>
+                        <label asp-for="Cedula" class="form-label"></label>
+                        <input asp-for="Cedula" class="form-control" pattern="^\d{9}$" required />
+                        <span asp-validation-for="Cedula" class="text-danger small"></span>
                     </div>
 
-                   
+                    <!-- Correo (opcional) -->
                     <div class="col-md-6">
-                        <label for="salario" class="form-label">Salario</label>
-                        <input type="number" class="form-control" id="salario" step="0.01" min="0" required />
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <label asp-for="Correo" class="form-label"></label>
+                        <input asp-for="Correo" class="form-control" type="email" placeholder="ejemplo@correo.com" />
+                        <span asp-validation-for="Correo" class="text-danger small"></span>
                     </div>
 
-              
+                    <!-- Salario -->
                     <div class="col-md-6">
-                        <label for="buseta" class="form-label">Asignar buseta</label>
-                        <select class="form-select" id="buseta" required>
+                        <label asp-for="Salario" class="form-label"></label>
+                        <input asp-for="Salario" class="form-control" type="number" step="0.01" min="0" required />
+                        <span asp-validation-for="Salario" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Buseta -->
+                    <div class="col-md-6">
+                        <label asp-for="BusetaId" class="form-label"></label>
+                        <select asp-for="BusetaId" class="form-select" asp-items="Model.BusetasSelectList" required>
                             <option selected disabled value="">Seleccione una buseta</option>
-                            <option value="1">Buseta 1 - ABC123</option>
-                            <option value="2">Buseta 2 - DEF456</option>
-                            <option value="3">Buseta 3 - GHI789</option>
                         </select>
-                        <div class="invalid-feedback">Seleccione una buseta.</div>
+                        <span asp-validation-for="BusetaId" class="text-danger small"></span>
                     </div>
 
-               
+                    <!-- Activo -->
                     <div class="col-md-12 d-flex align-items-center">
-                        <input type="checkbox" id="activo" class="form-check-input me-2" checked />
-                        <label class="form-check-label" for="activo">Activo</label>
+                        <input asp-for="Activo" class="form-check-input me-2" />
+                        <label asp-for="Activo" class="form-check-label"></label>
+                        <span asp-validation-for="Activo" class="text-danger small ms-2"></span>
                     </div>
 
                     <div class="col-12 text-end">
@@ -109,10 +120,10 @@
         </div>
     </div>
 </div>
-<!-- MODAL REGISTRO/EDICIÓN ASISTENTE -->
+<!-- =================== /MODAL =================== -->
 @section Scripts {
     <script>
-        // Validacion bootstrap
+        // Validación Bootstrap
         (() => {
             'use strict';
             const forms = document.querySelectorAll('.needs-validation');
@@ -127,25 +138,22 @@
             });
         })();
 
-        // Abre el modal automáticamente si viene el flag o el hash
+        // Auto-abrir modal si viene flag o hash y volver al listado al cerrar
         document.addEventListener('DOMContentLoaded', function () {
-            const fromServer = @((open ? "true" : "false").ToLower());
+            const fromServer = @(open.ToString().ToLower()); // <- evita TS1109
             const url = new URL(window.location.href);
             const fromQuery = url.searchParams.get('openModal') === 'true';
-            const fromHash = window.location.hash === '#modalAsistente';
+            const fromHash  = window.location.hash === '#modalAsistente';
 
-            if (fromServer || fromQuery || fromHash) {
-                const modalEl = document.getElementById('modalAsistente');
-                if (modalEl) {
-                    const modal = new bootstrap.Modal(modalEl);
-                    modal.show();
-         
-          // Codigo para redirigir al cerrar el modal (X, Cancelar, ESC, etc)
-        modalEl.addEventListener('hidden.bs.modal', function () {
-            window.location.href = '@Url.Action("ConsultarAsistente", "Asistente")';
-        });
+            const modalEl = document.getElementById('modalAsistente');
+            if (modalEl && (fromServer || fromQuery || fromHash)) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
 
-                }
+                // Al cerrar modal => regresar al listado
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    window.location.href = '@Url.Action("ConsultarAsistente", "Asistente")';
+                });
             }
         });
     </script>
