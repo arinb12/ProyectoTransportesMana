@@ -59,10 +59,12 @@ namespace ProyectoTransportesManaAPI.Controllers
                     request.PrimerApellido,
                     request.SegundoApellido,
                     request.Activo,
-                    IdEncargado = request.IdEncargado,
-                    IdInstitucion = request.IdInstitucion,
+                    request.IdEncargado,
+                    request.IdInstitucion,
                     request.Seccion,
-                    IdMaestra = request.IdMaestra
+                    request.IdMaestra,
+                    Telefono = request.Telefono!    
+
                 },
                 commandType: CommandType.StoredProcedure
             );
@@ -76,7 +78,8 @@ namespace ProyectoTransportesManaAPI.Controllers
                 request.IdEncargado,
                 request.IdInstitucion,
                 request.Seccion,
-                request.IdMaestra
+                request.IdMaestra,
+                request.Telefono
             );
             return CreatedAtAction(nameof(GetById), new { id = newId }, response);
         }

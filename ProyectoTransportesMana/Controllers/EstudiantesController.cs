@@ -44,7 +44,8 @@ namespace ProyectoTransportesMana.Controllers
                 IdEncargado = estudiante.IdEncargado,
                 IdInstitucion = estudiante.IdInstitucion,
                 Seccion = estudiante.Seccion,
-                IdMaestra = estudiante.IdMaestra
+                IdMaestra = estudiante.IdMaestra,
+                Telefono = estudiante.Telefono!     
             };
 
             var resp = await client.PostAsJsonAsync("api/v1/estudiantes", payload);

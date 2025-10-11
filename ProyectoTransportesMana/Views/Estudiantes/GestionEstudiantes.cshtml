@@ -48,6 +48,7 @@
                     <th>Institución</th>
                     <th>Maestra</th>
                     <th>Sección</th>
+                    <th>Teléfono</th>
                     <th>Activo</th>
                     <th>Acciones</th>
                 </tr>
@@ -59,16 +60,17 @@
                     {
                         var split = PartirNombre(e.NombreCompletoEstudiante);
                         <tr>
-                            <td>@split.Nombres</td>
-                            <td>@split.Apellidos</td>
-                            <td>@e.Encargado</td>
-                            <td>@e.Institucion</td>
-                            <td>@e.Maestra</td>
-                            <td>@e.Seccion</td>
-                            <td class="text-center">
+                            <td data-label="Nombre">@split.Nombres</td>
+                            <td data-label="Apellidos">@split.Apellidos</td>
+                            <td data-label="Encargado Legal">@e.Encargado</td>
+                            <td data-label="Institución">@e.Institucion</td>
+                            <td data-label="Maestra">@e.Maestra</td>
+                            <td data-label="Sección">@e.Seccion</td>
+                            <td data-label="Teléfono">@e.Telefono</td>
+                            <td data-label="Activo" class="text-center">
                                 <input type="checkbox" @(e.Activo ? "checked" : null) />
                             </td>
-                            <td>
+                            <td data-label="Acciones">
                                 <a href="#" class="text-primary ms-2" title="Editar" onclick="editarEstudiante(@e.Id)">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -76,6 +78,7 @@
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>
+
                         </tr>
                     }
                 }
@@ -162,6 +165,17 @@
                         <span asp-validation-for="Seccion" class="text-danger"></span>
                     </div>
 
+                    <div class="col-md-3">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono"
+                               class="form-control"
+                               id="Telefono"
+                               inputmode="tel"
+                               autocomplete="tel"
+                               placeholder="####-#### o +506 ####-####" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
                     <div class="col-md-3 d-flex align-items-center">
                         <div class="form-check mt-4">
                             <input class="form-check-input" asp-for="Activo" />
@@ -192,4 +206,12 @@
     </script>
 
     <script src="~/js/estudiantes/gestion-estudiantes.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            if (window.innerWidth <= 768) {
+                $('#tablaEstudiantes').DataTable().columns.adjust().responsive.recalc();
+            }
+        });
+    </script>
 }

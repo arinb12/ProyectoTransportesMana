@@ -1,15 +1,37 @@
 $(function () {
     // 1) DataTable
     if (typeof initDataTable === "function") {
-        // OJO: asegúrate que el índice de la columna de acciones (7) sea correcto
-        initDataTable('tablaEstudiantes', [7]);
+        initDataTable('tablaEstudiantes', [8]);
     }
 
-    // 2) Select2 dentro del modal (usar IDs reales generados por asp-for)
     const $modal = $('#modalEstudiante');
     const $encargado = $('#IdEncargado');
     const $maestra = $('#IdMaestra');
     const $institucion = $('#IdInstitucion');
+    const $form = $('#estudianteForm');
+    const $telefono = $('#Telefono');
+
+    let telefonoMask = null;
+    function initTelefonoMask() {
+        if (!$telefono.length || typeof IMask === 'undefined') return;
+
+        // Acepta "####-####" o "+506 ####-####"
+        telefonoMask = IMask($telefono[0], {
+            mask: [
+                { mask: '0000-0000' },
+                { mask: '+{506} 0000-0000' }
+            ],
+            lazy: false,
+            commit: function (value, masked) {
+                masked._value = value;
+            }
+        });
+
+        $telefono.on('input blur', function () {
+            $(this).trigger('change');
+            if ($form.length && $form.valid) { $form.valid(); }
+        });
+    }
 
     function initSelect2($el) {
         if (!$el.length || !$.fn.select2) return;
@@ -19,31 +41,44 @@ $(function () {
             width: 'resolve',
             dropdownParent: $modal
         })
-            // Mantener validación unobtrusive en selects ocultos por Select2
             .on('change.select2', function () {
                 $(this).trigger('input');
                 if ($(this).valid) { $(this).valid(); }
             });
     }
 
-    // Inicializar cuando el modal esté visible (para calcular bien el ancho)
+    if ($.validator && !$.validator.methods.crphone) {
+        $.validator.addMethod('crphone', function (value, element) {
+            if (!value) return true;
+            const digits = (value.match(/\d/g) || []).join('');
+            if (digits.length === 8) return true;
+            if (digits.length === 11 && digits.startsWith('506')) return true;
+            return false;
+        }, 'Ingrese un teléfono válido (####-#### o +506 ####-####).');
+
+        if ($form.length && $form.data('validator')) {
+            $telefono.rules('add', { crphone: true });
+        }
+    }
+
     $modal.on('shown.bs.modal', function () {
         initSelect2($encargado);
         initSelect2($maestra);
         initSelect2($institucion);
+        initTelefonoMask(); 
     });
 
-    // Reset limpio al cerrar (sin romper edición si precargas valores)
     $modal.on('hidden.bs.modal', function () {
         [$encargado, $maestra, $institucion].forEach($s => {
             $s.val('').trigger('change');
             $s.removeClass('is-invalid');
         });
-        const form = $('#estudianteForm')[0];
+        if (telefonoMask) { telefonoMask.destroy(); telefonoMask = null; }
+        const form = $form[0];
         if (form) form.reset();
+        $telefono.removeClass('is-invalid is-valid');
     });
 
-    const $form = $('#estudianteForm');
     if ($form.length && $form.data('validator')) {
         $form.data('validator').settings.ignore = ':hidden:not(.select2-hidden-accessible)';
     }
@@ -67,7 +102,7 @@ $(function () {
             return Object.assign({ confirmButtonText: "OK" }, arg1);
         }
         return {
-            icon: arg1 || "info", 
+            icon: arg1 || "info",
             title: arg2 || "",
             text: arg3 || "",
             confirmButtonText: "OK"

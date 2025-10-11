@@ -12,6 +12,10 @@ public sealed record class EstudianteCreateRequest
     [Range(1, int.MaxValue)] public int IdInstitucion { get; init; }
     public string? Seccion { get; init; }
     [Range(1, int.MaxValue)] public int IdMaestra { get; init; }
+
+    [RegularExpression(@"^(\+506[\s]?)?\d{4}-\d{4}$", ErrorMessage = "Formato de teléfono inválido. Use ####-#### o +506 ####-####.")]
+    [Required]
+    public string Telefono { get; init; } = default!;
 }
 
 public sealed record EstudianteResponse(
@@ -23,7 +27,8 @@ public sealed record EstudianteResponse(
     int IdEncargado,
     int IdInstitucion,
     string? Seccion,
-    int IdMaestra
+    int IdMaestra,
+    string Telefono
 );
 
 public sealed record EstudianteListItemResponse(
@@ -33,5 +38,6 @@ public sealed record EstudianteListItemResponse(
     string Institucion,
     string Maestra,
     string Encargado,
-    bool Activo
+    bool Activo,
+    string Telefono
 );
