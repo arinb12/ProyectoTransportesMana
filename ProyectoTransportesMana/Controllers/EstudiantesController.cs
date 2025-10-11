@@ -71,6 +71,46 @@ namespace ProyectoTransportesMana.Controllers
             return View("GestionEstudiantes", estudiante);
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> EliminarEstudiante(int id)
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            var resp = await client.DeleteAsync($"api/v1/estudiantes/{id}");
+
+            if (resp.IsSuccessStatusCode)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Ok(new
+                    {
+                        ok = true,
+                        title = "Estudiante eliminado",
+                        message = "El estudiante fue eliminado correctamente."
+                    });
+                }
+                TempData["SwalType"] = "success";
+                TempData["SwalTitle"] = "Estudiante eliminado";
+                TempData["SwalText"] = "El estudiante fue eliminado correctamente.";
+                return RedirectToAction(nameof(GestionEstudiantes));
+            }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    title = "Error al eliminar",
+                    message = "No se pudo eliminar el estudiante."
+                });
+            }
+
+            TempData["SwalType"] = "error";
+            TempData["SwalTitle"] = "Error al eliminar";
+            TempData["SwalText"] = "No se pudo eliminar el estudiante.";
+            return RedirectToAction(nameof(GestionEstudiantes));
+        }
+
         private async Task CargarDatosVistaAsync()
         {
             var client = _httpClientFactory.CreateClient("Api");

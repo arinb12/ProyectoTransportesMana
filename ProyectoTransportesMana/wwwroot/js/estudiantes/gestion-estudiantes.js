@@ -1,4 +1,4 @@
-$(function () {
+﻿$(function () {
     // 1) DataTable
     if (typeof initDataTable === "function") {
         initDataTable('tablaEstudiantes', [8]);
@@ -54,7 +54,7 @@ $(function () {
             if (digits.length === 8) return true;
             if (digits.length === 11 && digits.startsWith('506')) return true;
             return false;
-        }, 'Ingrese un tel�fono v�lido (####-#### o +506 ####-####).');
+        }, 'Ingrese un teléfono válido (####-#### o +506 ####-####).');
 
         if ($form.length && $form.data('validator')) {
             $telefono.rules('add', { crphone: true });
@@ -85,6 +85,57 @@ $(function () {
 });
 
 
+function eliminarEstudiante(id) {
+    ensureSwalReady(() => {
+        Swal.fire({
+            title: "\u00BfEliminar estudiante?",
+            text: "Esta acci\u00F3n marcar\u00E1 al estudiante como eliminado y no podr\u00E1 usar el sistema.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "S\u00ED, eliminar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            fetch(`/Estudiantes/EliminarEstudiante/${id}`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken":
+                        document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+                .then(async (response) => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+
+                    const data = await response.json().catch(() => null);
+
+                    if (response.ok && data?.ok) {
+                        Swal.fire({
+                            icon: "success",
+                            title: data.title || "Estudiante eliminado",
+                            text: data.message || "El estudiante fue eliminado correctamente."
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        SwalNotify("error", data?.title || "Error al eliminar", data?.message || "No se pudo eliminar el estudiante.");
+                    }
+                })
+                .catch(() => {
+                    SwalNotify("error", "Error", "Ocurrió un error inesperado.");
+                });
+        });
+    });
+}
+
+
 (function () {
     function ensureSwalReady(callback) {
         if (window.Swal && typeof window.Swal.fire === "function") {
@@ -97,6 +148,8 @@ $(function () {
         script.onload = callback;
         document.head.appendChild(script);
     }
+
+    window.ensureSwalReady = ensureSwalReady;
     function toOptions(arg1, arg2, arg3) {
         if (typeof arg1 === "object" && arg1 !== null) {
             return Object.assign({ confirmButtonText: "OK" }, arg1);

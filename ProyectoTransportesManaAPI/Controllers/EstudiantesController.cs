@@ -63,7 +63,7 @@ namespace ProyectoTransportesManaAPI.Controllers
                     request.IdInstitucion,
                     request.Seccion,
                     request.IdMaestra,
-                    Telefono = request.Telefono!    
+                    Telefono = request.Telefono!  
 
                 },
                 commandType: CommandType.StoredProcedure
@@ -84,6 +84,25 @@ namespace ProyectoTransportesManaAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = newId }, response);
         }
 
+
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> EliminarEstudiante(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var rows = await con.ExecuteAsync(
+                "sp_usuarios_eliminar_logico",
+                new { IdUsuario = id },
+                commandType: CommandType.StoredProcedure
+            );
+
+            if (rows == 0)
+                return NotFound(new { Message = "No se encontró el usuario o ya fue eliminado." });
+
+            return NoContent();
+        }
 
     }
 }
