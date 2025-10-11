@@ -54,7 +54,7 @@ namespace ProyectoTransportesMana.Controllers
             {
                 TempData["SwalType"] = "success";
                 TempData["SwalTitle"] = "Estudiante registrado";
-                TempData["SwalText"] = "El registro se completo correctamente.";
+                TempData["SwalText"] = "El registro se completó correctamente.";
                 return RedirectToAction(nameof(GestionEstudiantes));
             }
 

@@ -4,17 +4,37 @@ using System.ComponentModel.DataAnnotations;
 
 public sealed record class EstudianteCreateRequest
 {
-    [Required, MinLength(1)] public string Nombre { get; init; } = default!;
-    [Required, MinLength(1)] public string PrimerApellido { get; init; } = default!;
-    public string? SegundoApellido { get; init; }
-    [Required] public bool Activo { get; init; }
-    [Range(1, int.MaxValue)] public int IdEncargado { get; init; }
-    [Range(1, int.MaxValue)] public int IdInstitucion { get; init; }
-    public string? Seccion { get; init; }
-    [Range(1, int.MaxValue)] public int IdMaestra { get; init; }
+    [Display(Name = "Nombre")]
+    [Required(ErrorMessage = "El campo {0} es obligatorio."), MinLength(1)]
+    public string Nombre { get; init; } = default!;
 
-    [RegularExpression(@"^(\+506[\s]?)?\d{4}-\d{4}$", ErrorMessage = "Formato de teléfono inválido. Use ####-#### o +506 ####-####.")]
-    [Required]
+    [Display(Name = "Primer apellido")]
+    [Required(ErrorMessage = "El campo {0} es obligatorio."), MinLength(1)]
+    public string PrimerApellido { get; init; } = default!;
+
+    public string? SegundoApellido { get; init; }
+    public bool Activo { get; init; }
+
+    [Display(Name = "Encargado legal")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un {0}.")]
+    public int IdEncargado { get; init; }
+
+    [Display(Name = "Institución")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una {0}.")]
+    public int IdInstitucion { get; init; }
+
+    [Display(Name = "Sección")]
+    [Required(ErrorMessage = "La {0} es obligatoria.")]
+    public string? Seccion { get; init; }
+
+    [Display(Name = "Maestra")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una {0}.")]
+    public int IdMaestra { get; init; }
+
+    [Display(Name = "Teléfono")]
+    [RegularExpression(@"^(\+506[\s]?)?\d{4}-\d{4}$",
+        ErrorMessage = "Formato de teléfono inválido. Use ####-#### o +506 ####-####.")]
+    [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     public string Telefono { get; init; } = default!;
 }
 

@@ -20,14 +20,13 @@ function initDataTable(tableId, columnasNoOrdenables = [], extraOptions = {}) {
         language: {
             url: 'https://cdn.datatables.net/plug-ins/2.3.2/i18n/es-ES.json'
         },
-        lengthMenu: [[5, 10, 20, 50], [5, 10, 20, 50]],
+        lengthMenu: [[10, 20, 30, 50], [10, 20, 30, 50]],
         columnDefs: columnasNoOrdenables.map(index => ({
             targets: index,
             orderable: false
         }))
     };
 
-    // Combina opciones extra si vienen
     const finalOptions = $.extend(true, {}, defaultOptions, extraOptions);
 
     return table.DataTable(finalOptions);

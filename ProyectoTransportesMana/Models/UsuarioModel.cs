@@ -7,10 +7,10 @@ namespace ProyectoTransportesMana.Models
         public int IdUsuario { get; set; }
         public Rol RolId { get; set; }
         [Display(Name = "Nombre")]
-        [Required]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Nombre { get; set; } = "";
         [Display(Name = "Primer apellido")]
-        [Required]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string PrimerApellido { get; set; } = "";
 
         [Display(Name = "Segundo apellido")]
