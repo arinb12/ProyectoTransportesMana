@@ -104,5 +104,24 @@ namespace ProyectoTransportesManaAPI.Controllers
             return NoContent();
         }
 
+
+        [HttpPatch("{id:int}/estado")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ActualizarEstado(int id, [FromBody] bool activo)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var rows = await con.ExecuteAsync(
+                "sp_usuarios_actualizar_estado_activo",
+                new { IdUsuario = id, Activo = activo },
+                commandType: CommandType.StoredProcedure
+            );
+
+            if (rows == 0)
+                return NotFound(new { Message = "Usuario no encontrado o eliminado." });
+
+            return NoContent();
+        }
     }
 }

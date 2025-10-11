@@ -135,6 +135,40 @@ function eliminarEstudiante(id) {
     });
 }
 
+function cambiarEstadoEstudiante(id, isChecked) {
+    fetch(`/Estudiantes/CambiarEstado?id=${id}&activo=${isChecked}`, {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+            "RequestVerificationToken":
+                document.querySelector('input[name="__RequestVerificationToken"]').value
+        }
+    })
+        .then(async (response) => {
+            const data = await response.json().catch(() => null);
+            if (data?.ok) {
+                ensureSwalReady(() => {
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: data.title,
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 2500,
+                        timerProgressBar: true
+                    });
+                });
+            } else {
+                SwalNotify("error", data?.title || "Error", data?.message || "No se pudo actualizar el estado.");
+            }
+        })
+        .catch(() => {
+            SwalNotify("error", "Error", "Ocurrió un error inesperado.");
+        });
+}
+
 
 (function () {
     function ensureSwalReady(callback) {

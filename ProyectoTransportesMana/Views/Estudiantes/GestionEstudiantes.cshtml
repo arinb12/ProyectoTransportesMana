@@ -68,7 +68,9 @@
                             <td data-label="Sección">@e.Seccion</td>
                             <td data-label="Teléfono">@e.Telefono</td>
                             <td data-label="Activo" class="text-center">
-                                <input type="checkbox" @(e.Activo ? "checked" : null) />
+                                <input type="checkbox"
+                                       @(e.Activo ? "checked" : null)
+                                       onchange="cambiarEstadoEstudiante(@e.Id, this.checked)" />
                             </td>
                             <td data-label="Acciones">
                                 <a href="#" class="text-primary ms-2" title="Editar" onclick="editarEstudiante(@e.Id)">

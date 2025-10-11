@@ -111,6 +111,34 @@ namespace ProyectoTransportesMana.Controllers
             return RedirectToAction(nameof(GestionEstudiantes));
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> CambiarEstado(int id, bool activo)
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            var content = new StringContent(activo.ToString().ToLower(), System.Text.Encoding.UTF8, "application/json");
+            var resp = await client.PatchAsync($"api/v1/estudiantes/{id}/estado", content);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                return Json(new
+                {
+                    ok = false,
+                    title = "Error al cambiar estado",
+                    message = "No se pudo actualizar el estado del estudiante."
+                });
+            }
+
+            return Json(new
+            {
+                ok = true,
+                title = activo ? "Estudiante activado" : "Estudiante desactivado",
+                message = activo
+                    ? "El estudiante ahora está activo."
+                    : "El estudiante fue desactivado correctamente."
+            });
+        }
+
         private async Task CargarDatosVistaAsync()
         {
             var client = _httpClientFactory.CreateClient("Api");
