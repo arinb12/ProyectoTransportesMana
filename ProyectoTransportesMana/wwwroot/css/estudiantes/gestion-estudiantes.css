@@ -37,8 +37,6 @@ table.pastel-table tbody tr:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-
-/* Estilo base de select2 para que luzca como form-select */
 .select2-container--default .select2-selection--single {
     background-color: #fff;
     border: 1px solid #ced4da;
@@ -60,3 +58,4 @@ table.pastel-table tbody tr:hover {
         height: 100%;
         right: 0.75rem;
     }
+

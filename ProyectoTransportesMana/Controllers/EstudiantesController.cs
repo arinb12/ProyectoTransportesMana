@@ -139,6 +139,55 @@ namespace ProyectoTransportesMana.Controllers
             });
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> ObtenerParaEditar(int id)
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            var resp = await client.GetAsync($"api/v1/estudiantes/{id}");
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    return NotFound(new { ok = false, message = "Estudiante no encontrado." });
+
+                return StatusCode((int)resp.StatusCode, new { ok = false, message = "Error al consultar la API." });
+            }
+
+            var dto = await resp.Content.ReadFromJsonAsync<EstudianteResponse>();
+            if (dto is null)
+                return StatusCode(500, new { ok = false, message = "Respuesta inválida de la API." });
+
+            return Json(new { ok = true, data = dto });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ActualizarEstudiante(EstudianteModel estudiante)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { ok = false, message = "Datos inválidos en el formulario." });
+
+            var client = _httpClientFactory.CreateClient("Api");
+            var resp = await client.PutAsJsonAsync($"api/v1/estudiantes/{estudiante.IdUsuario}", new
+            {
+                Id = estudiante.IdUsuario,
+                estudiante.Nombre,
+                estudiante.PrimerApellido,
+                estudiante.SegundoApellido,
+                estudiante.Activo,
+                estudiante.IdEncargado,
+                estudiante.IdInstitucion,
+                estudiante.Seccion,
+                estudiante.IdMaestra,
+                estudiante.Telefono
+            });
+
+            if (resp.IsSuccessStatusCode)
+                return Json(new { ok = true, message = "Estudiante actualizado correctamente." });
+
+            return Json(new { ok = false, message = "No se pudo actualizar el estudiante." });
+        }
+
         private async Task CargarDatosVistaAsync()
         {
             var client = _httpClientFactory.CreateClient("Api");

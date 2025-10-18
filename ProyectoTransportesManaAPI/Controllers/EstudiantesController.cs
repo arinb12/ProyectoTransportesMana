@@ -24,7 +24,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             return Ok(data);
         }
 
-
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(EstudianteResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -40,7 +39,6 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             return est is null ? NotFound() : Ok(est);
         }
-
 
         [HttpPost]
         [ProducesResponseType(typeof(EstudianteResponse), StatusCodes.Status201Created)]
@@ -84,7 +82,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = newId }, response);
         }
 
-
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -104,7 +101,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             return NoContent();
         }
 
-
         [HttpPatch("{id:int}/estado")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -120,6 +116,44 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             if (rows == 0)
                 return NotFound(new { Message = "Usuario no encontrado o eliminado." });
+
+            return NoContent();
+        }
+
+
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ActualizarEstudiante(int id, [FromBody] EstudianteUpdateRequest request)
+        {
+            if (id != request.Id)
+                return BadRequest(new { Message = "El ID del estudiante no coincide." });
+
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            var rows = await con.ExecuteAsync(
+                "sp_estudiantes_actualizar",
+                new
+                {
+                    request.Id,
+                    request.Nombre,
+                    request.PrimerApellido,
+                    request.SegundoApellido,
+                    request.Activo,
+                    request.IdEncargado,
+                    request.IdInstitucion,
+                    request.Seccion,
+                    request.IdMaestra,
+                    request.Telefono
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            if (rows == 0)
+                return NotFound(new { Message = "Estudiante no encontrado." });
 
             return NoContent();
         }

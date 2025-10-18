@@ -169,6 +169,81 @@ function cambiarEstadoEstudiante(id, isChecked) {
         });
 }
 
+function editarEstudiante(id) {
+    fetch(`/Estudiantes/ObtenerParaEditar?id=${id}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+        .then(resp => {
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return resp.json();
+        })
+        .then(r => {
+            if (!r?.ok || !r.data) {
+                SwalNotify("error", "Error", r?.message || "No se pudieron cargar los datos del estudiante.");
+                return;
+            }
+            const data = r.data;
+
+            $("#modalEstudianteLabel").text("Editar Estudiante");
+            $("#estudianteForm").attr("action", "/Estudiantes/ActualizarEstudiante");
+            $("#IdUsuario").val(data.id);
+            $("#Nombre").val(data.nombre);
+            $("#PrimerApellido").val(data.primerApellido);
+            $("#SegundoApellido").val(data.segundoApellido || "");
+            $("#IdEncargado").val(data.idEncargado).trigger("change");
+            $("#IdInstitucion").val(data.idInstitucion).trigger("change");
+            $("#IdMaestra").val(data.idMaestra).trigger("change");
+            $("#Seccion").val(data.seccion);
+            $("#Telefono").val(data.telefono);
+            $("#Activo").prop("checked", data.activo);
+
+            $("#modalEstudiante").modal("show");
+        })
+        .catch(err => {
+            console.error("Error al cargar estudiante:", err);
+            SwalNotify("error", "Error", "Error al cargar los datos del estudiante.");
+        });
+}
+
+
+$(document).on("submit", "#estudianteForm", function (e) {
+    e.preventDefault();
+
+    const form = this;
+    const action = form.action;
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+
+    fetch(action, {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: formData
+    })
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.ok) {
+                $("#modalEstudiante").modal("hide");
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Estudiante actualizado",
+                    text: data.message,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                }).then(() => window.location.reload());
+            } else {
+                SwalNotify("error", "Error", data.message || "No se pudo actualizar el estudiante.");
+            }
+        })
+        .catch(() => {
+            SwalNotify("error", "Error", "Error al guardar los cambios.");
+        });
+});
 
 (function () {
     function ensureSwalReady(callback) {
@@ -180,10 +255,12 @@ function cambiarEstadoEstudiante(id, isChecked) {
         script.src = "https://cdn.jsdelivr.net/npm/sweetalert2@11";
         script.async = true;
         script.onload = callback;
+        script.onerror = callback;
         document.head.appendChild(script);
     }
 
     window.ensureSwalReady = ensureSwalReady;
+
     function toOptions(arg1, arg2, arg3) {
         if (typeof arg1 === "object" && arg1 !== null) {
             return Object.assign({ confirmButtonText: "OK" }, arg1);
@@ -196,9 +273,31 @@ function cambiarEstadoEstudiante(id, isChecked) {
         };
     }
 
-    function SwalNotify(arg1, arg2, arg3) {
+    function SwalNotify(arg1, arg2, arg3, asToast = false) {
         var opts = toOptions(arg1, arg2, arg3);
-        ensureSwalReady(function () { window.Swal.fire(opts); });
+
+        const useToast = asToast || /error|guard|fall/i.test(opts.text || "");
+
+        ensureSwalReady(function () {
+            if (window.Swal && typeof window.Swal.fire === "function") {
+                if (useToast) {
+                    window.Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: opts.icon || "error",
+                        title: opts.title || "Error",
+                        text: opts.text || "",
+                        showConfirmButton: false,
+                        timer: 2500,
+                        timerProgressBar: true
+                    });
+                } else {
+                    window.Swal.fire(opts);
+                }
+            } else {
+                alert((opts.title || "Aviso") + "\n" + (opts.text || ""));
+            }
+        });
     }
 
     window.SwalNotify = SwalNotify;
