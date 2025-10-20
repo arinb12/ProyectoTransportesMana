@@ -38,6 +38,27 @@ public sealed record class EstudianteCreateRequest
     public string Telefono { get; init; } = default!;
 }
 
+
+public sealed record class EstudianteUpdateRequest
+{
+    [Required] public int Id { get; init; }
+    [Required, MinLength(1)] public string Nombre { get; init; } = default!;
+    [Required, MinLength(1)] public string PrimerApellido { get; init; } = default!;
+    public string? SegundoApellido { get; init; }
+    public bool Activo { get; init; }
+
+    [Range(1, int.MaxValue)] public int IdEncargado { get; init; }
+    [Range(1, int.MaxValue)] public int IdInstitucion { get; init; }
+    [Required] public string Seccion { get; init; } = default!;
+    [Range(1, int.MaxValue)] public int IdMaestra { get; init; }
+
+    [Required]
+    [RegularExpression(@"^(\+506[\s]?)?\d{4}-\d{4}$",
+        ErrorMessage = "Formato de teléfono inválido. Use ####-#### o +506 ####-####.")]
+    public string Telefono { get; init; } = default!;
+}
+
+
 public sealed record EstudianteResponse(
     int Id,
     string Nombre,

@@ -108,6 +108,7 @@
                       class="row g-3 needs-validation">
 
                     @Html.AntiForgeryToken()
+                    <input type="hidden" id="IdUsuario" name="IdUsuario" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                     <div class="col-md-6">
