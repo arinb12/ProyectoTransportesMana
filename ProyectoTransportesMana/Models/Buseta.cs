@@ -1,8 +1,7 @@
-﻿using ProyectoTransportesMana.Models;
-using System.ComponentModel.DataAnnotations;
-using ProyectoTransportesMana.Controllers;
 
 using System.ComponentModel.DataAnnotations;
+
+
 
 namespace ProyectoTransportesMana.Models
 {

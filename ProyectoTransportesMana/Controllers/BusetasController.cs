@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProyectoTransportesMana.Controllers;
-using ProyectoTransportesMana.Models;
-using Microsoft.AspNetCore.Mvc;
 using ProyectoTransportesMana.Models;
 using System.Collections.Generic;
 using System.Linq;
+
 namespace ProyectoTransportesMana.Controllers
 {
     public class BusetasController : Controller
