@@ -17,4 +17,8 @@
     <ProjectReference Include="..\ProyectoTransportesMana.Contracts\ProyectoTransportesMana.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\css\asistentes\" />
+  </ItemGroup>
+
 </Project>
