@@ -18,12 +18,15 @@
 }
 
 body {
-  background-color: var(--background-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 20px;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none; 
 }
 
 .container {
@@ -82,12 +85,27 @@ body {
     }
 
 .remember-section {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px; 
+    font-size: 14px;
+    color: #555;
+    margin-top: 8px;
 }
+
+    .remember-section input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #b36dfb;
+        margin: 0;
+        transform: translateY(1px);
+    }
+
+    .remember-section label {
+        cursor: pointer;
+        user-select: none;
+    }
+
 
 .login-form button {
   margin-top: 40px;
@@ -176,7 +194,7 @@ body {
   text-decoration: underline;
 }
 
-/* ---------- Fondo general ---------- */
+
 .login-container {
     position: relative;
     width: 100%;
@@ -184,19 +202,19 @@ body {
     overflow: hidden;
 }
 
-/* Imagen de fondo con blur */
+
 .background-blur {
-    position: absolute;
+    position: fixed; 
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: url("/img/background.jpg") center/cover no-repeat;
-    filter: blur(8px) brightness(0.8);
+    filter: blur(10px) brightness(0.7);
     z-index: -1;
 }
 
-/* ---------- Tarjeta ---------- */
+
 .login-card {
     display: flex;
     justify-content: space-between;
@@ -212,7 +230,7 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* Lado izquierdo (formulario) */
+
 .login-left {
     flex: 1;
     padding: 3rem;
@@ -285,7 +303,7 @@ body {
             text-decoration: underline;
         }
 
-/* ---------- Lado derecho ---------- */
+
 .login-right {
     position: relative;
     flex: 1;
@@ -321,7 +339,7 @@ body {
         opacity: 0.9;
     }
 
-/* ---------- Responsivo ---------- */
+
 @media (max-width: 900px) {
     .login-card {
         flex-direction: column;
@@ -334,5 +352,20 @@ body {
 
     .info-text h2 {
         font-size: 1.4rem;
+    }
+}
+
+/* --- Estilo exclusivo para el modal de registro --- */
+.registro-card {
+    width: 100%; 
+    max-width: 1100px; 
+    height: 90vh; 
+}
+
+/* Ajuste responsivo */
+@media (max-width: 900px) {
+    .registro-card {
+        width: 100%;
+        height: auto;
     }
 }
