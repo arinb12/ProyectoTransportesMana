@@ -2,7 +2,7 @@
 {
     public class AsistenteListado
     {
-        public int Id { get; set; }                 // id_asistente 
+        public int Id { get; set; }                
         public string Nombre { get; set; } = "";
         public string PrimerApellido { get; set; } = "";
         public string SegundoApellido { get; set; } = "";

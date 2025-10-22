@@ -9,7 +9,7 @@
         public string Telefono { get; set; } = string.Empty;
         public string Cedula { get; set; } = string.Empty;
         public string? Correo { get; set; }
-        public int Salario { get; set; }   // usa decimal si en BD lo dejas INT igual funciona
+        public int Salario { get; set; }   
         public int? BusetaId { get; set; }
         public bool Activo { get; set; } = true;
     }

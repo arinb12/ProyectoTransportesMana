@@ -2,7 +2,7 @@
 {
     public class AsistenteUpdateRequest
     {
-        public int Id { get; set; }                 // id_usuario / id_asistente
+        public int Id { get; set; }                 
         public string Nombre { get; set; } = string.Empty;
         public string PrimerApellido { get; set; } = string.Empty;
         public string? SegundoApellido { get; set; }

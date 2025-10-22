@@ -84,7 +84,7 @@ namespace ProyectoTransportesMana.Controllers
             return RedirectToAction("ConsultarAsistente");
         }
 
-        // Utilidad: trae busetas desde la API y las convierte a SelectList
+        // trae busetas desde la API y convierte a SelectList
         private async Task<IEnumerable<SelectListItem>> GetBusetasSelectList()
         {
             var cliente = _httpClientFactory.CreateClient("Api");
@@ -92,11 +92,86 @@ namespace ProyectoTransportesMana.Controllers
             return lista.Select(b => new SelectListItem { Value = b.Id.ToString(), Text = b.Texto });
         }
 
-        // VM para consumir el endpoint de API/Busetas
+        // para usae el endpoint de API/Busetas
         private class BusetaVm
         {
             public int Id { get; set; }
             public string Texto { get; set; } = string.Empty;
+        }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ActualizarAsistente(int id, bool openModal = false)
+        {
+            var api = _httpClientFactory.CreateClient("Api");
+
+            var detalle = await api.GetFromJsonAsync<AsistenteResponse>($"api/Asistente/{id}");
+            if (detalle is null)
+            {
+                TempData["Error"] = "No se encontró el asistente.";
+                return RedirectToAction("ConsultarAsistente");
+            }
+
+            var model = new AsistenteModel
+            {
+                Id = detalle.Id,
+                Nombre = detalle.Nombre,
+                PrimerApellido = detalle.PrimerApellido,
+                SegundoApellido = detalle.SegundoApellido ?? "",
+                Telefono = detalle.Telefono,
+                Cedula = detalle.Cedula,
+                Correo = detalle.Correo,
+                Salario = detalle.Salario,     // int
+                BusetaId = detalle.BusetaId,
+                Activo = detalle.Activo,
+                BusetasSelectList = await GetBusetasSelectList()
+            };
+
+            ViewBag.OpenModal = openModal;
+            return View("ActualizarAsistente", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarAsistente(AsistenteModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.BusetasSelectList = await GetBusetasSelectList();
+                ViewBag.OpenModal = true;
+                return View("ActualizarAsistente", model);
+            }
+
+            var api = _httpClientFactory.CreateClient("Api");
+
+            var payload = new
+            {
+                Id = model.Id!.Value,
+                Nombre = model.Nombre,
+                PrimerApellido = model.PrimerApellido,
+                SegundoApellido = string.IsNullOrWhiteSpace(model.SegundoApellido) ? null : model.SegundoApellido,
+                Activo = model.Activo,
+                Telefono = model.Telefono,
+                Cedula = model.Cedula,
+                Correo = model.Correo,
+                Salario = model.Salario,        // int
+                BusetaId = model.BusetaId!.Value
+            };
+
+            var resp = await api.PutAsJsonAsync($"api/Asistente/{model.Id}", payload);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var msg = await resp.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Error al actualizar: {msg}");
+                model.BusetasSelectList = await GetBusetasSelectList();
+                ViewBag.OpenModal = true;
+                return View("ActualizarAsistente", model);
+            }
+
+            return RedirectToAction("ConsultarAsistente");
         }
     }
 }
