@@ -1,0 +1,184 @@
+﻿@{
+    ViewData["Title"] = "Detalle de Asignaciones";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+
+    var busetasConAsignaciones = ViewBag.BusetasConAsignaciones as List<dynamic>;
+}
+
+<h1 class="mb-4">
+    <i class="bi bi-clipboard-data"></i> Control Operacional - Asignaciones
+</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <p class="text-muted">
+            <i class="bi bi-info-circle"></i>
+            Vista completa de busetas activas y sus asignaciones de estudiantes
+        </p>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Listado
+        </a>
+        <a asp-action="Activas" class="btn btn-success">
+            <i class="bi bi-eye"></i> Solo Activas
+        </a>
+    </div>
+</div>
+
+@if (busetasConAsignaciones != null && busetasConAsignaciones.Any())
+{
+    <div class="row">
+        @foreach (var item in busetasConAsignaciones)
+        {
+            var buseta = item.Buseta as ProyectoTransportesMana.Models.Buseta;
+            var asignaciones = (int)item.Asignaciones;
+            var estudiantesAsignados = item.EstudiantesAsignados as List<int>;
+            var porcentajeOcupacion = buseta.Capacidad > 0 ? (asignaciones * 100) / buseta.Capacidad : 0;
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 @(buseta.Activa ? "border-success" : "border-secondary")">
+                    <div class="card-header @(buseta.Activa ? "bg-success text-white" : "bg-secondary text-white")">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-bus-front"></i> @buseta.Placa
+                            </h6>
+                            @if (buseta.Activa)
+                            {
+                                <span class="badge bg-light text-success">
+                                    <i class="bi bi-circle-fill"></i> Activa
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-secondary">
+                                    <i class="bi bi-circle"></i> Inactiva
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <small class="text-muted">ID:</small><br>
+                                <strong>@buseta.Id</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Capacidad:</small><br>
+                                <strong>@buseta.Capacidad</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <small class="text-muted">Conductor:</small><br>
+                            <strong>@buseta.NombreConductor</strong>
+                        </div>
+
+                        <div class="mb-2">
+                            <small class="text-muted">Horario:</small><br>
+                            <strong>@buseta.HorarioServicio</strong>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span><small class="text-muted">Ocupación:</small></span>
+                                <span><strong>@asignaciones / @buseta.Capacidad</strong></span>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar @(porcentajeOcupacion > 80 ? "bg-danger" : porcentajeOcupacion > 60 ? "bg-warning" : "bg-success")"
+                                     role="progressbar"
+                                     style="width: @porcentajeOcupacion%"
+                                     aria-valuenow="@porcentajeOcupacion"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted">@porcentajeOcupacion.ToString("F1")% ocupado</small>
+                        </div>
+
+                        @if (estudiantesAsignados != null && estudiantesAsignados.Any())
+                        {
+                            <div class="mb-2">
+                                <small class="text-muted">Estudiantes:</small><br>
+                                <div class="d-flex flex-wrap">
+                                    @foreach (var estudianteId in estudiantesAsignados.Take(5))
+                                    {
+                                        <span class="badge bg-primary me-1 mb-1">@estudianteId</span>
+                                    }
+                                    @if (estudiantesAsignados.Count > 5)
+                                    {
+                                        <span class="badge bg-secondary">+@(estudiantesAsignados.Count - 5)</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Asignaciones" asp-route-id="@buseta.Id" class="btn btn-sm btn-info">
+                                <i class="bi bi-people"></i> Ver Detalle
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@buseta.Id" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-bar-chart"></i> Resumen General
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var totalBusetas = busetasConAsignaciones.Count;
+                        var busetasActivas = busetasConAsignaciones.Count(b => b.Buseta.Activa);
+                        var totalAsignaciones = busetasConAsignaciones.Sum(b => b.Asignaciones);
+                        var totalCapacidad = busetasConAsignaciones.Sum(b => b.Buseta.Capacidad);
+                        var porcentajeGeneral = totalCapacidad > 0 ? (totalAsignaciones * 100) / totalCapacidad : 0;
+                    }
+
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-primary">@totalBusetas</h4>
+                            <small class="text-muted">Total Busetas</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-success">@busetasActivas</h4>
+                            <small class="text-muted">Busetas Activas</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-info">@totalAsignaciones</h4>
+                            <small class="text-muted">Estudiantes Asignados</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-warning">@porcentajeGeneral.ToString("F1")%</h4>
+                            <small class="text-muted">Ocupación General</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="bi bi-clipboard-data text-muted" style="font-size: 3rem;"></i>
+        <h4 class="text-muted mt-3">No hay datos de asignaciones</h4>
+        <p class="text-muted">No se encontraron busetas con asignaciones registradas.</p>
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
+}
+
