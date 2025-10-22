@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<ProyectoTransportesMana.Models.AsistenteListado>
+
+@{
     ViewData["Title"] = "Consultar Asistente";
     Layout = "_LayoutInterno";
 }
@@ -6,23 +8,16 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/asistentes/asistentes.css" />
     <style>
-        /* Validación check rojo/verde (si usas formularios aquí) */
-        .form-control:valid {
-            border-color: #198754;
-            padding-right: 2.25rem;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23198754' viewBox='0 0 16 16'%3e%3cpath d='M16 2.3L6 15.3 0 8.6l1.5-1.4L6 12.2 14.5 1z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right calc(0.375em + 0.1875rem) center;
-            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        .pastel-table thead th {
+            background: #e8f4ff;
         }
 
-        .form-control:invalid {
-            border-color: #dc3545;
-            padding-right: 2.25rem;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23dc3545' viewBox='0 0 16 16'%3e%3cpath d='M16 14L2 0 0 2l14 14zM2 14L16 0l-2-2L0 12z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right calc(0.375em + 0.1875rem) center;
-            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        .badge-activo {
+            background-color: #28a745;
+        }
+
+        .badge-inactivo {
+            background-color: #dc3545;
         }
     </style>
 }
@@ -30,13 +25,11 @@
 <h1 class="mt-4">Gestión Asistentes</h1>
 
 <div class="text-end mb-3">
-    <!-- Agregar (redirige a RegistrarAsistente y allá abre el modal) -->
-    <button class="btn-jump text-white"
-            type="button"
-            data-bs-toggle="modal"
-            data-bs-target="#modalAsistente">
-        Agregar
-    </button>
+    <!-- Agregar -> navega a RegistrarAsistente con auto-open del modal -->
+    <a class="btn btn-outline-primary"
+       href="@Url.Action("RegistrarAsistente", "Asistente", new { openModal = true })#modalAsistente">
+        <i class="fas fa-plus me-1"></i> Agregar
+    </a>
 </div>
 
 <div class="card mb-4 shadow">
@@ -44,85 +37,97 @@
         <i class="fas fa-table me-2 text-dark"></i>
         <span class="text-dark fw-bold">Listado Asistentes</span>
     </div>
+
     <div class="card-body">
-        <table id="datatablesSimple" class="table table-hover table-bordered pastel-table">
+        <table id="datatablesSimple" class="table table-hover table-bordered pastel-table align-middle">
             <thead>
                 <tr>
                     <th>Nombre completo</th>
+                    <th>Primer Apellido</th>
+                    <th>Segundo Apellido</th>
                     <th>Teléfono</th>
                     <th>Cédula</th>
                     <th>Correo</th>
                     <th>Fecha de Inicio</th>
                     <th>Buseta Asignada</th>
-                    <th>Salario</th>
-                    <th class="text-center">Acciones</th>
+                    <th class="text-end">Salario</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center" style="width: 110px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Fila de ejemplo; reemplaza por tu foreach -->
-                <tr>
-                    <td>Sonia Rodríguez</td>
-                    <td>88113322</td>
-                    <td>123456789</td>
-                    <td>ssro@gmail.com</td>
-                    <td>2011/04/25</td>
-                    <td>N/A</td>
-                    <td>$5000</td>
-                    <td class="text-center">
-                        <!-- Editar -> ActualizarAsistente (abre modal allá). data-edit-id es el ID real. -->
-                        <a href="#"
-                           class="text-primary mx-1"
-                           title="Editar"
-                           data-edit-id="1"
-                           data-role="edit-asistente">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <!-- Eliminar -> EliminarAsistente (abre modal allá). data-delete-id es el ID real. -->
-                        <a href="#"
-                           class="text-danger mx-1"
-                           title="Eliminar"
-                           data-delete-id="1"
-                           data-role="delete-asistente">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                    </td>
-                </tr>
-                <!-- /fila ejemplo -->
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>@a.Nombre</td>
+                            <td>@a.PrimerApellido</td>
+                            <td>@a.SegundoApellido</td>
+                            <td>@a.Telefono</td>
+                            <td>@a.Cedula</td>
+                            <td>@(string.IsNullOrWhiteSpace(a.Correo) ? "-" : a.Correo)</td>
+                            <td>@(a.FechaInicio.HasValue? a.FechaInicio.Value.ToString("yyyy-MM-dd") : "-")</td>
+                            <td>@(string.IsNullOrWhiteSpace(a.BusetaTexto) ? "-" : a.BusetaTexto)</td>
+                            <td class="text-end">@a.Salario.ToString("N2")</td>
+                            <td class="text-center">
+                                @if (a.Activo)
+                                {
+                                    <span class="badge badge-activo">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactivo">Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <!-- Editar -->
+                                <a class="btn btn-sm btn-outline-primary me-1"
+                                   title="Editar"
+                                   href="@Url.Action("ActualizarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalAsistente">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <!-- Eliminar (solo UI: confirm modal en otra vista) -->
+                                <a class="btn btn-sm btn-outline-danger"
+                                   title="Eliminar"
+                                   href="@Url.Action("EliminarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalEliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">
+                            No hay asistentes registrados.
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
 </div>
 
 @section Scripts {
+    <!-- Si usas DataTables, inicialízalo aquí (ajusta a tu bundle o CDN) -->
     <script>
-        document.addEventListener('click', (e) => {
-            // Agregar -> RegistrarAsistente (modal auto-open)
-            const addTrigger = e.target.closest('[data-bs-target="#modalAsistente"]');
-            if (addTrigger) {
-                e.preventDefault();
-                window.location.href =
-                    '@Url.Action("RegistrarAsistente", "Asistente")?openModal=true#modalAsistente';
-                return;
-            }
-
-            // Editar (lápiz) -> ActualizarAsistente?id=... (modal auto-open)
-            const editTrigger = e.target.closest('[data-role="edit-asistente"]');
-            if (editTrigger) {
-                e.preventDefault();
-                const id = editTrigger.getAttribute('data-edit-id');
-                window.location.href =
-                    '@Url.Action("ActualizarAsistente", "Asistente")' + `?id=${id}&openModal=true#modalAsistente`;
-                return;
-            }
-
-            // Eliminar (papelera) -> EliminarAsistente?id=... (modal auto-open)
-            const delTrigger = e.target.closest('[data-role="delete-asistente"]');
-            if (delTrigger) {
-                e.preventDefault();
-                const id = delTrigger.getAttribute('data-delete-id');
-                window.location.href =
-                    '@Url.Action("EliminarAsistente", "Asistente")' + `?id=${id}&openModal=true#modalEliminar`;
-                return;
+        document.addEventListener('DOMContentLoaded', function () {
+            const tbl = document.getElementById('datatablesSimple');
+            if (tbl && window.simpleDatatables) {
+                new simpleDatatables.DataTable(tbl, {
+                    searchable: true,
+                    fixedHeight: false,
+                    perPage: 10,
+                    labels: {
+                        placeholder: "Buscar...",
+                        perPage: "{select} por página",
+                        noRows: "No hay datos para mostrar",
+                        info: "Mostrando {start}–{end} de {rows}"
+                    }
+                });
             }
         });
     </script>

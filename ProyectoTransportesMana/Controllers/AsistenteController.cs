@@ -1,35 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.VisualBasic;
 using ProyectoTransportesMana.Models;
-using System.Diagnostics;
+using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
     public class AsistenteController : Controller
     {
+        private readonly IHttpClientFactory _httpClientFactory;
+        public AsistenteController(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
         [HttpGet]
-        public IActionResult ConsultarAsistente()
+        public async Task<IActionResult> ConsultarAsistente()
         {
-            return View();
+            var cliente = _httpClientFactory.CreateClient("Api");
+
+            List<AsistenteListado>? lista;
+            try
+            {
+                lista = await cliente.GetFromJsonAsync<List<AsistenteListado>>("api/Asistente/Listar");
+            }
+            catch
+            {
+                lista = new List<AsistenteListado>();
+                TempData["Error"] = "No se pudo cargar el listado de asistentes.";
+            }
+
+            return View(lista);
         }
 
-        [HttpGet]
-        public IActionResult RegistrarAsistente(bool openModal = false)
-        {
-            // Simulación catálogo; reemplaza por tu servicio/DB
-            var busetas = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "Buseta 1 - ABC123" },
-                new SelectListItem { Value = "2", Text = "Buseta 2 - DEF456" },
-                new SelectListItem { Value = "3", Text = "Buseta 3 - GHI789" },
-            };
 
+        [HttpGet]
+        public async Task<IActionResult> RegistrarAsistente(bool openModal = false)
+        {
             var model = new AsistenteModel
             {
-                BusetasSelectList = busetas,
-                Activo = true
+                Activo = true,
+                BusetasSelectList = await GetBusetasSelectList()
             };
 
             ViewBag.OpenModal = openModal;
@@ -38,80 +45,58 @@ namespace ProyectoTransportesMana.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RegistrarAsistente(AsistenteModel model)
+        public async Task<IActionResult> RegistrarAsistente(AsistenteModel model)
         {
-            // Si falló validación, reponemos el SelectList y mantenemos el modal abierto
             if (!ModelState.IsValid)
             {
-                model.BusetasSelectList = new List<SelectListItem>
-                {
-                    new SelectListItem { Value = "1", Text = "Buseta 1 - ABC123" },
-                    new SelectListItem { Value = "2", Text = "Buseta 2 - DEF456" },
-                    new SelectListItem { Value = "3", Text = "Buseta 3 - GHI789" },
-                };
-
+                model.BusetasSelectList = await GetBusetasSelectList();
                 ViewBag.OpenModal = true;
                 return View("RegistrarAsistente", model);
             }
 
-            // TODO: guardar en BD...
-            return RedirectToAction("ConsultarAsistente");
-        }
+            var cliente = _httpClientFactory.CreateClient("Api");
 
-        [HttpGet]
-        public IActionResult ActualizarAsistente(int id, bool openModal = false)
-        {
-            // TODO: Obtener de BD por id. Mock de ejemplo:
-            var model = new AsistenteModel
+            var payload = new
             {
-                Id = id,
-                Nombre = "Sonia Rodríguez",
-                Telefono = "88113322",
-                Cedula = "123456789",
-                Correo = "ssro@gmail.com",
-                Salario = 5000m,
-                BusetaId = 2,
-                Activo = true,
-                BusetasSelectList = CatalogoBusetas()
+                Id = model.Id,
+                Nombre = model.Nombre,
+                PrimerApellido = model.PrimerApellido,
+                SegundoApellido = model.SegundoApellido,
+                Telefono = model.Telefono,
+                Cedula = model.Cedula,
+                Correo = model.Correo,
+                Salario = model.Salario,
+                BusetaId = model.BusetaId,
+                Activo = model.Activo
             };
 
-            ViewBag.OpenModal = openModal;
-            return View("ActualizarAsistente", model);
-        }
+            var resp = await cliente.PostAsJsonAsync("api/Asistente/RegistrarAsistente", payload);
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ActualizarAsistente(AsistenteModel model)
-        {
-            // (Sin validaciones de cliente; aquí puedes validar servidor si quieres)
-            if (!ModelState.IsValid)
+            if (!resp.IsSuccessStatusCode)
             {
-                model.BusetasSelectList = CatalogoBusetas();
+                var msg = await resp.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Error al guardar: {msg}");
+                model.BusetasSelectList = await GetBusetasSelectList();
                 ViewBag.OpenModal = true;
-                return View("ActualizarAsistente", model);
+                return View("RegistrarAsistente", model);
             }
 
-            // TODO: Actualizar en BD...
             return RedirectToAction("ConsultarAsistente");
         }
 
-
-        [HttpGet]
-        public IActionResult EliminarAsistente(int id, bool openModal = false)
+        // Utilidad: trae busetas desde la API y las convierte a SelectList
+        private async Task<IEnumerable<SelectListItem>> GetBusetasSelectList()
         {
-            // (Opcional) podrías buscar el nombre por id para mostrarlo en el modal.
-            // Por ahora lo dejamos genérico.
-            ViewBag.AsistenteId = id;
-            ViewBag.OpenModal = openModal;
-            return View("EliminarAsistente");
+            var cliente = _httpClientFactory.CreateClient("Api");
+            var lista = await cliente.GetFromJsonAsync<List<BusetaVm>>("api/Asistente/Busetas") ?? new();
+            return lista.Select(b => new SelectListItem { Value = b.Id.ToString(), Text = b.Texto });
         }
 
-        // Utilidad para poblar el select
-        private static List<SelectListItem> CatalogoBusetas() => new()
+        // VM para consumir el endpoint de API/Busetas
+        private class BusetaVm
         {
-            new SelectListItem { Value = "1", Text = "Buseta 1 - ABC123" },
-            new SelectListItem { Value = "2", Text = "Buseta 2 - DEF456" },
-            new SelectListItem { Value = "3", Text = "Buseta 3 - GHI789" },
-        };
+            public int Id { get; set; }
+            public string Texto { get; set; } = string.Empty;
+        }
     }
 }

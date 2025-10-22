@@ -59,9 +59,21 @@
 
                     <!-- Nombre -->
                     <div class="col-md-6">
-                        <label asp-for="Nombre" class="form-label"></label>
+                        <label asp-for="Nombre" class="form-label">Nombre</label>
                         <input asp-for="Nombre" class="form-control" minlength="3" required />
                         <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="PrimerApellido" class="form-label">Primer Apellido</label>
+                        <input asp-for="PrimerApellido" class="form-control" />
+                        <span asp-validation-for="PrimerApellido" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="SegundoApellido" class="form-label">Segundo Apellido</label>
+                        <input asp-for="SegundoApellido" class="form-control" />
+                        <span asp-validation-for="SegundoApellido" class="text-danger small"></span>
                     </div>
 
                     <!-- Teléfono -->
@@ -94,7 +106,7 @@
 
                     <!-- Buseta -->
                     <div class="col-md-6">
-                        <label asp-for="BusetaId" class="form-label"></label>
+                        <label asp-for="BusetaId" class="form-label">Buseta Asignada</label>
                         <select asp-for="BusetaId" class="form-select" asp-items="Model.BusetasSelectList" required>
                             <option selected disabled value="">Seleccione una buseta</option>
                         </select>
