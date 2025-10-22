@@ -18,7 +18,7 @@ namespace ProyectoTransportesManaAPI.Controllers
         {
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
             var data = await con.QueryAsync<BusetaListItemResponse>(
-                "sp_busetas_listar_asistente",
+                "sp_busetas_listar",
                 commandType: CommandType.StoredProcedure
             );
             return Ok(data);

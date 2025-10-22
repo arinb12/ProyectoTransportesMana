@@ -25,7 +25,7 @@
 <h1 class="mt-4">Gestión Asistentes</h1>
 
 <div class="text-end mb-3">
-    <!-- Agregar -> navega a RegistrarAsistente con auto-open del modal -->
+   
     <a class="btn btn-outline-primary"
        href="@Url.Action("RegistrarAsistente", "Asistente", new { openModal = true })#modalAsistente">
         <i class="fas fa-plus me-1"></i> Agregar
@@ -88,7 +88,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <!-- Eliminar (solo UI: confirm modal en otra vista) -->
+                                <!-- Eliminar-->
                                 <a class="btn btn-sm btn-outline-danger"
                                    title="Eliminar"
                                    href="@Url.Action("EliminarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalEliminar">

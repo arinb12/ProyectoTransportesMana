@@ -11,7 +11,7 @@ namespace ProyectoTransportesManaAPI.Models
         public int BusetaId { get; set; }
         public string Telefono { get; set; } = "";
         public string Cedula { get; set; } = "";
-        public decimal Salario { get; set; }     // <- viene decimal de la vista
+        public decimal Salario { get; set; }     
         public string? Correo { get; set; }
     }
 }

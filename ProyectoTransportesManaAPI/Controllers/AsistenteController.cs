@@ -51,7 +51,7 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             if (row is null) return NotFound();
 
-            // Mapear a tu DTO de respuesta (con Salario int)
+            
             var res = new AsistenteResponse
             {
                 Id = row.Id,
@@ -63,7 +63,7 @@ namespace ProyectoTransportesManaAPI.Controllers
                 Telefono = row.Telefono,
                 Cedula = row.Cedula,
                 Correo = row.Correo,
-                Salario = (int)Math.Round(row.Salario) // <- vista trae decimal
+                Salario = (int)Math.Round(row.Salario) 
             };
 
             return Ok(res);
@@ -86,7 +86,7 @@ namespace ProyectoTransportesManaAPI.Controllers
                 p.Add("@Telefono", asistente.Telefono);
                 p.Add("@Cedula", asistente.Cedula);
                 p.Add("@Correo", asistente.Correo);
-                p.Add("@Salario", asistente.Salario);   // INT
+                p.Add("@Salario", asistente.Salario);   
                 p.Add("@IdBuseta", asistente.BusetaId);
 
                 var newId = await con.QuerySingleAsync<int>(
@@ -118,7 +118,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             p.Add("@Telefono", req.Telefono);
             p.Add("@Cedula", req.Cedula);
             p.Add("@Correo", req.Correo);
-            p.Add("@Salario", req.Salario); // <- aquí te faltaba el ')'
+            p.Add("@Salario", req.Salario); 
             p.Add("@IdBuseta", req.BusetaId);
 
             try

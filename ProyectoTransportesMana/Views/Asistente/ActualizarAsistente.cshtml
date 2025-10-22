@@ -12,7 +12,7 @@
 
 <h1 class="mt-4">Actualizar Asistente</h1>
 
-<!-- ===================== MODAL ACTUALIZAR ASISTENTE ===================== -->
+
 <div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4">
@@ -24,7 +24,7 @@
             </div>
 
             <div class="modal-body">
-                <!-- SIN validaciones de cliente -->
+                
                 <form id="formAsistente"
                       class="row g-3"
                       asp-action="ActualizarAsistente"
@@ -106,10 +106,10 @@
         </div>
     </div>
 </div>
-<!-- =================== /MODAL =================== -->
+
 @section Scripts {
     <script>
-        // Abrir modal automáticamente si viene flag o hash y regresar al listado al cerrar
+        
         document.addEventListener('DOMContentLoaded', function () {
             const fromServer = @(open.ToString().ToLower());
             const url = new URL(window.location.href);
@@ -121,7 +121,7 @@
                 const modal = new bootstrap.Modal(modalEl);
                 modal.show();
 
-                // Al cerrar (X, Cancelar, ESC/backdrop) => volver al listado
+                
                 modalEl.addEventListener('hidden.bs.modal', function () {
                     window.location.href = '@Url.Action("ConsultarAsistente", "Asistente")';
                 });
