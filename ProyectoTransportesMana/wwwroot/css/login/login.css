@@ -175,3 +175,164 @@ body {
 .back-login a:hover {
   text-decoration: underline;
 }
+
+/* ---------- Fondo general ---------- */
+.login-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Imagen de fondo con blur */
+.background-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("/img/background.jpg") center/cover no-repeat;
+    filter: blur(8px) brightness(0.8);
+    z-index: -1;
+}
+
+/* ---------- Tarjeta ---------- */
+.login-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 80%;
+    max-width: 1000px;
+    height: 70vh;
+    margin: 5% auto;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Lado izquierdo (formulario) */
+.login-left {
+    flex: 1;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.brand-title {
+    color: #6b4e9b;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.login-left h3 {
+    color: #222;
+    margin-bottom: 0.5rem;
+}
+
+.login-left p {
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+}
+
+    .login-form input:focus {
+        border-color: #b36dfb;
+        box-shadow: 0 0 6px rgba(179, 109, 251, 0.4);
+    }
+
+.btn-login {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #b36dfb, #6b4e9b);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn-login:hover {
+        background: linear-gradient(135deg, #a65cf7, #5b3d8c);
+    }
+
+.forgot-password, .create-account {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+    .forgot-password a,
+    .create-account a {
+        color: #6b4e9b;
+        text-decoration: none;
+    }
+
+        .forgot-password a:hover,
+        .create-account a:hover {
+            text-decoration: underline;
+        }
+
+/* ---------- Lado derecho ---------- */
+.login-right {
+    position: relative;
+    flex: 1;
+    background: url("/img/background.jpg") center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .login-right .overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(107, 78, 155, 0.7), rgba(255, 200, 240, 0.4));
+        backdrop-filter: blur(3px);
+    }
+
+.info-text {
+    position: relative;
+    color: white;
+    text-align: center;
+    z-index: 1;
+    padding: 2rem;
+}
+
+    .info-text h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-text p {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 900px) {
+    .login-card {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .login-right {
+        height: 200px;
+    }
+
+    .info-text h2 {
+        font-size: 1.4rem;
+    }
+}

@@ -3,38 +3,44 @@
     Layout = "_LayoutExterno";
 }
 
-<div class="login-card">
-    <div class="login-header">
-        <h2>TRANSPORTE ESCOLAR MANÁ</h2>
-    </div>
-    <div class="login-body">
-        <h3>¡Hola de nuevo! 🚌 👋</h3>
-        <p>Por favor, inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
 
-        <form class="login-form">
-            <input type="email" placeholder="Correo electrónico" required />
-            <input type="password" placeholder="Contraseña" required />
+<div class="login-container">
+    <!-- Fondo con imagen difuminada -->
+    <div class="background-blur"></div>
 
-            <div class="remember-section">
-                <input type="checkbox" id="remember" />
-                <label for="remember">Recuérdame</label>
+    <!-- Tarjeta de inicio de sesión -->
+    <div class="login-card shadow-lg">
+        <div class="login-left">
+            <h2 class="brand-title">TRANSPORTE ESCOLAR MANÁ</h2>
+            <h3>¡Hola de nuevo! 🚌 👋</h3>
+            <p>Inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
+
+            <form class="login-form">
+                <input type="email" placeholder="Correo electrónico" required />
+                <input type="password" placeholder="Contraseña" required />
+
+                <div class="remember-section">
+                    <input type="checkbox" id="remember" />
+                    <label for="remember">Recuérdame</label>
+                </div>
+
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+            </form>
+
+            <p class="forgot-password">
+                <a asp-controller="Home" asp-action="RecoverPassword">¿Olvidaste tu contraseña?</a>
+            </p>
+            <p class="create-account">
+                <a asp-controller="Home" asp-action="Registro">Crear cuenta nueva</a>
+            </p>
+        </div>
+
+        <div class="login-right">
+            <div class="overlay"></div>
+            <div class="info-text">
+                <h2>Organiza tu transporte escolar</h2>
+                <p>Gestiona rutas, horarios y puntos de abordaje de forma rápida y segura.</p>
             </div>
-            <button type="submit">Iniciar Sesión</button>
-        </form>
-        
-
-        <!-- Password recovery link -->
-        <p class="forgot-password">
-            <a asp-controller="Home" asp-action="RecoverPassword">¿Olvidaste tu contraseña?</a>
-        </p>
-        <p class="forgot-password">
-            <a asp-controller="Home" asp-action="Registro">Crear Cuenta</a>
-        </p>
+        </div>
     </div>
-</div>
-
-<div class="login-info">
-    <img src="https://cdn-icons-png.flaticon.com/512/0/308.png" alt="Bus illustration" />
-    <h2>Organiza tu <br /> transporte escolar</h2>
-    <p>Gestiona rutas, horarios y puntos de abordaje de forma rápida y segura.</p>
 </div>
