@@ -1,4 +1,5 @@
-﻿@{
+﻿@model UsuarioModel
+@{
     ViewData["Title"] = "Iniciar Sesión";
     Layout = "_LayoutExterno";
 }
@@ -14,10 +15,15 @@
             <h2 class="brand-title">TRANSPORTE ESCOLAR MANÁ</h2>
             <h3>¡Hola de nuevo! 🚌 👋</h3>
             <p>Inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
-
-            <form class="login-form">
-                <input type="email" placeholder="Correo electrónico" required />
-                <input type="password" placeholder="Contraseña" required />
+            @if (ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-primary text-center">
+                    @ViewBag.Mensaje
+                </div>
+            }
+            <form class="login-form" asp-action="Index" asp-controller="Home">
+                <input type="email" placeholder="Correo electrónico" asp-for="Correo" required />
+                <input type="password" placeholder="Contraseña" asp-for="ContrasenaHash" required />
 
                 <div class="remember-section">
                     <input type="checkbox" id="remember" />
