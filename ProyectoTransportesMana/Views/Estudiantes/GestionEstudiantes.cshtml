@@ -89,7 +89,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -102,8 +101,7 @@
             </div>
             <div class="modal-body">
                 <form id="estudianteForm"
-                      asp-action="RegistrarEstudiante"
-                      asp-controller="Estudiantes"
+                      action="/Estudiantes/RegistrarEstudiante"
                       method="post"
                       class="row g-3 needs-validation">
 
@@ -178,6 +176,18 @@
                                placeholder="####-#### o +506 ####-####" />
                         <span asp-validation-for="Telefono" class="text-danger"></span>
                     </div>
+
+                    <div class="col-md-12">
+                        <label for="Busetas" class="form-label">Busetas asignadas</label>
+                        <select id="Busetas"
+                                name="Busetas"
+                                class="form-select select2-multiple"
+                                multiple="multiple"
+                                data-placeholder="-- Seleccione una o varias busetas --">
+                        </select>
+                        <span class="text-muted small">Puede seleccionar más de una buseta.</span>
+                    </div>
+
 
                     <div class="col-md-3 d-flex align-items-center">
                         <div class="form-check mt-4">

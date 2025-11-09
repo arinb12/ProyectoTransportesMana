@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProyectoTransportesMana.Contracts.Busetas;
 using ProyectoTransportesMana.Contracts.Estudiantes;
 using ProyectoTransportesMana.Models;
 using System.Net;
@@ -45,31 +46,31 @@ namespace ProyectoTransportesMana.Controllers
                 IdInstitucion = estudiante.IdInstitucion,
                 Seccion = estudiante.Seccion,
                 IdMaestra = estudiante.IdMaestra,
-                Telefono = estudiante.Telefono!     
+                Telefono = estudiante.Telefono!,
+                Busetas = estudiante.Busetas ?? new List<int>()
             };
 
             var resp = await client.PostAsJsonAsync("api/v1/estudiantes", payload);
 
             if (resp.IsSuccessStatusCode)
             {
-                TempData["SwalType"] = "success";
-                TempData["SwalTitle"] = "Estudiante registrado";
-                TempData["SwalText"] = "El registro se completó correctamente.";
-                return RedirectToAction(nameof(GestionEstudiantes));
+                return RedirectToAction(nameof(GestionEstudiantes), new { created = true });
             }
 
             var problem = await SafeReadProblemDetails(resp);
-
             ModelState.AddModelError(string.Empty,
                 problem?.Detail ?? problem?.Title ?? "No se pudo registrar el estudiante.");
 
             ViewData["SwalType"] = "error";
             ViewData["SwalTitle"] = "Error al registrar";
-            ViewData["SwalText"] = problem?.Detail ?? "Ocurrió un error al guardar.";
+            ViewData["SwalText"] = "Ocurrió un error al guardar.";
 
             await CargarDatosVistaAsync();
             return View("GestionEstudiantes", estudiante);
         }
+
+
+
 
 
         [HttpPost]
@@ -182,11 +183,39 @@ namespace ProyectoTransportesMana.Controllers
                 estudiante.Telefono
             });
 
-            if (resp.IsSuccessStatusCode)
-                return Json(new { ok = true, message = "Estudiante actualizado correctamente." });
+            if (!resp.IsSuccessStatusCode)
+                return Json(new { ok = false, message = "No se pudo actualizar el estudiante." });
 
-            return Json(new { ok = false, message = "No se pudo actualizar el estudiante." });
+            var busetas = estudiante.Busetas ?? new List<int>();
+            await client.PutAsJsonAsync($"api/v1/estudiantes/{estudiante.IdUsuario}/busetas", busetas);
+
+            return Json(new { ok = true, message = "Estudiante actualizado correctamente." });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ObtenerBusetas()
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            var busetas = await GetOrEmpty<List<BusetaListItemResponse>>(client, "api/v1/busetas/activas") ?? new();
+
+            var result = busetas.Select(b => new
+            {
+                id = b.Id,
+                texto = $"{b.Placa} - {b.NombreConductor} ({b.Jornada})"
+            });
+
+            return Json(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObtenerBusetasPorEstudiante(int id)
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            var ids = await GetOrEmpty<List<int>>(client, $"api/v1/estudiantes/{id}/busetas") ?? new();
+            return Json(ids);
+        }
+
+
 
         private async Task CargarDatosVistaAsync()
         {

@@ -45,7 +45,7 @@ namespace ProyectoTransportesManaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<EstudianteResponse>> RegistrarEstudiante([FromBody] EstudianteCreateRequest request)
         {
-           if (!ModelState.IsValid) return ValidationProblem(ModelState);
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
 
@@ -61,7 +61,8 @@ namespace ProyectoTransportesManaAPI.Controllers
                     request.IdInstitucion,
                     request.Seccion,
                     request.IdMaestra,
-                    Telefono = request.Telefono!  
+                    Telefono = request.Telefono!,
+                    Busetas = string.Join(",", request.Busetas ?? new())
 
                 },
                 commandType: CommandType.StoredProcedure
@@ -155,6 +156,26 @@ namespace ProyectoTransportesManaAPI.Controllers
             if (rows == 0)
                 return NotFound(new { Message = "Estudiante no encontrado." });
 
+            return NoContent();
+        }
+
+        [HttpGet("{id:int}/busetas")]
+        public async Task<ActionResult<IEnumerable<int>>> GetBusetasDeEstudiante(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            var ids = await con.QueryAsync<int>(
+                "SELECT id_buseta FROM asignacion_estudiantes_buseta WHERE id_estudiante = @Id",
+                new { Id = id }
+            );
+            return Ok(ids);
+        }
+
+        [HttpPut("{id:int}/busetas")]
+        public async Task<IActionResult> ActualizarBusetas(int id, [FromBody] List<int> busetas)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            var csv = string.Join(",", busetas ?? new());
+            await con.ExecuteAsync("sp_estudiante_actualizar_busetas", new { IdEstudiante = id, Busetas = csv }, commandType: CommandType.StoredProcedure);
             return NoContent();
         }
     }

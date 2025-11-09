@@ -59,3 +59,34 @@ table.pastel-table tbody tr:hover {
         right: 0.75rem;
     }
 
+/* Estilos para el select múltiple de busetas */
+.select2-container--default .select2-selection--multiple {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    cursor: text;
+    min-height: calc(2.375rem + 2px);
+    padding: 0.375rem;
+}
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: var(--pastel-blue);
+        border: none;
+        color: #000;
+        border-radius: 0.375rem;
+        padding: 0.25rem 0.5rem;
+        margin-top: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #000;
+        margin-right: 0.35rem;
+        font-weight: bold;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }

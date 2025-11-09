@@ -36,6 +36,8 @@ public sealed record class EstudianteCreateRequest
         ErrorMessage = "Formato de teléfono inválido. Use ####-#### o +506 ####-####.")]
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     public string Telefono { get; init; } = default!;
+
+    public List<int>? Busetas { get; set; }
 }
 
 

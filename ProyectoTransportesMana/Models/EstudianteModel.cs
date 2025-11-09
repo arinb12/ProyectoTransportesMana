@@ -24,6 +24,7 @@ namespace ProyectoTransportesMana.Models
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         [RegularExpression(@"^(\+506[\s]?)?\d{4}-\d{4}$", ErrorMessage = "Formato de teléfono inválido. Use ####-#### o +506 ####-####.")]
         public string? Telefono { get; set; }
+        public List<int> Busetas { get; set; } = new();
 
         public EncargadoLegalModel? Encargado { get; set; }
         public InstitucionModel? Institucion { get; set; }

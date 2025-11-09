@@ -4,7 +4,7 @@ namespace ProyectoTransportesMana.Models
 {
     public class UsuarioModel
     {
-        public int IdUsuario { get; set; }
+        public int? IdUsuario { get; set; }
         public Rol RolId { get; set; }
         [Display(Name = "Nombre")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
