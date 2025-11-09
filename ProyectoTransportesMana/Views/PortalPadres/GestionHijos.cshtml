@@ -1,0 +1,160 @@
+﻿@model IEnumerable<ProyectoTransportesMana.Models.Buseta>
+
+@{
+    ViewData["Title"] = "Registro de hijos";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+
+
+
+            <div class="container-fluid p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="text-dark">Gestión de Hijos</h1>
+                    <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalAgregarEstudiante">
+                        <i class="bi bi-person-plus me-1"></i> Agregar Hijo/Estudiante
+                    </button>
+                </div>
+
+                <div id="listaEstudiantes" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+                    <!-- Tarjeta estudiante ejemplo -->
+                    <div class="col">
+                        <div class="card h-100 shadow pastel-card">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">Camila Ramírez Soto</h5>
+                                <p class="mb-1"><strong>Encargado:</strong> María Soto</p>
+                                <p class="mb-1"><strong>Sección:</strong> 4A</p>
+                                <p class="mb-2"><strong>Maestra:</strong> Andrea Vargas</p>
+                                <button class="btn pastel-btn w-100" onclick="abrirModalEditarEstudiante('1', 'Camila Ramírez Soto', 'María Soto', '4A', 'Andrea Vargas')">
+                                    <i class="bi bi-pencil me-1"></i>Editar Información
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="card h-100 shadow pastel-card">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">Gabriel Mendoza</h5>
+                                <p class="mb-1"><strong>Encargado:</strong> Carlos Mendoza</p>
+                                <p class="mb-1"><strong>Sección:</strong> 3B</p>
+                                <p class="mb-2"><strong>Maestra:</strong> Laura Cordero</p>
+                                <button class="btn pastel-btn w-100" onclick="editarEstudiante('Gabriel Mendoza')">
+                                    <i class="bi bi-pencil me-1"></i>Editar Información
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+
+
+<!-- Modal: Agregar Estudiante -->
+<div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-labelledby="modalAgregarEstudianteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="AgregarEstudiante">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarEstudianteLabel">Agregar Estudiante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="Nombre" class="form-label">Nombre del Estudiante</label>
+                        <input type="text" class="form-control" id="Nombre" name="Nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Encargado" class="form-label">Encargado</label>
+                        <input type="text" class="form-control" id="Encargado" name="Encargado" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Seccion" class="form-label">Sección</label>
+                        <input type="text" class="form-control" id="Seccion" name="Seccion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Maestra" class="form-label">Maestra</label>
+                        <input type="text" class="form-control" id="Maestra" name="Maestra" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn pastel-btn">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Editar Estudiante -->
+<div class="modal fade" id="modalEditarEstudiante" tabindex="-1" aria-labelledby="modalEditarEstudianteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="EditarEstudiante">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarEstudianteLabel">Editar Estudiante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="EditarId" name="Id" />
+                    <div class="mb-3">
+                        <label for="EditarNombre" class="form-label">Nombre del Estudiante</label>
+                        <input type="text" class="form-control" id="EditarNombre" name="Nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EditarEncargado" class="form-label">Encargado</label>
+                        <input type="text" class="form-control" id="EditarEncargado" name="Encargado" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EditarSeccion" class="form-label">Sección</label>
+                        <input type="text" class="form-control" id="EditarSeccion" name="Seccion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EditarMaestra" class="form-label">Maestra</label>
+                        <input type="text" class="form-control" id="EditarMaestra" name="Maestra" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn pastel-btn">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<script>
+    function abrirModalEditarEstudiante(id, nombre, encargado, seccion, maestra) {
+        document.getElementById('EditarId').value = id;
+        document.getElementById('EditarNombre').value = nombre;
+        document.getElementById('EditarEncargado').value = encargado;
+        document.getElementById('EditarSeccion').value = seccion;
+        document.getElementById('EditarMaestra').value = maestra;
+        var modal = new bootstrap.Modal(document.getElementById('modalEditarEstudiante'));
+        modal.show();
+    }
+</script>
+
+
+
+
+
+
+
+
+

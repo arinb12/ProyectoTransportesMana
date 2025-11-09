@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Registrarse";
+    Layout = "_LayoutExterno";
+}
+
+<div class="login-container registro-container">
+    <!-- Fondo difuminado -->
+    <div class="background-blur"></div>
+
+    <!-- Tarjeta de registro -->
+    <div class="login-card registro-card shadow-lg">
+        <div class="login-left">
+            <h2 class="brand-title"> </h2>
+            <h2 class="brand-title">TRANSPORTE ESCOLAR MANÁ</h2>
+            <h3>¡Bienvenido! 🚌 👋</h3>
+            <p>Regístrate para acceder a la plataforma y gestionar tus rutas escolares.</p>
+
+            <form class="login-form" method="post" asp-action="RegistrarUsuario" asp-controller="Home">
+                <input type="text" name="nombreCompleto" placeholder="Nombre completo" required />
+                <input type="text" name="nombreUsuario" placeholder="Nombre de usuario" required />
+                <input type="text" name="telefono" placeholder="Número de teléfono" required pattern="\d{8}" title="Debe tener 8 dígitos" />
+                <input type="text" name="cedula" placeholder="Número de cédula" required pattern="\d{9}" title="Debe tener 9 dígitos" />
+                <input type="email" name="correo" placeholder="Correo electrónico" required />
+                <input type="password" name="contrasena" placeholder="Contraseña" required />
+
+                <div class="remember-section">
+                    <input type="checkbox" id="terminos" required />
+                    <label for="terminos">Acepto los términos y condiciones</label>
+                </div>
+
+                <button type="submit" class="btn-login">Registrarse</button>
+            </form>
+
+            <p class="forgot-password">
+                <a asp-controller="Home" asp-action="RecoverPassword">¿Olvidaste tu contraseña?</a>
+            </p>
+            <p class="create-account">
+                <a asp-controller="Home" asp-action="Index">← Volver al inicio de sesión</a>
+            </p>
+        </div>
+
+        <div class="login-right">
+            <div class="overlay"></div>
+            <div class="info-text">
+                <h2>Únete a Transporte Escolar Maná</h2>
+                <p>Administra rutas, horarios y estudiantes desde una plataforma moderna y segura.</p>
+            </div>
+        </div>
+    </div>
+</div>

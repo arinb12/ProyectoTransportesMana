@@ -1,0 +1,183 @@
+﻿/* Indicadores de estado */
+.status - indicator {
+    display: inline - block;
+    width: 12px;
+    height: 12px;
+    border - radius: 50 %;
+    margin - right: 5px;
+}
+
+.status - active {
+    background - color: #28a745;
+    box - shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+}
+
+.status - inactive {
+    background - color: #6c757d;
+    box - shadow: 0 0 0 2px rgba(108, 117, 125, 0.2);
+}
+
+/* Animación para el indicador de estado */
+.status - indicator {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0 % {
+        box- shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+}
+70 % {
+    box- shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+100 % {
+    box- shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* Estilos para las tarjetas de busetas */
+.buseta - card {
+    transition: transform 0.2s ease -in -out, box - shadow 0.2s ease -in -out;
+}
+
+.buseta - card:hover {
+    transform: translateY(-2px);
+    box - shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Barras de progreso personalizadas */
+.progress - custom {
+    height: 8px;
+    border - radius: 4px;
+    background - color: #e9ecef;
+}
+
+.progress - bar - custom {
+    border - radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Estilos para la tabla de asignaciones */
+.table - assignments th {
+    background - color: #f8f9fa;
+    border - bottom: 2px solid #dee2e6;
+    font - weight: 600;
+}
+
+.table - assignments td {
+    vertical - align: middle;
+}
+
+/* Estilos para badges de estudiantes */
+.badge - estudiante {
+    font - size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    margin: 0.1rem;
+}
+
+/* Estilos para alertas personalizadas */
+.alert - custom {
+    border - left: 4px solid;
+    border - radius: 0.375rem;
+}
+
+.alert - success - custom {
+    border - left - color: #28a745;
+    background - color: #d4edda;
+    color: #155724;
+}
+
+.alert - info - custom {
+    border - left - color: #17a2b8;
+    background - color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Estilos para formularios */
+.form - floating - custom {
+    position: relative;
+}
+
+.form - floating - custom input {
+    padding - top: 1.625rem;
+    padding - bottom: 0.625rem;
+}
+
+.form - floating - custom label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100 %;
+    padding: 1rem 0.75rem;
+    pointer - events: none;
+    border: 1px solid transparent;
+    transform - origin: 0 0;
+    transition: opacity 0.1s ease -in -out, transform 0.1s ease -in -out;
+}
+
+/* Estilos para botones de acción */
+.btn - action - group {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.btn - action - group.btn {
+    padding: 0.25rem 0.5rem;
+    font - size: 0.875rem;
+}
+
+/* Estilos para el resumen de capacidad */
+.capacity - summary {
+    background: linear - gradient(135deg, #667eea 0 %, #764ba2 100 %);
+    color: white;
+    border - radius: 0.5rem;
+    padding: 1rem;
+}
+
+.capacity - summary h5 {
+    margin - bottom: 0.5rem;
+    font - weight: 600;
+}
+
+/* Estilos responsivos */
+@media(max - width: 768px) {
+    .table - responsive {
+        font - size: 0.875rem;
+    }
+    
+    .btn - action - group {
+        flex - direction: column;
+    }
+    
+    .btn - action - group.btn {
+        margin - bottom: 0.25rem;
+    }
+}
+
+/* Estilos para estados de ocupación */
+.ocupacion - baja {
+    color: #28a745;
+}
+
+.ocupacion - media {
+    color: #ffc107;
+}
+
+.ocupacion - alta {
+    color: #dc3545;
+}
+
+/* Animaciones de carga */
+.loading - spinner {
+    display: inline - block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border - top: 3px solid #3498db;
+    border - radius: 50 %;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0 % { transform: rotate(0deg); }
+    100 % { transform: rotate(360deg); }
+}

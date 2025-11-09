@@ -1,0 +1,231 @@
+﻿@using System
+@model EstudianteModel
+
+@{
+    ViewData["Title"] = "Gestión Estudiantes";
+    Layout = "_LayoutInterno";
+    var lista = ViewBag.Estudiantes as List<ProyectoTransportesMana.Contracts.Estudiantes.EstudianteListItemResponse>;
+}
+
+@functions {
+    public (string Nombres, string Apellidos) PartirNombre(string? full)
+    {
+        if (string.IsNullOrWhiteSpace(full)) return ("", "");
+        var parts = full.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return (parts[0], "");
+        if (parts.Length == 2) return (parts[0], parts[1]);
+
+        var apellidos = parts[^2] + " " + parts[^1];
+        var nombres = string.Join(" ", parts, 0, parts.Length - 2);
+        return (nombres, apellidos);
+    }
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="text-dark">Gestión de Estudiantes</h1>
+    <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEstudiante">
+        <i class="bi bi-person-plus me-1"></i>Nuevo Estudiante
+    </button>
+</div>
+
+<div class="card mb-4 shadow">
+    <div class="card-header bg-info text-dark fw-bold">
+        <i class="fas fa-users me-2"></i>Listado de Estudiantes
+    </div>
+    <div class="card-body">
+        <table id="tablaEstudiantes" class="table pastel-table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Encargado Legal</th>
+                    <th>Institución</th>
+                    <th>Maestra</th>
+                    <th>Sección</th>
+                    <th>Teléfono</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (lista != null && lista.Count > 0)
+                {
+                    foreach (var e in lista)
+                    {
+                        var split = PartirNombre(e.NombreCompletoEstudiante);
+                        <tr>
+                            <td data-label="Nombre">@split.Nombres</td>
+                            <td data-label="Apellidos">@split.Apellidos</td>
+                            <td data-label="Encargado Legal">@e.Encargado</td>
+                            <td data-label="Institución">@e.Institucion</td>
+                            <td data-label="Maestra">@e.Maestra</td>
+                            <td data-label="Sección">@e.Seccion</td>
+                            <td data-label="Teléfono">@e.Telefono</td>
+                            <td data-label="Activo" class="text-center">
+                                <input type="checkbox"
+                                       @(e.Activo ? "checked" : null)
+                                       onchange="cambiarEstadoEstudiante(@e.Id, this.checked)" />
+                            </td>
+                            <td data-label="Acciones">
+                                <a href="#" class="text-primary ms-2" title="Editar" onclick="editarEstudiante(@e.Id)">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(@e.Id)">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark fw-bold" id="modalEstudianteLabel">
+                    <i class="fas fa-user-graduate me-2"></i>Registrar Estudiante
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="estudianteForm"
+                      action="/Estudiantes/RegistrarEstudiante"
+                      method="post"
+                      class="row g-3 needs-validation">
+
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="IdUsuario" name="IdUsuario" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="PrimerApellido" class="form-label"></label>
+                        <input asp-for="PrimerApellido" class="form-control" />
+                        <span asp-validation-for="PrimerApellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="SegundoApellido" class="form-label"></label>
+                        <input asp-for="SegundoApellido" class="form-control" />
+                        <span asp-validation-for="SegundoApellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IdEncargado" class="form-label"></label>
+                        <select asp-for="IdEncargado"
+                                class="form-select select2"
+                                asp-items="ViewBag.Encargados"
+                                data-placeholder="-- Seleccione un encargado --">
+                            <option value=""></option>
+                        </select>
+                        <span asp-validation-for="IdEncargado" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IdInstitucion" class="form-label"></label>
+                        <select asp-for="IdInstitucion"
+                                class="form-select select2"
+                                asp-items="ViewBag.Instituciones"
+                                data-placeholder="-- Seleccione una institución --">
+                            <option value=""></option>
+                        </select>
+                        <span asp-validation-for="IdInstitucion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IdMaestra" class="form-label"></label>
+                        <select asp-for="IdMaestra"
+                                class="form-select select2"
+                                asp-items="ViewBag.Maestras"
+                                data-placeholder="-- Seleccione una maestra --">
+                            <option value=""></option>
+                        </select>
+                        <span asp-validation-for="IdMaestra" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Seccion" class="form-label"></label>
+                        <input asp-for="Seccion" class="form-control" />
+                        <span asp-validation-for="Seccion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono"
+                               class="form-control"
+                               id="Telefono"
+                               inputmode="tel"
+                               autocomplete="tel"
+                               placeholder="####-#### o +506 ####-####" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="Busetas" class="form-label">Busetas asignadas</label>
+                        <select id="Busetas"
+                                name="Busetas"
+                                class="form-select select2-multiple"
+                                multiple="multiple"
+                                data-placeholder="-- Seleccione una o varias busetas --">
+                        </select>
+                        <span class="text-muted small">Puede seleccionar más de una buseta.</span>
+                    </div>
+
+
+                    <div class="col-md-3 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" asp-for="Activo" />
+                            <label class="form-check-label" asp-for="Activo"></label>
+                        </div>
+                        <span asp-validation-for="Activo" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
+                        <a asp-action="GestionEstudiantes" asp-controller="Estudiantes" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+       window.__swalPayload = {
+            type: '@Html.Raw(TempData["SwalType"] ?? ViewData["SwalType"] ?? "")',
+            title: '@Html.Raw(TempData["SwalTitle"] ?? ViewData["SwalTitle"] ?? "")',
+            text: '@Html.Raw(TempData["SwalText"] ?? ViewData["SwalText"] ?? "")'
+       };
+
+    </script>
+
+    <script src="~/js/estudiantes/gestion-estudiantes.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            if (window.innerWidth <= 768) {
+                $('#tablaEstudiantes').DataTable().columns.adjust().responsive.recalc();
+            }
+        });
+    </script>
+}

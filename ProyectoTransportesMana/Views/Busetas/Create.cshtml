@@ -1,0 +1,149 @@
+﻿@model ProyectoTransportesMana.Models.Buseta
+
+@{
+    ViewData["Title"] = "Nueva Buseta";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+<h1 class="mb-4">
+    <i class="bi bi-plus-circle"></i> Registrar Nueva Buseta
+</h1>
+
+<!-- Debug: Verificar que el modelo tenga todos los campos -->
+<div class="alert alert-info d-none" id="debug-info">
+    <strong>Debug:</strong>
+    Campos disponibles: Placa, Capacidad, NombreConductor, Jornada, HorarioServicio, Activa, CedulaConductor
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create" class="needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Placa" class="form-label"></label>
+                        <input asp-for="Placa" class="form-control" placeholder="Ej: ABC123" />
+                        <span asp-validation-for="Placa" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Capacidad" class="form-label"></label>
+                        <input asp-for="Capacidad" class="form-control" type="number" min="1" max="50" />
+                        <span asp-validation-for="Capacidad" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="NombreConductor" class="form-label"></label>
+                        <input asp-for="NombreConductor" class="form-control" placeholder="Nombre completo del conductor" />
+                        <span asp-validation-for="NombreConductor" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="CedulaConductor" class="form-label"></label>
+                        <input asp-for="CedulaConductor" class="form-control" placeholder="Número de cédula" />
+                        <span asp-validation-for="CedulaConductor" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Jornada" class="form-label"></label>
+                        <select asp-for="Jornada" class="form-select">
+                            <option value="">Seleccione una jornada</option>
+                            <option value="Mañana">Mañana</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noche">Noche</option>
+                            <option value="Completa">Completa</option>
+                        </select>
+                        <span asp-validation-for="Jornada" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="HorarioServicio" class="form-label"></label>
+                        <input asp-for="HorarioServicio" class="form-control" placeholder="Ej: 6:00 AM - 2:00 PM" />
+                        <span asp-validation-for="HorarioServicio" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input asp-for="Activa" class="form-check-input" type="checkbox" checked />
+                    <label asp-for="Activa" class="form-check-label">
+                        <i class="bi bi-circle-fill text-success"></i> Buseta Activa
+                    </label>
+                </div>
+                <small class="form-text text-muted">Desmarque si la buseta no está disponible para servicio</small>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Guardar Buseta
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Información
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <strong>Campos obligatorios:</strong>
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check text-success"></i> Placa del vehículo</li>
+                    <li><i class="bi bi-check text-success"></i> Capacidad de pasajeros</li>
+                    <li><i class="bi bi-check text-success"></i> Nombre del conductor</li>
+                    <li><i class="bi bi-check text-success"></i> Cédula del conductor</li>
+                    <li><i class="bi bi-check text-success"></i> Jornada de trabajo</li>
+                    <li><i class="bi bi-check text-success"></i> Horario de servicio</li>
+                </ul>
+                <hr>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="bi bi-lightbulb"></i>
+                        La buseta se creará como activa por defecto. Puede cambiar este estado después de la creación.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Debug: Mostrar información de campos disponibles
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo) {
+                debugInfo.classList.remove('d-none');
+                setTimeout(() => {
+                    debugInfo.classList.add('d-none');
+                }, 5000);
+            }
+        });
+    </script>
+}

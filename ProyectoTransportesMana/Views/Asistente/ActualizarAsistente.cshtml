@@ -1,0 +1,131 @@
+﻿@model ProyectoTransportesMana.Models.AsistenteModel
+
+@{
+    ViewData["Title"] = "Actualizar Asistente";
+    Layout = "_LayoutInterno";
+    var open = (bool?)ViewBag.OpenModal ?? false;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/asistentes/asistentes.css" />
+}
+
+<h1 class="mt-4">Actualizar Asistente</h1>
+
+
+<div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark fw-bold" id="modalAsistenteLabel">
+                    <i class="fas fa-user me-2"></i>Actualizar Asistente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                
+                <form id="formAsistente"
+                      class="row g-3"
+                      asp-action="ActualizarAsistente"
+                      asp-controller="Asistente"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="col-12">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                     <div class="col-md-6">
+                        <label asp-for="PrimerApellido" class="form-label">Primer Apellido</label>
+                        <input asp-for="PrimerApellido" class="form-control" />
+                        <span asp-validation-for="PrimerApellido" class="text-danger small"></span>
+                    </div>
+
+                     <div class="col-md-6">
+                        <label asp-for="SegundoApellido" class="form-label">Segundo Apellido</label>
+                        <input asp-for="SegundoApellido" class="form-control" />
+                        <span asp-validation-for="SegundoApellido" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Cedula" class="form-label"></label>
+                        <input asp-for="Cedula" class="form-control" />
+                        <span asp-validation-for="Cedula" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Correo" class="form-label"></label>
+                        <input asp-for="Correo" class="form-control" type="email" />
+                        <span asp-validation-for="Correo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Salario" class="form-label"></label>
+                        <input asp-for="Salario" class="form-control" type="number" step="1" min="1" />
+                        <span asp-validation-for="Salario" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BusetaId" class="form-label"></label>
+                        <select asp-for="BusetaId" class="form-select" asp-items="Model.BusetasSelectList">
+                            <option value="">Seleccione una buseta</option>
+                        </select>
+                        <span asp-validation-for="BusetaId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 d-flex align-items-center">
+                        <input asp-for="Activo" class="form-check-input me-2" />
+                        <label asp-for="Activo" class="form-check-label"></label>
+                        <span asp-validation-for="Activo" class="text-danger small ms-2"></span>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn pastel-btn me-2">
+                            <i class="fas fa-save me-1"></i> Guardar cambios
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            const fromServer = @(open.ToString().ToLower());
+            const url = new URL(window.location.href);
+            const fromQuery = url.searchParams.get('openModal') === 'true';
+            const fromHash  = window.location.hash === '#modalAsistente';
+
+            const modalEl = document.getElementById('modalAsistente');
+            if (modalEl && (fromServer || fromQuery || fromHash)) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+                
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    window.location.href = '@Url.Action("ConsultarAsistente", "Asistente")';
+                });
+            }
+        });
+    </script>
+}

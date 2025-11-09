@@ -1,0 +1,52 @@
+﻿@model UsuarioModel
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = "_LayoutExterno";
+}
+
+
+<div class="login-container">
+    <!-- Fondo con imagen difuminada -->
+    <div class="background-blur"></div>
+
+    <!-- Tarjeta de inicio de sesión -->
+    <div class="login-card shadow-lg">
+        <div class="login-left">
+            <h2 class="brand-title">TRANSPORTE ESCOLAR MANÁ</h2>
+            <h3>¡Hola de nuevo! 🚌 👋</h3>
+            <p>Inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
+            @if (ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-primary text-center">
+                    @ViewBag.Mensaje
+                </div>
+            }
+            <form class="login-form" asp-action="Index" asp-controller="Home">
+                <input type="email" placeholder="Correo electrónico" asp-for="Correo" required />
+                <input type="password" placeholder="Contraseña" asp-for="ContrasenaHash" required />
+
+                <div class="remember-section">
+                    <input type="checkbox" id="remember" />
+                    <label for="remember">Recuérdame</label>
+                </div>
+
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+            </form>
+
+            <p class="forgot-password">
+                <a asp-controller="Home" asp-action="RecoverPassword">¿Olvidaste tu contraseña?</a>
+            </p>
+            <p class="create-account">
+                <a asp-controller="Home" asp-action="Registro">Crear cuenta nueva</a>
+            </p>
+        </div>
+
+        <div class="login-right">
+            <div class="overlay"></div>
+            <div class="info-text">
+                <h2>Organiza tu transporte escolar</h2>
+                <p>Gestiona rutas, horarios y puntos de abordaje de forma rápida y segura.</p>
+            </div>
+        </div>
+    </div>
+</div>

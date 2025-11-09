@@ -1,0 +1,136 @@
+﻿@model IEnumerable<ProyectoTransportesMana.Models.AsistenteListado>
+
+@{
+    ViewData["Title"] = "Consultar Asistente";
+    Layout = "_LayoutInterno";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/asistentes/asistentes.css" />
+    <style>
+        .pastel-table thead th {
+            background: #e8f4ff;
+        }
+
+        .badge-activo {
+            background-color: #28a745;
+        }
+
+        .badge-inactivo {
+            background-color: #dc3545;
+        }
+    </style>
+}
+
+<h1 class="mt-4">Gestión Asistentes</h1>
+
+<div class="text-end mb-3">
+   
+    <a class="btn btn-outline-primary"
+       href="@Url.Action("RegistrarAsistente", "Asistente", new { openModal = true })#modalAsistente">
+        <i class="fas fa-plus me-1"></i> Agregar
+    </a>
+</div>
+
+<div class="card mb-4 shadow">
+    <div class="card-header bg-info d-flex align-items-center">
+        <i class="fas fa-table me-2 text-dark"></i>
+        <span class="text-dark fw-bold">Listado Asistentes</span>
+    </div>
+
+    <div class="card-body">
+        <table id="datatablesSimple" class="table table-hover table-bordered pastel-table align-middle">
+            <thead>
+                <tr>
+                    <th>Nombre completo</th>
+                    <th>Primer Apellido</th>
+                    <th>Segundo Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Cédula</th>
+                    <th>Correo</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Buseta Asignada</th>
+                    <th class="text-end">Salario</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center" style="width: 110px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>@a.Nombre</td>
+                            <td>@a.PrimerApellido</td>
+                            <td>@a.SegundoApellido</td>
+                            <td>@a.Telefono</td>
+                            <td>@a.Cedula</td>
+                            <td>@(string.IsNullOrWhiteSpace(a.Correo) ? "-" : a.Correo)</td>
+                            <td>@(a.FechaInicio.HasValue? a.FechaInicio.Value.ToString("yyyy-MM-dd") : "-")</td>
+                            <td>@(string.IsNullOrWhiteSpace(a.BusetaTexto) ? "-" : a.BusetaTexto)</td>
+                            <td class="text-end">@a.Salario.ToString("N2")</td>
+                            <td class="text-center">
+                                @if (a.Activo)
+                                {
+                                    <span class="badge badge-activo">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactivo">Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <!-- Editar -->
+                                <a class="btn btn-sm btn-outline-primary me-1"
+                                   title="Editar"
+                                   href="@Url.Action("ActualizarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalAsistente">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <!-- Eliminar-->
+                                <a class="btn btn-sm btn-outline-danger"
+                                   title="Eliminar"
+                                   href="@Url.Action("EliminarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalEliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">
+                            No hay asistentes registrados.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Si usas DataTables, inicialízalo aquí (ajusta a tu bundle o CDN) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tbl = document.getElementById('datatablesSimple');
+            if (tbl && window.simpleDatatables) {
+                new simpleDatatables.DataTable(tbl, {
+                    searchable: true,
+                    fixedHeight: false,
+                    perPage: 10,
+                    labels: {
+                        placeholder: "Buscar...",
+                        perPage: "{select} por página",
+                        noRows: "No hay datos para mostrar",
+                        info: "Mostrando {start}–{end} de {rows}"
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script src="~/js/asistentes/asistentes.js" asp-append-version="true"></script>
+}
