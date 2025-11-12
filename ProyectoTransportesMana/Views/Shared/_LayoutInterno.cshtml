@@ -60,7 +60,7 @@
                     </a>
                     <a asp-controller="Asistente" asp-action="ConsultarAsistente"
                        class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
-                    <a href="Alertas/gestion-alertas.html"
+                    <a asp-controller="Alerta" asp-action="ConsultarAlerta"
                        class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
                 </div>
                 <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
@@ -127,6 +127,7 @@
 
 
                 @RenderBody()
+                Notificaciones
             </div>
         </div>
     </div>

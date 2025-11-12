@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Consultar Alertas";
+    Layout = "_LayoutInterno";
+}
+
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-dark">Alertas Informativas</h1>
+        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalAlerta">
+            <i class="bi bi-bell-fill me-1"></i> Generar Alerta
+        </button>
+    </div>
+
+    <!-- Tabla de alertas -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-dark fw-bold">
+            <i class="bi bi-megaphone me-2"></i>Listado de Alertas
+        </div>
+        <div class="card-body">
+            <table id="tablaAlertas" class="table table-hover table-bordered pastel-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th><i class="bi bi-pencil-square me-1"></i>Título</th>
+                        <th><i class="bi bi-calendar-event me-1"></i>Fecha de Publicación</th>
+                        <th><i class="bi bi-eye me-1"></i>Visibilidad</th>
+                        <th><i class="bi bi-bullseye me-1"></i>Tipo</th>
+                        <th><i class="bi bi-tools me-1"></i>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#001</td>
+                        <td>Cambio de Ruta Zona Sur</td>
+                        <td>2025-08-01</td>
+                        <td>Por Ruta</td>
+                        <td>Cambio Ruta</td>
+                        <td>
+                            <a href="#" class="text-primary me-2" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" class="text-danger me-2" title="Eliminar">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            <a href="#" class="text-secondary" title="Archivar">
+                                <i class="fas fa-archive"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <!-- Más filas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalAlerta" tabindex="-1" aria-labelledby="modalAlertaLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info">
+                    <h5 class="modal-title text-dark" id="modalAlertaLabel">
+                        <i class="bi bi-bell me-2"></i>Registrar Nueva Alerta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formAlerta">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="tipoAlerta" class="form-label">Tipo de Alerta</label>
+                                <select id="tipoAlerta" class="form-select" required>
+                                    <option selected disabled>Seleccione un tipo</option>
+                                    <option>Retraso</option>
+                                    <option>Cambio Ruta</option>
+                                    <option>Evento Especial</option>
+                                    <option>Otro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fechaPublicacion" class="form-label">
+                                    Fecha de
+                                    Publicación
+                                </label>
+                                <input type="date" id="fechaPublicacion" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tituloAlerta" class="form-label">
+                                Título <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="tituloAlerta" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contenidoAlerta" class="form-label">Mensaje / Contenido</label>
+                            <textarea class="form-control" id="contenidoAlerta" rows="5"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="publico" class="form-label">Público Destinatario</label>
+                            <select id="publico" class="form-select">
+                                <option value="todos">Todos (Masiva)</option>
+                                <option value="ruta">Por Ruta</option>
+                                <option value="buseta">Por Buseta</option>
+                                <option value="encargado">Por Encargado Legal</option>
+                            </select>
+                        </div>
+
+                        <!-- Select Condicionales -->
+                        <div class="mb-3 d-none" id="grupoRuta">
+                            <label for="ruta" class="form-label">Selecciona una Ruta</label>
+                            <select id="ruta" class="form-select">
+                                <option disabled selected>Selecciona una ruta</option>
+                                <option>Ruta 1</option>
+                                <option>Ruta 2</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="grupoBuseta">
+                            <label for="buseta" class="form-label">Selecciona una Buseta</label>
+                            <select id="buseta" class="form-select">
+                                <option disabled selected>Selecciona una buseta</option>
+                                <option>Buseta A</option>
+                                <option>Buseta B</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="grupoEncargado">
+                            <label for="encargado" class="form-label">Selecciona un Encargado Legal</label>
+                            <select id="encargado" class="form-select">
+                                <option disabled selected>Selecciona un encargado</option>
+                                <option>María López</option>
+                                <option>Carlos Pérez</option>
+                            </select>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn pastel-btn">Guardar Alerta</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>

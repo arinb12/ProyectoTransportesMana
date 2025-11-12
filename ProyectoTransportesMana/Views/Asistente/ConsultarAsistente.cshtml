@@ -81,18 +81,15 @@
                                 }
                             </td>
                             <td class="text-center">
-                                <!-- Editar -->
+                           
                                 <a class="btn btn-sm btn-outline-primary me-1"
                                    title="Editar"
                                    href="@Url.Action("ActualizarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalAsistente">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <!-- Eliminar-->
-                                <a class="btn btn-sm btn-outline-danger"
-                                   title="Eliminar"
-                                   href="@Url.Action("EliminarAsistente", "Asistente", new { id = a.Id, openModal = true })#modalEliminar">
-                                    <i class="fas fa-trash-alt"></i>
+                                <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarAsistente(@a.Id)">
+                                    <i class="fas fa-trash"></i>
                                 </a>
                             </td>
                         </tr>
@@ -112,7 +109,7 @@
 </div>
 
 @section Scripts {
-    <!-- Si usas DataTables, inicialízalo aquí (ajusta a tu bundle o CDN) -->
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const tbl = document.getElementById('datatablesSimple');
@@ -132,5 +129,23 @@
         });
     </script>
 
+    <script>
+        window.__swalPayload = {
+             type: '@Html.Raw(TempData["SwalType"] ?? ViewData["SwalType"] ?? "")',
+             title: '@Html.Raw(TempData["SwalTitle"] ?? ViewData["SwalTitle"] ?? "")',
+             text: '@Html.Raw(TempData["SwalText"] ?? ViewData["SwalText"] ?? "")'
+        };
+
+    </script>
+
     <script src="~/js/asistentes/asistentes.js" asp-append-version="true"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            if (window.innerWidth <= 768) {
+                $('#datatablesSimple').DataTable().columns.adjust().responsive.recalc();
+            }
+        });
+    </script>
 }
