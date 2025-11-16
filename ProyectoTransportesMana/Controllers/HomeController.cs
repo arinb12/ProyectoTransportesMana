@@ -14,7 +14,10 @@ namespace ProyectoTransportesMana.Controllers
             _http = http;
             _config = config;
         }
-        public IActionResult Index() { 
+
+        [HttpGet]
+        public IActionResult Index()
+        {   
             return View();
         }
 
@@ -28,12 +31,18 @@ namespace ProyectoTransportesMana.Controllers
                 var respuesta = context.PostAsJsonAsync(urlApi, usuario).Result;
 
                 if (respuesta.IsSuccessStatusCode)
+                    // TODO VALIDAR QUE TIPO DE USUARIO SE LOGUEA PARA ENVIAR UNA U OTRA VISTA AL LOGUEARSE
                 {
                     var datosApi = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
                     if (datosApi != null)
                     {
-                        //HttpContext.Session.SetString("NombreUsuario", datosApi.Nombre);
-                        
+                        var nombreCompleto = $"{datosApi.Nombre} {datosApi.PrimerApellido}";
+
+                        HttpContext.Session.SetString("NombreUsuario", nombreCompleto);
+                        HttpContext.Session.SetString("RolUsuario", datosApi.NombreRol);
+                        HttpContext.Session.SetInt32("IdUsuario", datosApi.IdUsuario ?? 0);
+                        HttpContext.Session.SetInt32("IdRol", datosApi.RolId);
+
 
                         return RedirectToAction("Principal", "Home");
                     }
@@ -41,6 +50,13 @@ namespace ProyectoTransportesMana.Controllers
                 ViewBag.Mensaje = "Usuario o contraseña incorrecta.";
                 return View();
             }
+        }
+
+        [HttpGet]
+        public IActionResult CerrarSesion()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Home");
         }
 
 

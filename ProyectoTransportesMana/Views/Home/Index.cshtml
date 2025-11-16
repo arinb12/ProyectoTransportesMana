@@ -17,11 +17,11 @@
             <p>Inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
             @if (ViewBag.Mensaje != null)
             {
-                <div class="alert alert-primary text-center">
+                <div class="alert alert-danger text-center">
                     @ViewBag.Mensaje
                 </div>
             }
-            <form class="login-form" asp-action="Index" asp-controller="Home">
+            <form id="FormInicioSesion" class="login-form" asp-action="Index" asp-controller="Home">
                 <input type="email" placeholder="Correo electrónico" asp-for="Correo" required />
                 <input type="password" placeholder="Contraseña" asp-for="ContrasenaHash" required />
 
@@ -50,3 +50,11 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
+    <script src="~/js/home/inicio-sesion.js"></script>
+}

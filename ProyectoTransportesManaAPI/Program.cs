@@ -1,32 +1,35 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-
+// Controllers + Swagger
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", p =>
+    {
         p.WithOrigins(
-            "https://localhost:7272", // <-hostWeb)
-            "https://localhost:7238"  // <-hostApi)
-         .AllowAnyHeader()
-         .AllowAnyMethod());
+            "https://localhost:7272", // host frontend
+            "https://localhost:7238"  // host api
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Manejo global de excepciones
+app.UseExceptionHandler("/api/v1/Error/RegistrarError");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-// Usar cors antes de MapControllers
+
 app.UseCors("AllowFrontend");
 
 app.UseAuthorization();

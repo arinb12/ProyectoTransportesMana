@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ProyectoTransportesMana.Models
 {
     public class UsuarioModel
     {
         public int? IdUsuario { get; set; }
-        public Rol RolId { get; set; }
+        public int RolId { get; set; }
         [Display(Name = "Nombre")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string Nombre { get; set; } = "";
@@ -20,5 +21,8 @@ namespace ProyectoTransportesMana.Models
         public DateTime FechaRegistro { get; set; }
         [Display(Name = "Activo")]
         public bool Activo { get; set; }
+
+        [JsonPropertyName("nombre_rol")]
+        public string NombreRol { get; set; } = string.Empty;
     }
 }

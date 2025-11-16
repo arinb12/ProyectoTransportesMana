@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var nombreUsuario = (Context.Session.GetString("NombreUsuario") != null ? Context.Session.GetString("NombreUsuario") : "");
+    var nombreRol = (Context.Session.GetString("RolUsuario") != null ? Context.Session.GetString("RolUsuario") : "");
+}v
+
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -108,17 +113,17 @@
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://randomuser.me/api/portraits/women/75.jpg" class="rounded-circle me-2"
                              width="36" height="36" />
-                        <span class="d-none d-md-inline text-dark">Julia Morales</span>
+                        <span class="d-none d-md-inline text-dark">@nombreUsuario</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
                         <li>
-                            <h6 class="dropdown-header">Administrador</h6>
+                            <h6 class="dropdown-header">@nombreRol</h6>
                         </li>
                         <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
                         <li>
                             <hr class="dropdown-divider" />
                         </li>
-                        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item text-danger" asp-action="CerrarSesion" asp-controller="Home">Cerrar Sesión</a></li>
                     </ul>
                 </div>
             </nav>
