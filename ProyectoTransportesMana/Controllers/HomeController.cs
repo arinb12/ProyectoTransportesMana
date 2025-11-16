@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Models.Filters;
 using System.Diagnostics;
 using System.Net.Http.Json;
 
@@ -52,6 +53,14 @@ namespace ProyectoTransportesMana.Controllers
             }
         }
 
+
+        [Seguridad]
+        public IActionResult Principal()
+        {
+            return View();
+        }
+
+        [Seguridad]
         [HttpGet]
         public IActionResult CerrarSesion()
         {
@@ -86,11 +95,6 @@ namespace ProyectoTransportesMana.Controllers
             return View();
         }
 
-
-        public IActionResult Principal()
-        {
-            return View();
-        }
 
         public IActionResult Registro()
         {

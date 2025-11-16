@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Models.Filters;
 using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
+    [Seguridad]
     public class AsistenteController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
