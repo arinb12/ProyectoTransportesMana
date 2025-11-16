@@ -3,6 +3,11 @@
     Layout = "_LayoutInterno";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/index/index.css" />
+
+}
+
 <div class="mb-4">
     <h1 class="text-dark fw-bold">Horarios de Salida 2026</h1>
 </div>
@@ -34,26 +39,44 @@
         const cont = document.getElementById('contenedor-escuelas');
         cont.innerHTML = '';
 
-        for (const ins of instituciones) {
-          const card = document.createElement('div');
-          card.className = 'card mb-4 shadow';
-          card.innerHTML = `
-            <div class="card-header bg-pastel text-dark fw-bold">${escapeHtml(ins.nombre)}</div>
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table id="tabla-inst-${ins.idInstitucion}" class="table pastel-table table-hover table-bordered mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Sección</th><th>Estudiante</th>
-                      <th>Lunes</th><th>Martes</th><th>Miércoles</th>
-                      <th>Jueves</th><th>Viernes</th><th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>`;
-          cont.appendChild(card);
+
+       for (const ins of instituciones) {
+
+    // paleta pastel infinita
+    const paletas = ['--pastel-purple', '--pastel-blue', '--pastel-pink', '--pastel-green'];
+
+    // índice automático según ID
+    const idx = Math.abs(ins.idInstitucion) % paletas.length;
+    const varColor = paletas[idx];
+
+    const card = document.createElement('div');
+    card.className = 'card mb-4 shadow pastel-card';
+
+    const headerStyle = `
+      background: linear-gradient(90deg, var(${varColor}) 0%, rgba(255,255,255,0.85) 100%);
+    `;
+
+    card.innerHTML = `
+      <div class="card-header pastel-header" style="${headerStyle}">
+        ${escapeHtml(ins.nombre)}
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table id="tabla-inst-${ins.idInstitucion}" class="table pastel-table table-hover table-bordered mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Sección</th><th>Estudiante</th>
+                <th>Lunes</th><th>Martes</th><th>Miércoles</th>
+                <th>Jueves</th><th>Viernes</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    cont.appendChild(card);
 
           // trae estudiantes/horarios para esa institucion
           const stRes = await fetch(`${base}/api/v1/instituciones/${ins.idInstitucion}/estudiantes`);
@@ -137,58 +160,113 @@
       });
     }
 
+      /** Validación simple de hora HH:mm (00:00 - 23:59) */
+    function validarHoraSimple(h) {
+        if (!h) return true; // permitir vacío (se interpreta como sin hora)
+        // aceptar formatos con o sin cero delante: 9:05 o 09:05 -> pero aquí pedimos 2 dígitos para consistencia
+        const re = /^([01]\d|2[0-3]):([0-5]\d)$/;
+        return re.test(h);
+    }
+
+    /** Muestra texto para cada cambio y confirma con Swal antes de mandar */
     async function guardarHorarioSimple(aElem) {
-      const tr = aElem.closest('tr');
-      const idEstudiante = tr.dataset.idEstudiante;
-      if (!idEstudiante) { alert('Id de estudiante no encontrado'); return; }
+        const tr = aElem.closest('tr');
+        const idEstudiante = tr.dataset.idEstudiante;
+        if (!idEstudiante) { Swal.fire('Error','Id de estudiante no encontrado','error'); return; }
 
-      const base = window.API_BASE || '';
+        const base = window.API_BASE || '';
 
-      const promises = [];
-      tr.querySelectorAll('td[data-dia]').forEach(td => {
-        const inputE = td.querySelector('.hora-entrada');
-        const inputS = td.querySelector('.hora-salida');
-        if (!inputE && !inputS) return;
-        const dia = td.dataset.dia;
-        const entrada = inputE ? inputE.value.trim() : '';
-        const salida  = inputS ? inputS.value.trim() : '';
-        if (!entrada && !salida) return;
-
-        const body = {
-          idEstudiante: parseInt(idEstudiante, 10),
-          diaSemana: dia,
-          horaEntrada: entrada,
-          horaSalida: salida
-        };
-
-        promises.push(
-          fetch(`${base}/api/v1/horarios`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          }).then(r => {
-            if (!r.ok) throw new Error(`Error actualizando ${dia} (status ${r.status})`);
-          })
-        );
-      });
-
-      if (promises.length === 0) { alert('No hay cambios para guardar'); return; }
-
-      try {
-        await Promise.all(promises);
+        // recopilar cambios
+        const cambios = [];
         tr.querySelectorAll('td[data-dia]').forEach(td => {
-          const inputE = td.querySelector('.hora-entrada');
-          const inputS = td.querySelector('.hora-salida');
-          if (!inputE && !inputS) return;
-          const e = inputE ? inputE.value.trim() : '';
-          const s = inputS ? inputS.value.trim() : '';
-          td.textContent = e && s ? `${e} / ${s}` : (e || s || '');
+            const inputE = td.querySelector('.hora-entrada');
+            const inputS = td.querySelector('.hora-salida');
+            if (!inputE && !inputS) return;
+
+            const dia = td.dataset.dia;
+            const entrada = inputE ? inputE.value.trim() : '';
+            const salida  = inputS ? inputS.value.trim() : '';
+
+            // si ambos vacíos => ignorar
+            if (!entrada && !salida) return;
+
+            // validar formato
+            if (!validarHoraSimple(entrada) || !validarHoraSimple(salida)) {
+                cambios.push({ dia, entrada, salida, valido: false });
+            } else {
+                cambios.push({ dia, entrada, salida, valido: true });
+            }
         });
-        alert('Horarios guardados');
-      } catch (err) {
-        console.error('guardarHorarioSimple error:', err);
-        alert('Error guardando horarios. Revisa la consola.');
-      }
+
+        if (cambios.length === 0) {
+            Swal.fire('Nada que guardar','No se detectaron cambios en las celdas editables.','info');
+            return;
+        }
+
+        // construir resumen para confirmar
+        const resumenHtml = cambios.map(c => `<strong>${c.dia}</strong>: ${c.entrada || '-'} ${c.salida ? ' / ' + c.salida : ''}`).join('<br>');
+
+        // mostrar confirmación similar a eliminarEstudiante
+        const res = await Swal.fire({
+            title: 'Guardar horarios',
+            html: `Se guardarán los siguientes horarios para el estudiante:<br><br>${resumenHtml}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#aaa'
+        });
+
+        if (!res.isConfirmed) return;
+
+        // enviar todas las peticiones (paralelas)
+        try {
+            const promises = cambios.map(c => {
+                const body = {
+                    idEstudiante: parseInt(idEstudiante, 10),
+                    diaSemana: c.dia,
+                    horaEntrada: c.entrada,
+                    horaSalida: c.salida
+                };
+                // fetch PUT al endpoint
+                return fetch(`${base}/api/v1/horarios`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }).then(async r => {
+                    if (r.ok) return r;
+                    // si devuelve 204 No Content (algunas APIs usan esto), r.ok también es true para 204
+                    // manejar / lanzar error con mensaje cuando no sea ok
+                    let texto = '';
+                    try { texto = await r.text(); } catch {}
+                    throw new Error(`Error ${r.status} al guardar ${c.dia}: ${texto || r.statusText}`);
+                });
+            });
+
+            // mostrar cargando
+            Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, allowEscapeKey: false });
+
+            await Promise.all(promises);
+
+            Swal.fire({ icon: 'success', title: 'Horarios guardados', timer: 1400, showConfirmButton: false });
+
+            // actualizar la UI: reemplazar inputs por texto
+            tr.querySelectorAll('td[data-dia]').forEach(td => {
+                const inputE = td.querySelector('.hora-entrada');
+                const inputS = td.querySelector('.hora-salida');
+                if (!inputE && !inputS) return;
+                const e = inputE ? inputE.value.trim() : '';
+                const s = inputS ? inputS.value.trim() : '';
+                td.textContent = e && s ? `${e} / ${s}` : (e || s || '');
+            });
+
+        } catch (err) {
+            console.error('guardarHorarioSimple error:', err);
+            Swal.fire('Error','Ocurrió un error guardando los horarios. Revisa la consola para más detalles.','error');
+        }
     }
 
     function escapeHtml(s) { if (s == null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }

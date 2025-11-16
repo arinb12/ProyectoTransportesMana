@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using ProyectoTransportesMana.Contracts.Estudiantes;
 using ProyectoTransportesManaAPI.Models;
 using System.Data;
 using System.Net.Http;
@@ -33,13 +34,12 @@ namespace ProyectoTransportesManaAPI.Controllers
         [HttpGet("Listar")]
         public async Task<IActionResult> Listar()
         {
-            const string sql = @"
-                SELECT *
-                FROM dbo.vw_asistentes_listado
-                ORDER BY Nombre, PrimerApellido;";
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var lista = await con.QueryAsync<AsistenteListItemResponse>(sql);
-            return Ok(lista);
+            var data = await con.QueryAsync<AsistenteListItemResponse>(
+               "sp_asistentes_listar",
+               commandType: CommandType.StoredProcedure
+           );
+            return Ok(data);
         }
 
 

@@ -179,7 +179,7 @@ namespace ProyectoTransportesMana.Controllers
         public async Task<IActionResult> EliminarAsistente(int id)
         {
             var client = _httpClientFactory.CreateClient("Api");
-            var resp = await client.DeleteAsync($"api/v1/asistentes/{id}");
+            var resp = await client.DeleteAsync($"api/asistente/{id}");
 
 
             if (resp.IsSuccessStatusCode)

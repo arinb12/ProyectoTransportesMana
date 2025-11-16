@@ -11,6 +11,7 @@
         decimal Salario,
         string? BusetaTexto,      
         DateTime? FechaInicio,    
-        bool Activo
+        bool Activo,
+        bool Eliminado
     );
 }

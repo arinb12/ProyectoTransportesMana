@@ -37,7 +37,6 @@ function eliminarAsistente(id) {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     "Content-Type": "application/json",
-
                     "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
                 }
             })
