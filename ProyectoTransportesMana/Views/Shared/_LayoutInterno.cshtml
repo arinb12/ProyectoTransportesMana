@@ -1,7 +1,7 @@
 ﻿@{
     var nombreUsuario = (Context.Session.GetString("NombreUsuario") != null ? Context.Session.GetString("NombreUsuario") : "");
     var nombreRol = (Context.Session.GetString("RolUsuario") != null ? Context.Session.GetString("RolUsuario") : "");
-}v
+}
 
 <!DOCTYPE html>
 <html lang="es">
@@ -119,7 +119,7 @@
                         <li>
                             <h6 class="dropdown-header">@nombreRol</h6>
                         </li>
-                        <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                        <li><a class="dropdown-item" asp-action="Perfil" asp-controller="Usuarios">Mi Perfil</a></li>
                         <li>
                             <hr class="dropdown-divider" />
                         </li>
@@ -129,10 +129,7 @@
             </nav>
 
             <div class="container-fluid p-4">
-
-
                 @RenderBody()
-                Notificaciones
             </div>
         </div>
     </div>
@@ -170,6 +167,13 @@
 
     <script src="https://unpkg.com/imask"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+                window.location.reload(true);
+            }
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

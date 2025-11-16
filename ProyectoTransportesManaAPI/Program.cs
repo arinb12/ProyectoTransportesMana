@@ -1,3 +1,6 @@
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers + Swagger
@@ -18,6 +21,23 @@ builder.Services.AddCors(options =>
     });
 });
 
+string key = builder.Configuration["Valores:KeyJWT"]!;
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        var config = builder.Configuration;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
 var app = builder.Build();
 
 // Manejo global de excepciones
@@ -32,6 +52,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

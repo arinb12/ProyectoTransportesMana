@@ -2,8 +2,11 @@ using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSession();
 
 // HttpClient hacia API
 builder.Services.AddHttpClient("Api", (sp, client) =>
@@ -16,9 +19,16 @@ builder.Services.AddHttpClient("Api", (sp, client) =>
     client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
     client.DefaultRequestHeaders.Accept.Add(
         new MediaTypeWithQualityHeaderValue("application/json"));
-});
 
-builder.Services.AddSession();
+    var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+    var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+
+    if (!string.IsNullOrWhiteSpace(token))
+    {
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+    }
+});
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ProyectoTransportesMana.Contracts.Busetas;
@@ -6,6 +7,7 @@ using System.Data;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/busetas")]
     public class BusetasController : ControllerBase

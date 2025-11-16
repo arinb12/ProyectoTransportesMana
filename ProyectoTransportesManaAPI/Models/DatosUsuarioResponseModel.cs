@@ -16,6 +16,7 @@ namespace ProyectoTransportesManaAPI.Models
         public bool Activo { get; set; }
         [JsonPropertyName("nombre_rol")]
         public string NombreRol { get; set; }  = string.Empty;
+        public string Token { get; set; } = string.Empty;
 
 
     }

@@ -43,6 +43,7 @@ namespace ProyectoTransportesMana.Controllers
                         HttpContext.Session.SetString("RolUsuario", datosApi.NombreRol);
                         HttpContext.Session.SetInt32("IdUsuario", datosApi.IdUsuario ?? 0);
                         HttpContext.Session.SetInt32("IdRol", datosApi.RolId);
+                        HttpContext.Session.SetString("Token", datosApi.Token);
 
 
                         return RedirectToAction("Principal", "Home");
