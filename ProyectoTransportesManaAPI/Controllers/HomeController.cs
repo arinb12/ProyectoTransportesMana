@@ -25,7 +25,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             _enviroment = enviroment;
         }
 
- 
+
         [HttpPost]
         [Route("ValidarSesion")]
         public IActionResult ValidarSesion(ValidarSesionRequestModel usuario)
@@ -34,22 +34,24 @@ namespace ProyectoTransportesManaAPI.Controllers
             {
                 var parametros = new DynamicParameters();
                 parametros.Add("@Correo", usuario.Correo);
-                parametros.Add("@ContrasenaHash", usuario.ContrasenaHash);
 
                 var resultado = context.QueryFirstOrDefault<DatosUsuarioResponseModel>("ValidarSesion", parametros);
 
-                if (resultado != null)
-                {
-                    resultado.Token = GenerarToken(resultado.IdUsuario, resultado.Nombre, resultado.RolId);
-                    return Ok(resultado);
-                }
-                else
-                {
+                if (resultado == null)
                     return Unauthorized("Credenciales inválidas.");
-                }
+
+                bool passwordValida =
+                    Helpers.PasswordHasher.VerifyPassword(usuario.ContrasenaHash, resultado.ContrasenaHash);
+
+                if (!passwordValida)
+                    return Unauthorized("Credenciales inválidas.");
+
+                resultado.Token = GenerarToken(resultado.IdUsuario, resultado.Nombre, resultado.RolId);
+
+                return Ok(resultado);
             }
-            
         }
+
 
         private string GenerarToken(int usuarioId, string nombre, int rol)
         {
