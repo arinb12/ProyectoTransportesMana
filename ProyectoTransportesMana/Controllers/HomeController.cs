@@ -27,12 +27,10 @@ namespace ProyectoTransportesMana.Controllers
         {
             using (var context = _http.CreateClient())
             {
-
                 var urlApi = _config["Api:BaseUrl"] + "api/Home/ValidarSesion";
                 var respuesta = context.PostAsJsonAsync(urlApi, usuario).Result;
 
                 if (respuesta.IsSuccessStatusCode)
-                    // TODO VALIDAR QUE TIPO DE USUARIO SE LOGUEA PARA ENVIAR UNA U OTRA VISTA AL LOGUEARSE
                 {
                     var datosApi = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
                     if (datosApi != null)
@@ -44,8 +42,10 @@ namespace ProyectoTransportesMana.Controllers
                         HttpContext.Session.SetInt32("IdUsuario", datosApi.IdUsuario ?? 0);
                         HttpContext.Session.SetInt32("IdRol", datosApi.RolId);
                         HttpContext.Session.SetString("Token", datosApi.Token);
-
-
+                        if (datosApi.RolId == 2)
+                        {
+                            return RedirectToAction("Index", "PortalPadres");
+                        }
                         return RedirectToAction("Principal", "Home");
                     }
                 }
@@ -53,7 +53,6 @@ namespace ProyectoTransportesMana.Controllers
                 return View();
             }
         }
-
 
         [Seguridad]
         public IActionResult Principal()

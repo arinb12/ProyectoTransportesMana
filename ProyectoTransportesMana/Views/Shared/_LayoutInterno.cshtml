@@ -1,6 +1,7 @@
 ﻿@{
     var nombreUsuario = (Context.Session.GetString("NombreUsuario") != null ? Context.Session.GetString("NombreUsuario") : "");
     var nombreRol = (Context.Session.GetString("RolUsuario") != null ? Context.Session.GetString("RolUsuario") : "");
+    int? rol = Context.Session.GetInt32("IdRol");
 }
 
 <!DOCTYPE html>
@@ -19,10 +20,8 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
 
-
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -41,67 +40,88 @@
     <div class="d-flex" id="wrapper">
         <!-- Sidebar -->
         <nav class="bg-white pastel-sidebar border-end" id="sidebar-wrapper">
-            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
-            <div class="list-group list-group-flush">
-                <a asp-controller="Home" asp-action="Principal" class="list-group-item list-group-item-action pastel-link">
-                    <i class="bi bi-house-door me-2"></i>Inicio
-                </a>
-                <a href="PortalPadres/comunicados.html" class="list-group-item list-group-item-action pastel-link">
-                    <i class="bi bi-journal-text me-2"></i>Comunicados
-                </a>
-                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
-                   data-bs-toggle="collapse" href="#gestionMenu" role="button">
-                    <div><i class="bi bi-sliders me-2"></i>Gestión</div>
-                    <i class="bi bi-chevron-down small"></i>
-                </a>
-                <div class="collapse" id="gestionMenu">
-                    <a asp-controller="Estudiantes" asp-action="GestionEstudiantes"
-                       class="list-group-item list-group-item-action pastel-sublink ps-5">Estudiantes</a>
-                    <a asp-controller="Padres" asp-action="Index" 
-                       class="list-group-item list-group-item-action pastel-sublink ps-5">Padres</a>
-                    <a asp-controller="Busetas" asp-action="Index"
-                       class="list-group-item list-group-item-action pastel-sublink ps-5">
-                        Busetas
+
+            @* =================== SECCIÓN MAIN =================== *@
+            @if (rol == 1)  @* Admin: ve todo el menú principal *@
+            {
+                <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+                <div class="list-group list-group-flush">
+                    <a asp-controller="Home" asp-action="Principal" class="list-group-item list-group-item-action pastel-link">
+                        <i class="bi bi-house-door me-2"></i>Inicio
                     </a>
-                    <a asp-controller="Asistente" asp-action="ConsultarAsistente"
-                       class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
-                    <a asp-controller="Alerta" asp-action="ConsultarAlerta"
-                       class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
+
+                    <a href="PortalPadres/comunicados.html" class="list-group-item list-group-item-action pastel-link">
+                        <i class="bi bi-journal-text me-2"></i>Comunicados
+                    </a>
+
+                    <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                       data-bs-toggle="collapse" href="#gestionMenu" role="button">
+                        <div><i class="bi bi-sliders me-2"></i>Gestión</div>
+                        <i class="bi bi-chevron-down small"></i>
+                    </a>
+                    <div class="collapse" id="gestionMenu">
+                        <a asp-controller="Estudiantes" asp-action="GestionEstudiantes"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Estudiantes</a>
+                        <a asp-controller="Padres" asp-action="Index"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Padres</a>
+                        <a asp-controller="Busetas" asp-action="Index"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Busetas</a>
+                        <a asp-controller="Asistente" asp-action="ConsultarAsistente"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
+                        <a asp-controller="Alerta" asp-action="ConsultarAlerta"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
+                    </div>
+
+                    <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                       data-bs-toggle="collapse" href="#viajesMenu" role="button">
+                        <div><i class="bi bi-scissors me-2"></i>Viajes</div>
+                        <i class="bi bi-chevron-down small"></i>
+                    </a>
+                    <div class="collapse" id="viajesMenu">
+                        <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
+                        <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
+                        <a href="Viajes/control-asistencia.html"
+                           class="list-group-item list-group-item-action pastel-link ps-5">
+                            Control de Asistencia
+                        </a>
+                        <a href="Viajes/historial-asistencia.html"
+                           class="list-group-item list-group-item-action pastel-link">
+                            <i class="bi bi-journal-text me-2"></i>Historial de Asistencia
+                        </a>
+                    </div>
+
+                    <a href="Reportes/gestion-reportes.html" class="list-group-item list-group-item-action pastel-link">
+                        <i class="bi bi-clipboard-data me-2"></i>Reportes
+                    </a>
                 </div>
-                <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
-                   data-bs-toggle="collapse" href="#viajesMenu" role="button">
-                    <div><i class="bi bi-scissors me-2"></i>Viajes</div>
-                    <i class="bi bi-chevron-down small"></i>
-                </a>
-                <div class="collapse" id="viajesMenu">
-                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
-                    <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
-                    <a href="Viajes/control-asistencia.html"
-                       class="list-group-item list-group-item-action pastel-link ps-5">
-                        Control de
-                        Asistencia
+            }
+            else if (rol == 2)
+            {
+                <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+                <div class="list-group list-group-flush">
+                    <a href="PortalPadres/comunicados.html" class="list-group-item list-group-item-action pastel-link">
+                        <i class="bi bi-journal-text me-2"></i>Comunicados
                     </a>
-                    <a href="Viajes/historial-asistencia.html"
-                       class="list-group-item list-group-item-action pastel-link">
-                        <i class="bi bi-journal-text me-2"></i>Historial de Asistencia
-                    </a>
-
                 </div>
+            }
+            else
+            {
+                @* Otros roles, por ahora nada en Main (luego lo ajustas) *@
+            }
 
-                <a href="Reportes/gestion-reportes.html" class="list-group-item list-group-item-action pastel-link">
-                    <i class="bi bi-clipboard-data me-2"></i>Reportes
-                </a>
-            </div>
+            @if (rol == 1 || rol == 2)
+            {
+                <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Portal de Padres</div>
+                <div class="list-group list-group-flush">
+                    <a asp-controller="PortalPadres" asp-action="Index" class="list-group-item list-group-item-action pastel-link">
+                        <i class="bi bi-laptop me-2"></i>Vista Portal
+                    </a>
+                    <a asp-controller="PortalPadres" asp-action="GestionHijos" class="list-group-item list-group-item-action pastel-link">
+                        <i class="bi bi-person me-2"></i>Gestionar Hijos
+                    </a>
+                </div>
+            }
 
-            <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Portal de Padres</div>
-            <div class="list-group list-group-flush">
-                <a asp-controller="PortalPadres" asp-action="Index" class="list-group-item list-group-item-action pastel-link">
-                    <i class="bi bi-laptop me-2"></i>Vista Portal
-                </a>
-                <a asp-controller="PortalPadres" asp-action="GestionHijos" class="list-group-item list-group-item-action pastel-link">
-                    <i class="bi bi-person me-2"></i>Gestionar Hijos
-                </a>
-            </div>
         </nav>
 
         <!-- Page Content -->
@@ -147,7 +167,7 @@
                 celdas[i].innerHTML = `<input type="time" class="form-control form-control-sm" value="${convertirHora(valorActual)}">`;
             }
 
-            elemento.onclick = null; 
+            elemento.onclick = null;
         }
 
         function convertirHora(hora) {
@@ -157,11 +177,8 @@
             if (ap.toLowerCase() === 'am' && horas === 12) horas = 0;
             return `${horas.toString().padStart(2, '0')}:${m}`;
         }
-
-
-
-
     </script>
+
     <script src="~/js/scripts.js" asp-append-version="true"></script>
     <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>>
 
