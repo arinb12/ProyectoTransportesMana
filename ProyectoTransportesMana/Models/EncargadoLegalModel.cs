@@ -35,7 +35,7 @@ namespace ProyectoTransportesMana.Models
         public string? DireccionResidencia { get; set; }
 
         [Display(Name = "Aceptó términos")]
-        public bool?  AceptoTerminos { get; set; }
+        public bool  AceptoTerminos { get; set; }
 
         [Display(Name = "Fecha de firma de contrato")]
         [DataType(DataType.Date)]

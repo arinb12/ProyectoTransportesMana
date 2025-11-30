@@ -176,7 +176,7 @@ namespace ProyectoTransportesMana.Controllers
                 Correo = dto.Correo,
                 Activo = dto.Activo,
                 DireccionResidencia = dto.DireccionResidencia,
-                AceptoTerminos = dto.AceptoTerminos,
+                AceptoTerminos = (bool)dto.AceptoTerminos,
                 FirmaContrato = dto.FirmaContrato,
                 Telefono = dto.Telefono
                 // Contrasena se deja vacío, no se edita aquí

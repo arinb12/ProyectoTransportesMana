@@ -8,9 +8,25 @@ namespace ProyectoTransportesMana.Contracts.EncargadosLegales
 {
     public sealed class EncargadoLegalListItemResponse
     {
-        public int IdUsuario { get; set; }              // mismo que id_encargado
-        public string NombreCompleto { get; set; } = "";
+        public int IdUsuario { get; set; }
+
+        public string NombreCompleto { get; set; } = string.Empty;
+
+       
+        public string? Estudiantes { get; set; }
+
+       
+        public string? Direccion { get; set; }
+
+        
         public string? Telefono { get; set; }
+
+        
+        public string EstadoContrato { get; set; } = string.Empty;
+
+        
+        public DateTime? FechaInicio { get; set; }
+
         public bool Activo { get; set; }
     }
 
