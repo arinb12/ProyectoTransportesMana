@@ -8,9 +8,81 @@
 
 }
 
-<div class="mb-4">
+<<div class="mb-4">
     <h1 class="text-dark fw-bold">Horarios de Salida 2026</h1>
+
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEscuela">
+        <i class="fas fa-plus"></i> Nueva Escuela
+    </button>
+
 </div>
+
+<div id="contenedor-escuelas"></div>
+<!-- Modal Crear Escuela -->
+<div class="modal fade" id="modalEscuela" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Nueva Escuela</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nombre de la Escuela</label>
+                    <input id="nombreEscuela" type="text" class="form-control" placeholder="Ej: Escuela Fidel" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarEscuela()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    async function guardarEscuela() {
+        const nombre = document.getElementById("nombreEscuela").value.trim();
+        if (!nombre) {
+            alert("Debe ingresar un nombre.");
+            return;
+        }
+
+        const base = window.API_BASE || "";
+
+        try {
+            const res = await fetch(`${base}/api/v1/instituciones`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ idInstitucion: 0, nombre })
+            });
+
+            if (!res.ok) {
+                alert("Ocurrió un error al guardar.");
+                console.error(await res.text());
+                return;
+            }
+
+            // cerrar modal
+            bootstrap.Modal.getInstance(document.getElementById("modalEscuela")).hide();
+
+            // limpiar input
+            document.getElementById("nombreEscuela").value = "";
+
+            // refrescar escuelas
+            await loadAllSimple();
+
+            alert("Escuela agregada exitosamente.");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Error en la solicitud.");
+        }
+    }
+</script>
 
 <div id="contenedor-escuelas"></div>
 
