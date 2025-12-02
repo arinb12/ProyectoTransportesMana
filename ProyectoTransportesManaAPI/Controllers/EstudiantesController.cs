@@ -180,5 +180,22 @@ namespace ProyectoTransportesManaAPI.Controllers
             await con.ExecuteAsync("sp_estudiante_actualizar_busetas", new { IdEstudiante = id, Busetas = csv }, commandType: CommandType.StoredProcedure);
             return NoContent();
         }
+
+        [HttpGet("por-encargado/{idEncargado:int}")]
+        [ProducesResponseType(typeof(IEnumerable<EstudianteListItemResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<EstudianteListItemResponse>>> GetPorEncargado(int idEncargado)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var data = await con.QueryAsync<EstudianteListItemResponse>(
+                "sp_estudiantes_listar_por_encargado",
+                new { IdEncargado = idEncargado },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return Ok(data);
+        }
+
+
     }
 }
