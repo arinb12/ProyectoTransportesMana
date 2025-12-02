@@ -3,11 +3,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers + Swagger
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-// CORS
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", p =>
@@ -17,7 +17,8 @@ builder.Services.AddCors(options =>
             "https://localhost:7238"  // host api
         )
         .AllowAnyHeader()
-        .AllowAnyMethod();
+        .AllowAnyMethod()
+        .AllowCredentials(); 
     });
 });
 

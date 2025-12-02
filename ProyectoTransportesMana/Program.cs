@@ -6,9 +6,13 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddSession();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options => {
+    options.IdleTimeout = TimeSpan.FromHours(1);
+    options.Cookie.HttpOnly = true;
+});
 
-// HttpClient hacia API
+
 builder.Services.AddHttpClient("Api", (sp, client) =>
 {
     var cfg = sp.GetRequiredService<IConfiguration>();
