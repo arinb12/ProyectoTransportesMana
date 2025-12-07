@@ -1,0 +1,157 @@
+﻿:root {
+    --asistencia-blue: #a8d8ea;
+    --asistencia-green: #bde4a9;
+    --asistencia-yellow: #fff3b0;
+    --asistencia-grey: #f7f7f7;
+    --asistencia-border: #e2e2e2;
+}
+
+/* Contenedor por escuela */
+.asistencia-bloque {
+    padding: 1rem;
+    border: 1px solid var(--asistencia-border);
+    border-radius: 0.75rem;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Nombre escuela */
+.asistencia-escuela-nombre {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Filtros */
+.asistencia-header-filters {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.asistencia-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.asistencia-input,
+.asistencia-select {
+    border-radius: 0.5rem;
+    border: 1px solid var(--asistencia-border);
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.asistencia-bloque-dirty {
+    border-left: 4px solid #ffc107; /* amarillito de advertencia */
+    padding-left: 0.75rem;
+}
+
+    .asistencia-bloque-dirty .asistencia-escuela-nombre::after {
+        content: " • Cambios sin guardar";
+        font-size: 0.85rem;
+        color: #d39e00;
+    }
+
+/* Botón de filtros */
+.asistencia-boton-filtros {
+    background-color: var(--asistencia-blue);
+    padding: 6px 16px !important;
+    height: 38px;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: auto;
+    transition: background-color 0.3s ease-in-out;
+}
+
+    .asistencia-boton-filtros:hover {
+        background-color: var(--asistencia-green);
+    }
+
+/* Tabla */
+.asistencia-table-container {
+    border: 1px solid var(--asistencia-border);
+    border-radius: 0.75rem;
+    background-color: #fff;
+    padding: 15px;
+    overflow-x: auto;
+}
+
+.asistencia-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+    .asistencia-table thead {
+        background-color: var(--asistencia-blue);
+        color: #000;
+        font-weight: 600;
+    }
+
+    .asistencia-table th,
+    .asistencia-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--asistencia-border);
+    }
+
+    .asistencia-table tbody tr:nth-child(even) {
+        background-color: var(--asistencia-grey);
+    }
+
+    .asistencia-table tbody tr:hover {
+        background-color: var(--asistencia-yellow);
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .asistencia-table select.asistencia-select {
+        appearance: none;
+        background-color: #fff;
+        border: 1px solid var(--asistencia-border);
+        border-radius: 0.5rem;
+        padding: 0.4rem 0.75rem;
+        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6' fill='none' stroke='black'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 12px;
+        font-size: 1rem;
+        width: 100%;
+        transition: border-color 0.3s;
+    }
+
+        .asistencia-table select.asistencia-select:focus {
+            outline: none;
+            border-color: var(--asistencia-blue);
+            box-shadow: 0 0 0 2px rgba(168, 216, 234, 0.4);
+        }
+
+    /* Feedback visual al cambiar estado */
+    .asistencia-table tr.asistencia-row-updated {
+        animation: asistenciaFlash 0.5s ease-in-out;
+    }
+
+@keyframes asistenciaFlash {
+    0% {
+        background-color: var(--asistencia-green);
+    }
+
+    100% {
+        background-color: inherit;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .asistencia-table th,
+    .asistencia-table td {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .asistencia-header-filters {
+        flex-direction: column;
+    }
+}

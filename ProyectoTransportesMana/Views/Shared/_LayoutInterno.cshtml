@@ -82,7 +82,7 @@
                     <div class="collapse" id="viajesMenu">
                         <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
                         <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
-                        <a href="Viajes/control-asistencia.html" class="list-group-item list-group-item-action pastel-link ps-5">Control de Asistencia</a>
+                        <a asp-controller="Asistencia" asp-action="GestionAsistencia" class="list-group-item list-group-item-action pastel-link ps-5">Control de Asistencia</a>
                         <a href="Viajes/historial-asistencia.html" class="list-group-item list-group-item-action pastel-link"><i class="bi bi-journal-text me-2"></i>Historial de Asistencia</a>
                     </div>
 
@@ -254,6 +254,8 @@
 
     <script src="~/js/scripts.js" asp-append-version="true"></script>
     <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+
 
     <script src="https://unpkg.com/imask"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
