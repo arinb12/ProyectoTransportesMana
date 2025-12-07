@@ -11,6 +11,7 @@
     <PackageReference Include="jQuery.Validation" Version="1.21.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="NETCore.MailKit" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

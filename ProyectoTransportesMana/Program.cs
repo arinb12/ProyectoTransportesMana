@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Options;
+using NETCore.MailKit.Core;
+using ProyectoTransportesMana.Config;
+using ProyectoTransportesMana.Services;
 using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +15,10 @@ builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromHours(1);
     options.Cookie.HttpOnly = true;
 });
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddTransient<ProyectoTransportesMana.Services.IEmailService, SmtpEmailService>();
 
 
 builder.Services.AddHttpClient("Api", (sp, client) =>

@@ -165,4 +165,18 @@ namespace ProyectoTransportesManaAPI.Controllers
     }
 }
 
- 
+public record AsistenteListItemResponse()
+{
+    public int Id { get; init; }
+    public string Nombre { get; init; }
+    public string PrimerApellido { get; init; }
+    public string? SegundoApellido { get; init; }
+    public string Telefono { get; init; }
+    public string Cedula { get; init; }
+    public string? Correo { get; init; }
+    public decimal Salario { get; init; }
+    public string? BusetaTexto { get; init; }
+    public DateTime? FechaInicio { get; init; }
+    public bool Activo { get; init; }
+    public bool Eliminado { get; init; }
+   }

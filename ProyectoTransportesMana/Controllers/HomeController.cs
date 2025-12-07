@@ -42,11 +42,25 @@ namespace ProyectoTransportesMana.Controllers
                         HttpContext.Session.SetInt32("IdUsuario", datosApi.IdUsuario ?? 0);
                         HttpContext.Session.SetInt32("IdRol", datosApi.RolId);
                         HttpContext.Session.SetString("Token", datosApi.Token);
+                        HttpContext.Session.SetString("AceptoTerminos", datosApi.AceptoTerminos == true ? "1" : "0");
+
+                        
                         if (datosApi.RolId == 2)
                         {
+                            HttpContext.Session.SetString("AceptoTerminos", datosApi.AceptoTerminos == true ? "1" : "0");
+
+                            if (datosApi.AceptoTerminos == false)
+                                return RedirectToAction("PrimerIngreso", "Cuenta");
+
                             return RedirectToAction("Index", "PortalPadres");
                         }
-                        return RedirectToAction("Principal", "Home");
+                        else
+                        {
+                            
+                            HttpContext.Session.Remove("AceptoTerminos");
+                            return RedirectToAction("Principal", "Home");
+                        }
+
                     }
                 }
                 ViewBag.Mensaje = "Usuario o contraseña incorrecta.";

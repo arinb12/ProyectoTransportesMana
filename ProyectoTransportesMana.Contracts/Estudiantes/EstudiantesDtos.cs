@@ -84,3 +84,23 @@ public sealed record EstudianteListItemResponse(
     bool Activo,
     string Telefono
 );
+
+public class EstudianteTransporteDetalleResponse
+{
+    public int IdEstudiante { get; set; }
+    public int? IdBuseta { get; set; }
+    public string? PlacaBuseta { get; set; }
+
+    public string? ConductorNombre { get; set; }
+    public string? ConductorCedula { get; set; }
+
+    public string? Jornada { get; set; }
+    public string? HorarioServicio { get; set; }
+    public int? Capacidad { get; set; }
+    public bool? BusetaActiva { get; set; }
+
+    public int? IdAsistente { get; set; }
+    public string? AsistenteCedula { get; set; }
+    public string? AsistenteTelefono { get; set; }
+    public string? AsistenteNombre { get; set; }
+};

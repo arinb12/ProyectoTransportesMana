@@ -1,164 +1,190 @@
-﻿@{
+﻿@model ProyectoTransportesMana.Models.PortalPadresViewModel
+
+@{
     ViewData["Title"] = "Portal Padres";
     Layout = "~/Views/Shared/_LayoutInterno.cshtml";
 }
 
 @section Styles {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
-
 }
 
-<!-- Main Content Placeholder -->
 <div class="container-fluid p-4">
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <h1 class="mt-4 text-center">Bienvenidos al Portal de Padre de Familia</h1>
+                <h1 class="mt-4 text-center">Bienvenido al Portal de Padres de Familia</h1>
                 <ol class="breadcrumb mb-4 justify-content-center">
                     <li class="breadcrumb-item active">Resumen de datos</li>
                 </ol>
+
+                <!-- Detalles de viaje (inactivo) -->
                 <div class="row justify-content-center">
                     <div>
-                        <div class="card mb-4">
-                            <div class="card-header text-center">
-                                <i class="fas fa-chart-area me-1"></i>
-                                Vista en tiempo real de la buseta
+                        <div class="card mb-4 border-secondary">
+                            <div class="card-header bg-secondary text-white text-center">
+                                <i class="fas fa-bus me-1"></i> Detalles de viaje
+                            </div>
+                            <div class="card-body text-center text-muted">
+                                <p class="mb-1">No hay un viaje activo en este momento.</p>
+                                <p class="mb-0">
+                                    Cuando exista un viaje en curso, aquí se mostrarán los detalles del recorrido
+                                    y el estado del traslado de su hijo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de conductor y ayudante -->
+                <div class="row justify-content-center mt-3">
+                    <div>
+                        <div class="card mb-4 shadow">
+                            <div class="card-header bg-info d-flex align-items-center">
+                                <i class="fas fa-id-badge me-2 text-dark"></i>
+                                Información del personal asignado
                             </div>
                             <div class="card-body">
-                                <div id="map" style="height: 350px; width: 100%;"></div>
-                            </div>
-                            <div class="card card-primary mt-3">
-                                <div class="card-body text-center">
-                                    <button class="btn btn-primary" onclick="abrirChatModal()">
-                                        <i class="fas fa-envelope"></i> Mensaje al Conductor
-                                    </button>
-                                </div>
+                                <table class="table table-bordered mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 30%">Conductor</th>
+                                            <td>
+                                                @if (Model?.Conductor != null)
+                                                {
+                                                    @Model.Conductor.NombreCompleto <br />
+                                                    <small class="text-muted">
+                                                        Teléfono: @Model.Conductor.Telefono
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin conductor asignado</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Ayudante</th>
+                                            <td>
+                                                @if (Model?.Ayudante != null)
+                                                {
+                                                    @Model.Ayudante.NombreCompleto <br />
+                                                    <small class="text-muted">
+                                                        Teléfono: @Model.Ayudante.Telefono
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin ayudante asignado</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Estudiantes transportados</th>
+                                            <td>
+                                                @if (Model?.Hijos != null && Model.Hijos.Any())
+                                                {
+                                                    @string.Join(", ", Model.Hijos.Select(h => h.NombreEstudiante))
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Aún no hay estudiantes asociados</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    <!-- Tabla de información general -->
-                    <div class="row justify-content-center mt-4">
-                        <div>
-                            <div class="card mb-4 shadow">
-                                <div class="card-header bg-info d-flex align-items-center">
-                                    <i class="fas fa-table me-2 text-dark"></i>
-                                    Información General
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-bordered">
-                                        <tbody>
-                                            <tr>
-                                                <th>Nombre del Conductor</th>
-                                                <td>Juan Pérez</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Estudiante Transportado</th>
-                                                <td>María Rodríguez</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Resumen de horario semanal -->
-                    <div class="row justify-content-center mt-4">
-                        <div>
-                            <div class="card mb-4 shadow">
-                                <div class="card-header bg-info d-flex align-items-center">
-                                    <i class="fas fa-table me-2 text-dark"></i>
-                                    Horario Semanal
-                                </div>
-                                <div class=" card-body">
-                                    <table id="datatablesSimple"
-                                           class="table table-hover table-bordered pastel-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Día</th>
-                                                <th>Hora de Salida</th>
-                                                <th>Hora de Entrega</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Lunes</td>
-                                                <td>7:00 am</td>
-                                                <td>3:00 pm</td>
+                </div>
 
-                                            </tr>
-                                            <tr>
-                                                <td>Martes</td>
-                                                <td>7:00 am</td>
-                                                <td>3:00 pm</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Miércoles</td>
-                                                <td>7:00 am</td>
-                                                <td>3:00 pm</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jueves</td>
-                                                <td>7:00 am</td>
-                                                <td>3:00 pm</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Viernes</td>
-                                                <td>7:00 am</td>
-                                                <td>3:00 pm</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="card card-primary mt-3">
-                                        <div class="card-body text-center">
-                                            <button class="btn btn-sm" id="btnEditarHorario"
-                                                    onclick="editarHorario(this)">
-                                                <i class="fas fa-plus"></i> Modificar Horario
-                                            </button>
-                                            <button class="btn btn-success btn-sm" id="btnGuardarHorario"
-                                                    onclick="guardarHorario()" style="display:none;">
-                                                <i class="fas fa-save"></i> Guardar Horario
+                <!-- Horario mensual de los hijos -->
+                <div class="row justify-content-center mt-3">
+                    <div>
+                        <div class="card mb-4 shadow">
+                            <div class="card-header bg-info d-flex align-items-center">
+                                <i class="fas fa-calendar-alt me-2 text-dark"></i>
+                                Horario mensual y cambios
+                            </div>
+                            <div class="card-body">
+
+                                @if (Model?.Hijos != null && Model.Hijos.Any())
+                                {
+                                    foreach (var hijo in Model.Hijos)
+                                    {
+                                        <div class="mb-4">
+                                            <h5 class="mb-2">
+                                                @hijo.NombreEstudiante
+                                                <small class="text-muted">(@hijo.Institucion)</small>
+                                            </h5>
+
+                                            <table class="table table-hover table-bordered pastel-table mb-2"
+                                                   data-id-hijo="@hijo.IdEstudiante">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 18%">Fecha</th>
+                                                        <th style="width: 18%">Tipo</th>
+                                                        <th style="width: 18%">Hora regular</th>
+                                                        <th style="width: 18%">Hora ajustada</th>
+                                                        <th>Motivo del cambio</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (hijo.CambiosHorario != null && hijo.CambiosHorario.Any())
+                                                    {
+                                                        foreach (var cambio in hijo.CambiosHorario)
+                                                        {
+                                                            <tr>
+                                                                <td>@cambio.Fecha.ToString("dd/MM/yyyy")</td>
+                                                                <td>@cambio.Tipo</td>
+                                                                <td>@cambio.HoraRegular</td>
+                                                                <td>@cambio.HoraAjustada</td>
+                                                                <td>@cambio.Motivo</td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <tr>
+                                                            <td colspan="5" class="text-center text-muted">
+                                                                No hay cambios registrados para este mes.
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+
+                                            <button class="btn btn-sm btn-primary"
+                                                    onclick="abrirModalCambioHorario(@hijo.IdEstudiante, '@hijo.NombreEstudiante')">
+                                                Registrar cambio de horario
                                             </button>
                                         </div>
-                                    </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted mb-0">
+                                        Aún no hay hijos registrados para este usuario.
+                                    </p>
+                                }
 
-                                </div>
                             </div>
                         </div>
                     </div>
-                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function () {
-                            var map = L.map('map').setView([9.9281, -84.0907], 13);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                maxZoom: 19,
-                                attribution: '© OpenStreetMap'
-                            }).addTo(map);
-
-                            var busMarker = L.marker([9.9281, -84.0907]).addTo(map)
-                                .bindPopup('En Camino, ETA: 10 minutos')
-                                .openPopup();
-
-                            var lat = 9.9281, lng = -84.0907;
-                            setInterval(function () {
-                                lat += (Math.random() - 0.5) * 0.001;
-                                lng += (Math.random() - 0.5) * 0.001;
-                                busMarker.setLatLng([lat, lng]);
-                                map.panTo([lat, lng]);
-                            }, 2000);
-                        });
-                    </script>
                 </div>
+
+            </div>
         </main>
+
         <footer class="py-4 bg-light mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div class="text-muted">Copyright &copy; Transportes Maná</div>
                     <div>
-                        <a href="#">Privacy Policy</a>
+                        <a href="#">Política de privacidad</a>
                         &middot;
-                        <a href="#">Terms &amp; Conditions</a>
+                        <a href="#">Términos y condiciones</a>
                     </div>
                 </div>
             </div>
@@ -166,103 +192,112 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
-        crossorigin="anonymous"></script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/scripts.js"></script>
-<script src="js/utilitarios/utilitarios.js"></script>
-<script>
-    function editarHorario(elemento) {
-        const filas = document.querySelectorAll('#datatablesSimple tbody tr');
-        filas.forEach(fila => {
-            const salida = fila.children[1];
-            const entrega = fila.children[2];
-
-            salida.innerHTML = `<input type="time" class="form-control form-control-sm" value="${convertirHora(salida.innerText)}">`;
-            entrega.innerHTML = `<input type="time" class="form-control form-control-sm" value="${convertirHora(entrega.innerText)}">`;
-        });
-
-        elemento.style.display = "none";
-        document.getElementById("btnGuardarHorario").style.display = "inline-block";
-    }
-
-    function convertirHora(hora) {
-        // Convertidor básico para formato 12h a 24h si lo deseas
-        const [h, m, ap] = hora.replace(/ /g, '').match(/(\d+):(\d+)(am|pm)/i).slice(1);
-        let horas = parseInt(h);
-        if (ap.toLowerCase() === 'pm' && horas !== 12) horas += 12;
-        if (ap.toLowerCase() === 'am' && horas === 12) horas = 0;
-        return `${horas.toString().padStart(2, '0')}:${m}`;
-    }
-
-    function guardarHorario() {
-        const filas = document.querySelectorAll('#datatablesSimple tbody tr');
-        filas.forEach(fila => {
-            const salida = fila.children[1];
-            const entrega = fila.children[2];
-
-            const salidaInput = salida.querySelector('input');
-            const entregaInput = entrega.querySelector('input');
-
-            if (salidaInput && entregaInput) {
-                salida.innerText = convertirHora12h(salidaInput.value);
-                entrega.innerText = convertirHora12h(entregaInput.value);
-            }
-        });
-
-        document.getElementById("btnEditarHorario").style.display = "inline-block";
-        document.getElementById("btnGuardarHorario").style.display = "none";
-    }
-
-    // Convierte de 24h a 12h
-    function convertirHora12h(hora24) {
-        const [h, m] = hora24.split(':');
-        let horas = parseInt(h);
-        const ampm = horas >= 12 ? 'pm' : 'am';
-        horas = horas % 12 || 12;
-        return `${horas}:${m} ${ampm}`;
-    }
-
-    function abrirChatModal() {
-        var chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
-        chatModal.show();
-    }
-
-    function enviarMensaje() {
-        const input = document.getElementById('chatInput');
-        const mensajes = document.getElementById('chatMensajes');
-        if (input.value.trim() !== "") {
-            mensajes.innerHTML += `<div class="mb-2"><strong>Tú:</strong> ${input.value}</div>`;
-            input.value = "";
-            mensajes.scrollTop = mensajes.scrollHeight;
-        }
-    }
-</script>
-<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- Modal para registrar cambios de horario -->
+<div class="modal fade" id="cambioHorarioModal" tabindex="-1" aria-labelledby="cambioHorarioLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="chatModalLabel">Chat con el Conductor</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body" style="max-height:300px;overflow-y:auto;">
-                <div id="chatMensajes" style="font-size: 0.95em;">
-                    <!-- Mensajes de ejemplo -->
-                    <div class="mb-2"><strong>Tú:</strong> Hola, ¿a qué hora llega la buseta?</div>
-                    <div class="mb-2"><strong>Conductor:</strong> Llegamos en 10 minutos.</div>
+            <form id="formCambioHorario">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cambioHorarioLabel">Registrar cambio de horario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-            </div>
-            <div class="modal-footer d-flex flex-row gap-2 w-100">
-                <input type="text" id="chatInput" class="form-control form-control-sm flex-grow-1"
-                       placeholder="Escribe tu mensaje...">
+                <div class="modal-body">
 
-            </div>
-            <button type="button" class="btn btn-primary btn-sm" onclick="enviarMensaje()">Enviar</button>
+                    <input type="hidden" id="IdEstudianteCambio" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Estudiante</label>
+                        <input type="text" class="form-control" id="NombreEstudianteCambio" disabled />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="FechaCambio" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="TipoCambio" required>
+                            <option value="">Seleccione</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Salida">Salida</option>
+                            <option value="Ambos">Ambos</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Hora ajustada</label>
+                        <input type="time" class="form-control" id="HoraAjustadaCambio" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Motivo</label>
+                        <textarea class="form-control" id="MotivoCambio" rows="3"
+                                  placeholder="Ejemplo: cita médica, actividad escolar, retraso, etc."
+                                  required></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Guardar cambio</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function abrirModalCambioHorario(idEstudiante, nombre) {
+            document.getElementById('IdEstudianteCambio').value = idEstudiante;
+            document.getElementById('NombreEstudianteCambio').value = nombre;
+            document.getElementById('FechaCambio').value = '';
+            document.getElementById('TipoCambio').value = '';
+            document.getElementById('HoraAjustadaCambio').value = '';
+            document.getElementById('MotivoCambio').value = '';
+
+            var modal = new bootstrap.Modal(document.getElementById('cambioHorarioModal'));
+            modal.show();
+        }
+
+        document.getElementById('formCambioHorario').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var idEstudiante = document.getElementById('IdEstudianteCambio').value;
+            var fecha = document.getElementById('FechaCambio').value;
+            var tipo = document.getElementById('TipoCambio').value;
+            var horaAjustada = document.getElementById('HoraAjustadaCambio').value;
+            var motivo = document.getElementById('MotivoCambio').value;
+
+            if (!idEstudiante || !fecha || !tipo || !horaAjustada || !motivo) {
+                alert("Complete todos los campos.");
+                return;
+            }
+
+            var tabla = document.querySelector('table[data-id-hijo="' + idEstudiante + '"] tbody');
+
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + new Date(fecha).toLocaleDateString() + '</td>' +
+                '<td>' + tipo + '</td>' +
+                '<td class="text-muted">Horario regular</td>' +
+                '<td>' + horaAjustada + '</td>' +
+                '<td>' + motivo + '</td>';
+
+            var filaVacia = tabla.querySelector('tr td[colspan="5"]');
+            if (filaVacia) {
+                filaVacia.parentElement.remove();
+            }
+
+            tabla.appendChild(tr);
+
+            var modal = bootstrap.Modal.getInstance(document.getElementById('cambioHorarioModal'));
+            modal.hide();
+
+            // Aquí luego puedes hacer un POST vía AJAX al backend para guardar el cambio de horario
+        });
+    </script>
+}

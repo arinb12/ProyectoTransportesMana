@@ -2,6 +2,7 @@
 using ProyectoTransportesMana.Contracts.EncargadosLegales;
 using ProyectoTransportesMana.Models;
 using ProyectoTransportesMana.Models.Filters;
+using ProyectoTransportesMana.Services;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -11,9 +12,15 @@ namespace ProyectoTransportesMana.Controllers
     public class EncargadosLegalesController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IEmailService _emailService;
 
-        public EncargadosLegalesController(IHttpClientFactory httpClientFactory)
-            => _httpClientFactory = httpClientFactory;
+        public EncargadosLegalesController(
+            IHttpClientFactory httpClientFactory,
+            IEmailService emailService)
+        {
+            _httpClientFactory = httpClientFactory;
+            _emailService = emailService;
+        }
 
         private HttpClient CreateClient()
             => _httpClientFactory.CreateClient("Api");
@@ -31,6 +38,10 @@ namespace ProyectoTransportesMana.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistrarEncargado(EncargadoLegalModel model)
         {
+            // Como vamos a generar la contraseña nosotros, no queremos que
+            // falle la validación solo porque viene vacía desde la vista.
+            ModelState.Remove(nameof(EncargadoLegalModel.Contrasena));
+
             if (!ModelState.IsValid)
             {
                 await CargarDatosVistaAsync();
@@ -40,6 +51,13 @@ namespace ProyectoTransportesMana.Controllers
                 return View("GestionEncargadosLegales", model);
             }
 
+            // 1) Generar contraseña temporal solo si viene vacía
+            string password = string.IsNullOrWhiteSpace(model.Contrasena)
+                ? GenerarPasswordTemporal()
+                : model.Contrasena;
+
+            model.Contrasena = password;
+
             var client = CreateClient();
 
             var payload = new EncargadoLegalCreateRequest
@@ -48,7 +66,7 @@ namespace ProyectoTransportesMana.Controllers
                 PrimerApellido = model.PrimerApellido,
                 SegundoApellido = model.SegundoApellido,
                 Correo = model.Correo,
-                Contrasena = model.Contrasena,
+                Contrasena = model.Contrasena, // ya es la que se usará
                 Activo = model.Activo,
                 DireccionResidencia = model.DireccionResidencia,
                 AceptoTerminos = model.AceptoTerminos,
@@ -58,21 +76,68 @@ namespace ProyectoTransportesMana.Controllers
 
             var resp = await client.PostAsJsonAsync("api/v1/encargados-legales", payload);
 
-            if (resp.IsSuccessStatusCode)
+            if (!resp.IsSuccessStatusCode)
             {
-                return RedirectToAction(nameof(GestionEncargadosLegales), new { created = true });
+                var problem = await SafeReadProblemDetails(resp);
+                ModelState.AddModelError(string.Empty,
+                    problem?.Detail ?? problem?.Title ?? "No se pudo registrar el encargado.");
+
+                ViewData["SwalType"] = "error";
+                ViewData["SwalTitle"] = "Error al registrar";
+                ViewData["SwalText"] = problem?.Detail ?? "Ocurrió un error al guardar.";
+
+                await CargarDatosVistaAsync();
+                return View("GestionEncargadosLegales", model);
             }
 
-            var problem = await SafeReadProblemDetails(resp);
-            ModelState.AddModelError(string.Empty,
-                problem?.Detail ?? problem?.Title ?? "No se pudo registrar el encargado.");
+            // 2) Enviar el correo de bienvenida. Si falla, no deshacemos el registro.
+            var asunto = "Bienvenido al Portal de Padres - Transportes Maná";
 
-            ViewData["SwalType"] = "error";
-            ViewData["SwalTitle"] = "Error al registrar";
-            ViewData["SwalText"] = "Ocurrió un error al guardar.";
+            var cuerpoHtml = $@"
+<p>Hola {model.Nombre} {model.PrimerApellido},</p>
+<p>Gracias por registrarte en el portal de padres de <strong>Transportes Maná</strong>.</p>
+<p>Tu cuenta ha sido creada con los siguientes datos:</p>
+<ul>
+    <li><strong>Usuario:</strong> {model.Correo}</li>
+    <li><strong>Contraseña temporal:</strong> {password}</li>
+</ul>
+<p>Por seguridad, inicia sesión y cambia tu contraseña.</p>
+<p>Saludos cordiales,<br>Equipo Transportes Maná</p>
+";
 
-            await CargarDatosVistaAsync();
-            return View("GestionEncargadosLegales", model);
+            try
+            {
+                await _emailService.EnviarEmailAsync(model.Correo!, asunto, cuerpoHtml);
+
+                TempData["SwalType"] = "success";
+                TempData["SwalTitle"] = "Encargado registrado";
+                TempData["SwalText"] = "Se envió un correo con su contraseña temporal.";
+            }
+            catch
+            {
+                // El encargado ya está creado en la base. Solo avisamos del problema de correo.
+                TempData["SwalType"] = "warning";
+                TempData["SwalTitle"] = "Encargado registrado";
+                TempData["SwalText"] = "El usuario se creó, pero no se pudo enviar el correo de bienvenida.";
+            }
+
+            return RedirectToAction(nameof(GestionEncargadosLegales), new { created = true });
+        }
+
+        private string GenerarPasswordTemporal()
+        {
+            const int longitud = 10;
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789";
+
+            var random = new Random();
+            var buffer = new char[longitud];
+
+            for (int i = 0; i < longitud; i++)
+            {
+                buffer[i] = chars[random.Next(chars.Length)];
+            }
+
+            return new string(buffer);
         }
 
         // POST: eliminar encargado
@@ -166,7 +231,6 @@ namespace ProyectoTransportesMana.Controllers
             if (dto is null)
                 return StatusCode(500, new { ok = false, message = "Respuesta inválida de la API." });
 
-            // Mapear DTO -> modelo de pantalla
             var model = new EncargadoLegalModel
             {
                 IdUsuario = dto.IdUsuario,
@@ -179,7 +243,6 @@ namespace ProyectoTransportesMana.Controllers
                 AceptoTerminos = (bool)dto.AceptoTerminos,
                 FirmaContrato = dto.FirmaContrato,
                 Telefono = dto.Telefono
-                // Contrasena se deja vacío, no se edita aquí
             };
 
             return Json(new { ok = true, data = model });
@@ -190,6 +253,7 @@ namespace ProyectoTransportesMana.Controllers
         public async Task<IActionResult> ActualizarEncargado(EncargadoLegalModel model)
         {
             ModelState.Remove(nameof(EncargadoLegalModel.Contrasena));
+
             if (!ModelState.IsValid)
                 return BadRequest(new { ok = false, message = "Datos inválidos en el formulario." });
 
@@ -218,7 +282,6 @@ namespace ProyectoTransportesMana.Controllers
             return Json(new { ok = true, message = "Encargado actualizado correctamente." });
         }
 
-        // Cargar lista de encargados para la vista
         private async Task CargarDatosVistaAsync()
         {
             var client = CreateClient();

@@ -196,6 +196,24 @@ namespace ProyectoTransportesManaAPI.Controllers
             return Ok(data);
         }
 
+        [HttpGet("{id:int}/detalle-transporte")]
+        public async Task<ActionResult<EstudianteTransporteDetalleResponse>> GetDetalleTransporte(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var result = await con.QuerySingleOrDefaultAsync<EstudianteTransporteDetalleResponse>(
+                "sp_estudiantes_detalle_transporte",
+                new { IdEstudiante = id },
+                commandType: CommandType.StoredProcedure
+            );
+
+            if (result is null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+
 
     }
 }
