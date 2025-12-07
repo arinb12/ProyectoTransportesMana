@@ -6,4 +6,27 @@
         string Apellidos,
         string? Seccion
     );
+    public sealed record AsistenciaDetalleItemRequest
+   (
+       int IdEstudiante,
+       string Estado,
+       string? Observaciones
+   );
+
+    public sealed record GuardarAsistenciaRequest
+    (
+        int IdInstitucion,
+        int IdBuseta,
+        string TipoViaje,
+        int IdUsuarioRegistro,
+        List<AsistenciaDetalleItemRequest> Detalles
+    );
+
+    public sealed record AsistenciaEstadoResponse
+    (
+       int IdEstudiante,
+       string Estado
+    );
+
+
 }
