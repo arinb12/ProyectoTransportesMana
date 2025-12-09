@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Maestras";
+    Layout = "_LayoutInterno";
+}
+
+<div class="mb-4">
+    <h1 class="text-dark fw-bold">Gestión de Maestras</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMaestra">
+        <i class="fas fa-plus"></i> Nueva Maestra
+    </button>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaMaestras" class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Sección</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se cargan las maestras -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear/Editar Maestra -->
+<div class="modal fade" id="modalMaestra" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Registrar / Editar Maestra</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="IdMaestra">
+                <div class="mb-3">
+                    <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                    <input id="Nombre" class="form-control" placeholder="Nombre completo de la maestra">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Sección <span class="text-danger">*</span></label>
+                    <input id="Seccion" class="form-control" placeholder="Ej: Preescolar, Primaria">
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" id="Activo" type="checkbox" checked>
+                    <label class="form-check-label" for="Activo">Activo</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" id="btnGuardarMaestra">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@inject IConfiguration Configuration
+<script>
+    window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "")';
+    // Descomentar para desarrollo local:
+    // window.API_BASE = "https://localhost:7238";
+</script>
+
+<script src="~/js/Maestra/maestras.js"></script>
