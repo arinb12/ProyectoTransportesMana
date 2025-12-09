@@ -57,10 +57,26 @@ namespace ProyectoTransportesManaAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
-            await con.ExecuteAsync("Instituciones_Delete", new { IdInstitucion = id }, commandType: CommandType.StoredProcedure);
-            return NoContent();
+            try
+            {
+                using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+                await con.ExecuteAsync("Instituciones_Delete",
+                    new { IdInstitucion = id },
+                    commandType: CommandType.StoredProcedure);
+
+                return Ok(new { message = "Institución eliminada correctamente." });
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 547) 
+                {
+                    return BadRequest(new { message = "No se puede eliminar la institución porque tiene estudiantes asociados." });
+                }
+
+                return BadRequest(new { message = "Ocurrió un error al intentar eliminar la institución." });
+            }
         }
+
     }
 }
 

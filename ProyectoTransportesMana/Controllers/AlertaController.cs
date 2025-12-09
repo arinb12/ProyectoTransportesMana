@@ -12,7 +12,6 @@ namespace ProyectoTransportesMana.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         public AlertaController(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
-        // GET: /Alerta/ConsultarAlerta
         public IActionResult ConsultarAlerta()
         {
             int currentUserId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
@@ -20,14 +19,13 @@ namespace ProyectoTransportesMana.Controllers
             return View();
         }
 
-        // GET: /Alerta/RegistrarAlerta
         [HttpGet]
         public async Task<IActionResult> RegistrarAlerta(bool openModal = false)
         {
             var model = new CrearAlertaViewModel
             {
                 FechaPublicacion = DateTime.Now,
-                EnviadoPor = GetCurrentUserId(), // opcional, para autocompletar
+                EnviadoPor = GetCurrentUserId(), 
                 BusetasSelectList = await GetBusetasSelectList(),
                 EncargadosSelectList = await GetEncargadosSelectList()
             };
@@ -36,7 +34,6 @@ namespace ProyectoTransportesMana.Controllers
             return View("RegistrarAlerta", model);
         }
 
-        // POST: /Alerta/RegistrarAlerta
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistrarAlerta(CrearAlertaViewModel model)
@@ -51,7 +48,6 @@ namespace ProyectoTransportesMana.Controllers
 
             var cliente = _httpClientFactory.CreateClient("Api");
 
-            // payload que espera la API (CrearAlertaDto)
             var payload = new
             {
                 EnviadoPor = model.EnviadoPor,
@@ -76,7 +72,6 @@ namespace ProyectoTransportesMana.Controllers
             return RedirectToAction("ConsultarAlerta");
         }
 
-        // GET: /Alerta/GetAlertasParaUsuario (proxy que llama a la API)
         [HttpGet]
         public async Task<IActionResult> GetAlertasParaUsuario()
         {
@@ -96,7 +91,6 @@ namespace ProyectoTransportesMana.Controllers
             }
         }
 
-        // GET: /Alerta/GetCountAlertasParaUsuario
         [HttpGet]
         public async Task<IActionResult> GetCountAlertasParaUsuario()
         {
@@ -122,7 +116,6 @@ namespace ProyectoTransportesMana.Controllers
             }
         }
 
-        // POST: /Alerta/MarcarAlertasComoLeidas
         [HttpPost]
         public async Task<IActionResult> MarcarAlertasComoLeidas()
         {
@@ -205,7 +198,7 @@ namespace ProyectoTransportesMana.Controllers
                 var idFromSession = HttpContext.Session.GetInt32("IdUsuario");
                 if (idFromSession.HasValue) return idFromSession.Value;
             }
-            catch { /* session no configurada */ }
+            catch {  }
 
             var claim = User?.FindFirst("id_usuario")?.Value
                         ?? User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
