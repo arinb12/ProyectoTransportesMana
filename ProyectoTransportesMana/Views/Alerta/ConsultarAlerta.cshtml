@@ -110,7 +110,6 @@
 
 @section Scripts {
     <script>
-        // Función de escape de HTML
         function escapeHtml(text) {
             if (text === null || text === undefined) return '';
             return text
@@ -121,7 +120,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Inicialización segura del CURRENT_USER_ID
         window.CURRENT_USER_ID = @(ViewData["CurrentUserId"]);
         console.log('CURRENT_USER_ID=', window.CURRENT_USER_ID);
 
@@ -209,37 +207,56 @@
             togglePublicoGroups();
         });
 
-        async function cargarAlertas() {
-            const resp = await fetch(`${window.API_BASE}/api/alerta/user/${window.CURRENT_USER_ID}/today`);
-            const rows = await resp.json();
+           async function cargarAlertas() {
+            const esAdmin = Number(window.ROL_ACTUAL) === 1;
 
+            const url = esAdmin
+                ? `${window.API_BASE}/api/alerta/listar?userId=${window.CURRENT_USER_ID}`
+                : `${window.API_BASE}/api/alerta/user/${window.CURRENT_USER_ID}/today`;
+
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                console.error('Error cargando alertas', resp.status);
+                return;
+            }
+
+            const rows = await resp.json();
             const tbody = document.querySelector('#tablaAlertas tbody');
             tbody.innerHTML = '';
 
             rows.forEach(r => {
-                let publicoTexto = r.publico_destino;
+                let publicoTexto = r.publico_destino ?? r.PublicoDestino;
 
                 for (let [key, value] of busetasMap.entries()) {
-                    if (r.publico_destino === `buseta:${key}`) { publicoTexto = "Buseta: " + value; break; }
+                    if (publicoTexto === `buseta:${key}`) { publicoTexto = "Buseta: " + value; break; }
                 }
-
-                if (String(r.publico_destino).startsWith("usuario:")) {
-                    const id = r.publico_destino.split(":")[1];
+                if (String(publicoTexto).startsWith("usuario:")) {
+                    const id = String(publicoTexto).split(":")[1];
                     publicoTexto = "Encargado: " + (encargadosMap.get(id) || "Desconocido");
                 }
 
-                if (r.publico_destino === "todos") publicoTexto = "Todos";
+                if (publicoTexto === "todos") publicoTexto = "Todos";
+
+                const leidoRaw = r.Leido ?? r.leido;
+                const leidoFlag =
+                    leidoRaw === true ||
+                    leidoRaw === 1 ||
+                    leidoRaw === '1' ||
+                    (typeof leidoRaw === 'string' && leidoRaw.toLowerCase() === 'sí') ||
+                    (typeof leidoRaw === 'string' && leidoRaw.toLowerCase() === 'si');
+
+                const fecha = r.fecha_publicacion || r.Fecha_Publicacion || r.FechaPublicacion;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${r.id_alerta}</td>
-                    <td>${r.titulo}</td>
-                    <td>${r.mensaje}</td>
-                    <td>${new Date(r.fecha_publicacion).toLocaleString()}</td>
+                    <td>${r.id_alerta ?? r.Id_Alerta ?? r.IdAlerta ?? ''}</td>
+                    <td>${r.titulo ?? r.Titulo ?? ''}</td>
+                    <td>${r.mensaje ?? r.Mensaje ?? ''}</td>
+                    <td>${fecha ? new Date(fecha).toLocaleString() : ''}</td>
                     <td>${publicoTexto}</td>
-                    <td class="${r.Leido ? 'text-success fw-bold' : 'text-danger'}">${r.Leido ? 'Sí' : 'No'}</td>
-                    <td>${r.tipo_alerta}</td>
-                    <td><a href="#" onclick="borrarAlerta(${r.id_alerta})"><i class="fas fa-trash"></i></a></td>
+                    <td class="${leidoFlag ? 'text-success fw-bold' : 'text-danger'}">${leidoFlag ? 'Sí' : 'No'}</td>
+                    <td>${r.tipo_alerta ?? r.TipoAlerta ?? ''}</td>
+                    <td><a href="#" onclick="borrarAlerta(${r.id_alerta ?? r.IdAlerta ?? 0})"><i class="fas fa-trash"></i></a></td>
                 `;
                 tbody.appendChild(tr);
             });

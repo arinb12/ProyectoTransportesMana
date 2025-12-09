@@ -47,7 +47,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             }
             catch (SqlException sqlEx)
             {
-                // devuelve detalle mínimo para debug (opcional en dev)
                 return StatusCode(500, new { ok = false, message = "Error guardando alerta", detail = sqlEx.Message });
             }
             catch (Exception ex)
@@ -67,7 +66,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             var lista = await con.QueryAsync(sql);
             return Ok(lista);
         }
-
 
         [HttpGet("encargados")]
         public async Task<IActionResult> GetEncargados()
@@ -101,20 +99,33 @@ namespace ProyectoTransportesManaAPI.Controllers
             return Ok(rows);
         }
 
-        // GET api/alerta/listar  -> listar todas (útil para la vista de administración)
+        // GET api/alerta/listar  -> listar todas (vista administración / admin)
+        // ACEPTA ?userId= para evitar depender siempre de claims
         [HttpGet("listar")]
-        public async Task<IActionResult> ListarTodas()
+        public async Task<IActionResult> ListarTodas([FromQuery] int? userId = null)
         {
             try
             {
                 using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
 
-                // Obtener el Id del usuario logueado desde Claims
-                int userId = int.Parse(User.FindFirst("id_usuario").Value);
+                int usuarioLogueado;
 
-                var data = await con.QueryAsync<CrearAlertaDto>(
+                if (userId.HasValue && userId.Value > 0)
+                {
+                    usuarioLogueado = userId.Value;
+                }
+                else
+                {
+                    var claim = User?.FindFirst("id_usuario")?.Value;
+                    if (!int.TryParse(claim, out usuarioLogueado))
+                    {
+                        usuarioLogueado = 0;
+                    }
+                }
+
+                var data = await con.QueryAsync(
                     "sp_alertas_listar",
-                    new { UsuarioLogueado = userId }, // pasamos el parámetro al SP
+                    new { UsuarioLogueado = usuarioLogueado },
                     commandType: CommandType.StoredProcedure
                 );
 
@@ -125,9 +136,6 @@ namespace ProyectoTransportesManaAPI.Controllers
                 return StatusCode(500, new { ok = false, message = "Error listando alertas", detail = ex.Message });
             }
         }
-
-
-
 
         // DELETE api/alerta/{id}
         [HttpDelete("{id}")]
@@ -158,29 +166,50 @@ namespace ProyectoTransportesManaAPI.Controllers
             }
         }
 
-
         // -----------------------
-        // RUTAS ADICIONALES AGREGADAS
+        // RUTAS ADICIONALES
         // -----------------------
 
         // GET api/alerta
-        // Alias simple para listar alertas (puede ser útil si el frontend solicita /api/alerta con GET)
+        // Alias simple para listar alertas (equivalente a /api/alerta/listar)
         [HttpGet]
-        public async Task<IActionResult> GetAllAlias()
+        public async Task<IActionResult> GetAllAlias([FromQuery] int? userId = null)
         {
-            using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+            try
+            {
+                using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
 
-            var data = await con.QueryAsync<CrearAlertaDto>(
-                "sp_alertas_listar",
-                commandType: CommandType.StoredProcedure
-            );
+                int usuarioLogueado;
 
-            return Ok(data);
+                if (userId.HasValue && userId.Value > 0)
+                {
+                    usuarioLogueado = userId.Value;
+                }
+                else
+                {
+                    var claim = User?.FindFirst("id_usuario")?.Value;
+                    if (!int.TryParse(claim, out usuarioLogueado))
+                    {
+                        usuarioLogueado = 0;
+                    }
+                }
+
+                var data = await con.QueryAsync(
+                    "sp_alertas_listar",
+                    new { UsuarioLogueado = usuarioLogueado },
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ok = false, message = "Error listando alertas", detail = ex.Message });
+            }
         }
 
-
         // GET api/alerta/{id}
-        // Obtener detalle de una alerta por id (útil para edición/ver)
+        // Obtener detalle de una alerta por id
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -199,7 +228,6 @@ namespace ProyectoTransportesManaAPI.Controllers
         }
 
         // GET api/alerta/user/{userId}
-        // Alias que llama al mismo procedimiento que /today (por si el frontend pide /api/alerta/user/{id})
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetAlertasParaUsuario(int userId)
         {
@@ -226,7 +254,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             {
                 using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
 
-   
                 var idBusetaObj = await con.QueryFirstOrDefaultAsync<int?>(
                     "SELECT a.id_buseta FROM dbo.asistentes a WHERE a.id_asistente = @id",
                     new { id = userId }
@@ -235,7 +262,6 @@ namespace ProyectoTransportesManaAPI.Controllers
 
                 var total = await con.ExecuteScalarAsync<int>(
                     "sp_alertas_count_real",
-        
                     new
                     {
                         IdUsuario = userId,
@@ -272,6 +298,5 @@ namespace ProyectoTransportesManaAPI.Controllers
                 return StatusCode(500, new { ok = false, message = "Error marcando alertas como leídas", detail = ex.Message });
             }
         }
-
     }
 }

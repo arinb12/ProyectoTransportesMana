@@ -6,7 +6,7 @@ using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
-    [Seguridad] // si usas este filtro como en AsistenteController
+    [Seguridad]
     public class AlertaController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -21,7 +21,6 @@ namespace ProyectoTransportesMana.Controllers
         }
 
         // GET: /Alerta/RegistrarAlerta
-        // openModal = true si quieres abrir el modal al cargar la vista (misma idea que AsistenteController)
         [HttpGet]
         public async Task<IActionResult> RegistrarAlerta(bool openModal = false)
         {
@@ -44,7 +43,6 @@ namespace ProyectoTransportesMana.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // recargar selects si falla validación
                 model.BusetasSelectList = await GetBusetasSelectList();
                 model.EncargadosSelectList = await GetEncargadosSelectList();
                 ViewBag.OpenModal = true;
@@ -75,8 +73,6 @@ namespace ProyectoTransportesMana.Controllers
                 ViewBag.OpenModal = true;
                 return View("RegistrarAlerta", model);
             }
-
-            // redirige a listado / consultar
             return RedirectToAction("ConsultarAlerta");
         }
 
@@ -110,7 +106,6 @@ namespace ProyectoTransportesMana.Controllers
             try
             {
                 var cliente = _httpClientFactory.CreateClient("Api");
-                // Llamamos al nuevo endpoint del API que cuenta solo NO-LEIDAS
                 var url = $"api/alerta/user/{userId}/count-real";
                 var resp = await cliente.GetAsync(url);
 
@@ -119,7 +114,6 @@ namespace ProyectoTransportesMana.Controllers
                 if (!resp.IsSuccessStatusCode)
                     return StatusCode((int)resp.StatusCode, txt);
 
-                // devolver el JSON tal cual para que el layout lo consuma
                 return Content(txt, "application/json");
             }
             catch (Exception ex)
@@ -158,7 +152,6 @@ namespace ProyectoTransportesMana.Controllers
 
         #region Helpers para selects (busetas / encargados)
 
-        // Busetas: usa el endpoint de Asistente api/Asistente/Busetas (tal como tu API ya expone)
         private async Task<IEnumerable<SelectListItem>> GetBusetasSelectList()
         {
             try
@@ -173,14 +166,11 @@ namespace ProyectoTransportesMana.Controllers
             }
         }
 
-        // Encargados: intenta llamar a un endpoint que devuelva encargados (ver nota abajo)
         private async Task<IEnumerable<SelectListItem>> GetEncargadosSelectList()
         {
             try
             {
                 var cliente = _httpClientFactory.CreateClient("Api");
-                // Ajusta esta ruta si tu API tiene otro controller/route para encargados legales.
-                // En tu BD existe sp_encargados_legales_lookup -> crea un endpoint API si no existe.
                 var lista = await cliente.GetFromJsonAsync<List<EncargadoLookupVm>>("api/Encargado/Lookup")
                             ?? new List<EncargadoLookupVm>();
 
@@ -188,7 +178,6 @@ namespace ProyectoTransportesMana.Controllers
             }
             catch
             {
-                // si el endpoint no existe, devolvemos vacío (la vista seguirá mostrando "Todos")
                 return Enumerable.Empty<SelectListItem>();
             }
         }

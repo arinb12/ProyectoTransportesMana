@@ -167,18 +167,18 @@
     @using Microsoft.AspNetCore.Http
 
     <script>
-        window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';      
-        (function(){
-          var uid = 0;
-          try {
-            // Si guardas IdUsuario en Session:
-            @* Ejemplo usando ViewBag: window.CURRENT_USER_ID = '@(ViewBag.CurrentUserId ?? 0)'; *@
-          } catch(e){}
-          window.CURRENT_USER_ID = window.CURRENT_USER_ID || '0';
+        window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';
+        (function () {
+            var uid = 0;
+            try {
+            } catch (e) { }
+            window.CURRENT_USER_ID = window.CURRENT_USER_ID || '0';
         })();
-        console.log('layout: window.API_BASE=', window.API_BASE, ' window.CURRENT_USER_ID=', window.CURRENT_USER_ID);
-    </script>
 
+        window.ROL_ACTUAL = @((rol ?? 0));
+
+        console.log('layout: window.API_BASE=', window.API_BASE, ' window.CURRENT_USER_ID=', window.CURRENT_USER_ID, ' ROL=', window.ROL_ACTUAL);
+    </script>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -211,73 +211,65 @@
             }
         }
 
-        // ---------- ACTUALIZAR CONTADOR (usa tu Web Controller proxy)
         async function actualizarContadorAlertas() {
-          try {
-            const span = document.getElementById('notifsCount');
-            if (!span) return;
+            try {
+                const span = document.getElementById('notifsCount');
+                if (!span) return;
 
-            const userId = window.CURRENT_USER_ID || '0';
-            if (!userId || userId === '0') {
-              span.style.display = 'none';
-              return;
+                const userId = window.CURRENT_USER_ID || '0';
+                if (!userId || userId === '0') {
+                    span.style.display = 'none';
+                    return;
+                }
+
+                const resp = await fetch(`/Alerta/GetCountAlertasParaUsuario`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin'
+                });
+
+                const text = await resp.text().catch(() => null);
+
+                if (!resp.ok) {
+                    console.warn('Error conteo alertas', resp.status, text);
+                    return;
+                }
+
+                let data;
+                try { data = JSON.parse(text); } catch (e) { data = null; }
+
+                const count = (data && (data.count ?? data.Total ?? data.total ?? 0)) || 0;
+                span.textContent = count;
+                span.style.display = count > 0 ? 'inline-block' : 'none';
+            } catch (err) {
+                console.error('actualizarContadorAlertas error:', err);
             }
-
-            // Llamamos al Web Controller que hace proxy al API (reemplazamos la ruta por la nueva que dejamos arriba)
-            const resp = await fetch(`/Alerta/GetCountAlertasParaUsuario`, {
-              method: 'GET',
-              headers: { 'Accept': 'application/json' },
-              credentials: 'same-origin'
-            });
-
-            const text = await resp.text().catch(() => null);
-
-            if (!resp.ok) {
-              console.warn('Error conteo alertas', resp.status, text);
-              return;
-            }
-
-            let data;
-            try { data = JSON.parse(text); } catch (e) { data = null; }
-
-            // Aceptamos { count } devuelto por el Web Controller
-            const count = (data && (data.count ?? data.Total ?? data.total ?? 0)) || 0;
-            span.textContent = count;
-            span.style.display = count > 0 ? 'inline-block' : 'none';
-          } catch (err) {
-            console.error('actualizarContadorAlertas error:', err);
-          }
         }
 
-        // ---------- MARCAR COMO LEIDAS (llama al Web Controller proxy que creamos)
         async function marcarAlertasComoLeidas() {
-          try {
-            const userId = window.CURRENT_USER_ID || '0';
-            if (!userId || userId === '0') return;
+            try {
+                const userId = window.CURRENT_USER_ID || '0';
+                if (!userId || userId === '0') return;
 
-            const resp = await fetch(`/Alerta/MarcarAlertasComoLeidas`, {
-              method: 'POST',
-              credentials: 'same-origin'
-            });
+                const resp = await fetch(`/Alerta/MarcarAlertasComoLeidas`, {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
 
-            if (resp.ok) {
-              // actualizamos el contador inmediatamente para apagar el badge
-              await actualizarContadorAlertas();
-            } else {
-              const txt = await resp.text().catch(() => null);
-              console.warn('No se pudo marcar como leídas', resp.status, txt);
+                if (resp.ok) {
+                    await actualizarContadorAlertas();
+                } else {
+                    const txt = await resp.text().catch(() => null);
+                    console.warn('No se pudo marcar como leídas', resp.status, txt);
+                }
+            } catch (err) {
+                console.error('Error marcando alertas como leídas', err);
             }
-          } catch (err) {
-            console.error('Error marcando alertas como leídas', err);
-          }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-          // carga inicial del contador
-          actualizarContadorAlertas();
-
-          // refresco periódico del contador
-          setInterval(actualizarContadorAlertas, 60 * 1000);
+            actualizarContadorAlertas();
+            setInterval(actualizarContadorAlertas, 60 * 1000);
         });
     </script>
 
