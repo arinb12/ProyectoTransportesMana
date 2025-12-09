@@ -10,15 +10,12 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", p =>
+    options.AddPolicy("AllowWeb", policy =>
     {
-        p.WithOrigins(
-            "https://localhost:7272", // host frontend
-            "https://localhost:7238"  // host api
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials(); 
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -51,7 +48,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowFrontend");
+app.UseCors("AllowWeb");
 
 app.UseAuthentication();
 app.UseAuthorization();

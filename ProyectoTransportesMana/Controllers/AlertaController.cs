@@ -15,7 +15,8 @@ namespace ProyectoTransportesMana.Controllers
         // GET: /Alerta/ConsultarAlerta
         public IActionResult ConsultarAlerta()
         {
-            // la vista leerá el id del usuario desde la session inyectada en el layout
+            int currentUserId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+            ViewData["CurrentUserId"] = currentUserId;
             return View();
         }
 
@@ -99,7 +100,7 @@ namespace ProyectoTransportesMana.Controllers
             }
         }
 
-        // GET: /Alerta/GetCountAlertasParaUsuario (proxy para badge)
+        // GET: /Alerta/GetCountAlertasParaUsuario
         [HttpGet]
         public async Task<IActionResult> GetCountAlertasParaUsuario()
         {
@@ -109,9 +110,10 @@ namespace ProyectoTransportesMana.Controllers
             try
             {
                 var cliente = _httpClientFactory.CreateClient("Api");
-                var url = $"api/alerta/user/{userId}/count";
-                // Esperamos un JSON como { count: 3 }
+                // Llamamos al nuevo endpoint del API que cuenta solo NO-LEIDAS
+                var url = $"api/alerta/user/{userId}/count-real";
                 var resp = await cliente.GetAsync(url);
+
                 var txt = await resp.Content.ReadAsStringAsync();
 
                 if (!resp.IsSuccessStatusCode)
@@ -122,9 +124,37 @@ namespace ProyectoTransportesMana.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { ok = false, message = "Error conteo alertas", detail = ex.Message });
+                return StatusCode(500, new { ok = false, count = 0, message = "Error conteo alertas", detail = ex.Message });
             }
         }
+
+        // POST: /Alerta/MarcarAlertasComoLeidas
+        [HttpPost]
+        public async Task<IActionResult> MarcarAlertasComoLeidas()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == 0) return Json(new { ok = false });
+
+            try
+            {
+                var cliente = _httpClientFactory.CreateClient("Api");
+                var url = $"api/alerta/user/{userId}/marcar-leidas";
+                var resp = await cliente.PostAsync(url, null);
+
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var txt = await resp.Content.ReadAsStringAsync();
+                    return StatusCode((int)resp.StatusCode, txt);
+                }
+
+                return Ok(new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ok = false, message = "Error marcando alertas", detail = ex.Message });
+            }
+        }
+
 
         #region Helpers para selects (busetas / encargados)
 

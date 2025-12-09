@@ -29,6 +29,7 @@
     <!-- DataTables Responsive extension -->
     <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" rel="stylesheet">
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/index/index.css" />
@@ -95,8 +96,11 @@
             {
                 <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
                 <div class="list-group list-group-flush">
-                    <a asp-controller="Alerta" asp-action="ConsultarAlerta" class="list-group-item list-group-item-action pastel-link">
-                        <i class="bi bi-journal-text me-2"></i>Comunicados
+                    <a asp-controller="Alerta" asp-action="ConsultarAlerta"
+                       class="list-group-item list-group-item-action pastel-link d-flex align-items-center">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Comunicados</span>
+                        <span id="notifsCount" class="badge bg-danger ms-2" style="display:none; font-size:0.8rem;">0</span>
                     </a>
                 </div>
             }
@@ -163,9 +167,7 @@
     @using Microsoft.AspNetCore.Http
 
     <script>
-        // lee la configuración o usa fallback a https://localhost:7238
-        window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';
-        // expone el id del usuario en sesión (ajusta la clave de session si usas otra)
+        window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';      
         (function(){
           var uid = 0;
           try {
@@ -209,6 +211,7 @@
             }
         }
 
+        // ---------- ACTUALIZAR CONTADOR (usa tu Web Controller proxy)
         async function actualizarContadorAlertas() {
           try {
             const span = document.getElementById('notifsCount');
@@ -220,6 +223,7 @@
               return;
             }
 
+            // Llamamos al Web Controller que hace proxy al API (reemplazamos la ruta por la nueva que dejamos arriba)
             const resp = await fetch(`/Alerta/GetCountAlertasParaUsuario`, {
               method: 'GET',
               headers: { 'Accept': 'application/json' },
@@ -233,40 +237,50 @@
               return;
             }
 
-   
             let data;
             try { data = JSON.parse(text); } catch (e) { data = null; }
 
-            const count = (data && (data.count ?? data.length ?? 0)) || 0;
+            // Aceptamos { count } devuelto por el Web Controller
+            const count = (data && (data.count ?? data.Total ?? data.total ?? 0)) || 0;
             span.textContent = count;
             span.style.display = count > 0 ? 'inline-block' : 'none';
-
           } catch (err) {
             console.error('actualizarContadorAlertas error:', err);
           }
         }
 
+        // ---------- MARCAR COMO LEIDAS (llama al Web Controller proxy que creamos)
+        async function marcarAlertasComoLeidas() {
+          try {
+            const userId = window.CURRENT_USER_ID || '0';
+            if (!userId || userId === '0') return;
+
+            const resp = await fetch(`/Alerta/MarcarAlertasComoLeidas`, {
+              method: 'POST',
+              credentials: 'same-origin'
+            });
+
+            if (resp.ok) {
+              // actualizamos el contador inmediatamente para apagar el badge
+              await actualizarContadorAlertas();
+            } else {
+              const txt = await resp.text().catch(() => null);
+              console.warn('No se pudo marcar como leídas', resp.status, txt);
+            }
+          } catch (err) {
+            console.error('Error marcando alertas como leídas', err);
+          }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+          // carga inicial del contador
           actualizarContadorAlertas();
+
+          // refresco periódico del contador
           setInterval(actualizarContadorAlertas, 60 * 1000);
         });
     </script>
 
-    <script src="~/js/scripts.js" asp-append-version="true"></script>
-    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
-    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
-
-
-    <script src="https://unpkg.com/imask"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        window.addEventListener("pageshow", function (event) {
-            if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
-                window.location.reload(true);
-            }
-        });
-    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

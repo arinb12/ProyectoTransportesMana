@@ -36,6 +36,13 @@ namespace ProyectoTransportesManaAPI.Controllers
                 p.Add("@fecha_publicacion", dto.FechaPublicacion, DbType.DateTime);
 
                 var id = await con.QuerySingleAsync<int>("dbo.sp_alertas_insertar", p, commandType: CommandType.StoredProcedure);
+
+                await con.ExecuteAsync(
+                    "dbo.sp_alerta_generar_lecturas",
+                    new { IdAlerta = id },
+                    commandType: CommandType.StoredProcedure
+                );
+
                 return Ok(new { ok = true, id_alerta = id });
             }
             catch (SqlException sqlEx)
@@ -49,12 +56,11 @@ namespace ProyectoTransportesManaAPI.Controllers
             }
         }
 
-        // GET api/alerta/busetas  -> lista de busetas para dropdown
         [HttpGet("busetas")]
         public async Task<IActionResult> GetBusetas()
         {
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var sql = @"SELECT id_buseta AS Id, placa AS Placa, CONCAT('Buseta - ', placa) AS Texto 
+            var sql = @"SELECT id_buseta AS Id, placa AS Placa, CONCAT('Placa - ', placa) AS Texto 
                         FROM dbo.busetas
                         WHERE activa = 1
                         ORDER BY placa;";
@@ -62,7 +68,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             return Ok(lista);
         }
 
-        // GET api/alerta/encargados -> lista de encargados (usuarios encargados_legales)
+
         [HttpGet("encargados")]
         public async Task<IActionResult> GetEncargados()
         {
@@ -81,8 +87,6 @@ namespace ProyectoTransportesManaAPI.Controllers
         public async Task<IActionResult> GetAlertasParaUsuarioHoy(int userId)
         {
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-
-            // obtener id_buseta desde asistentes (si el usuario es un asistente)
             var idBusetaObj = await con.QueryFirstOrDefaultAsync<int?>(
                 "SELECT a.id_buseta FROM dbo.asistentes a WHERE a.id_asistente = @id",
                 new { id = userId }
@@ -95,50 +99,57 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             var rows = await con.QueryAsync("dbo.sp_alertas_para_usuario", p, commandType: CommandType.StoredProcedure);
             return Ok(rows);
-        }
-
-        // GET api/alerta/user/{userId}/count  -> cuenta para badge
-        [HttpGet("user/{userId}/count")]
-        public async Task<IActionResult> GetCountAlertasParaUsuarioHoy(int userId)
-        {
-            using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-
-            // obtener id_buseta desde asistentes (si el usuario es un asistente)
-            var idBusetaObj = await con.QueryFirstOrDefaultAsync<int?>(
-                "SELECT a.id_buseta FROM dbo.asistentes a WHERE a.id_asistente = @id",
-                new { id = userId }
-            );
-            string idBuseta = idBusetaObj?.ToString();
-
-            var p = new DynamicParameters();
-            p.Add("@IdUsuario", userId, DbType.Int32);
-            p.Add("@IdBuseta", idBuseta, DbType.String);
-
-            var rows = await con.QueryAsync("dbo.sp_alertas_para_usuario", p, commandType: CommandType.StoredProcedure);
-            var count = rows?.Count() ?? 0;
-            return Ok(new { count });
         }
 
         // GET api/alerta/listar  -> listar todas (útil para la vista de administración)
         [HttpGet("listar")]
         public async Task<IActionResult> ListarTodas()
         {
-            using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var rows = await con.QueryAsync("dbo.sp_alertas_listar", commandType: CommandType.StoredProcedure);
-            return Ok(rows);
+            try
+            {
+                using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+
+                // Obtener el Id del usuario logueado desde Claims
+                int userId = int.Parse(User.FindFirst("id_usuario").Value);
+
+                var data = await con.QueryAsync<CrearAlertaDto>(
+                    "sp_alertas_listar",
+                    new { UsuarioLogueado = userId }, // pasamos el parámetro al SP
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ok = false, message = "Error listando alertas", detail = ex.Message });
+            }
         }
+
+
+
 
         // DELETE api/alerta/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAlert(int id)
         {
-            if (id <= 0) return BadRequest(new { ok = false, message = "Id inválido" });
-
-            using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
             try
             {
-                var rows = await con.ExecuteAsync("DELETE FROM alertas WHERE id_alerta = @id", new { id });
-                if (rows > 0) return Ok(new { ok = true });
+                using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+
+                await con.ExecuteAsync(
+                    "DELETE FROM Alerta_Lectura WHERE IdAlerta = @id",
+                    new { id }
+                );
+
+                var rows = await con.ExecuteAsync(
+                    "DELETE FROM alertas WHERE id_alerta = @id",
+                    new { id }
+                );
+
+                if (rows > 0)
+                    return Ok(new { ok = true });
+
                 return NotFound(new { ok = false, message = "Alerta no encontrada" });
             }
             catch (Exception ex)
@@ -146,6 +157,7 @@ namespace ProyectoTransportesManaAPI.Controllers
                 return StatusCode(500, new { ok = false, message = "Error eliminando alerta", detail = ex.Message });
             }
         }
+
 
         // -----------------------
         // RUTAS ADICIONALES AGREGADAS
@@ -157,9 +169,15 @@ namespace ProyectoTransportesManaAPI.Controllers
         public async Task<IActionResult> GetAllAlias()
         {
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var rows = await con.QueryAsync("dbo.sp_alertas_listar", commandType: CommandType.StoredProcedure);
-            return Ok(rows);
+
+            var data = await con.QueryAsync<CrearAlertaDto>(
+                "sp_alertas_listar",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return Ok(data);
         }
+
 
         // GET api/alerta/{id}
         // Obtener detalle de una alerta por id (útil para edición/ver)
@@ -200,5 +218,60 @@ namespace ProyectoTransportesManaAPI.Controllers
             var rows = await con.QueryAsync("dbo.sp_alertas_para_usuario", p, commandType: CommandType.StoredProcedure);
             return Ok(rows);
         }
+
+        [HttpGet("user/{userId}/count-real")]
+        public async Task<IActionResult> GetCountReal(int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+
+   
+                var idBusetaObj = await con.QueryFirstOrDefaultAsync<int?>(
+                    "SELECT a.id_buseta FROM dbo.asistentes a WHERE a.id_asistente = @id",
+                    new { id = userId }
+                );
+                string idBuseta = idBusetaObj?.ToString();
+
+                var total = await con.ExecuteScalarAsync<int>(
+                    "sp_alertas_count_real",
+        
+                    new
+                    {
+                        IdUsuario = userId,
+                        IdBuseta = idBuseta
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return Ok(new { count = total });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ok = false, message = "Error contando alertas", detail = ex.Message });
+            }
+        }
+
+        [HttpPost("user/{userId}/marcar-leidas")]
+        public async Task<IActionResult> MarcarLeidas(int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+
+                await con.ExecuteAsync(
+                    "sp_alerta_marcar_leidas",
+                    new { IdUsuario = userId },
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return Ok(new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ok = false, message = "Error marcando alertas como leídas", detail = ex.Message });
+            }
+        }
+
     }
 }
