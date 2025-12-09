@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using ProyectoTransportesManaAPI.Models;
 using System.Data;
 namespace ProyectoTransportesManaAPI.Controllers
 
@@ -22,5 +23,44 @@ namespace ProyectoTransportesManaAPI.Controllers
                 "sp_instituciones_lookup", commandType: CommandType.StoredProcedure);
             return Ok(data);
         }
+
+        [HttpGet("{id}/estudiantes")]
+        public async Task<IActionResult> GetEstudiantesPorInstitucion(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            var data = await con.QueryAsync<EstudianteDto>(
+                "ConsultarEstudiantesPorInstitucion",
+                new { IdInstitucion = id },
+                commandType: CommandType.StoredProcedure);
+            return Ok(data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] InstitucionLookupDto dto)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            var newId = await con.ExecuteScalarAsync<int>("Instituciones_Insert",
+                new { Nombre = dto.Nombre }, commandType: CommandType.StoredProcedure);
+            return CreatedAtAction(nameof(Get), new { id = newId }, new { IdInstitucion = newId });
+        }
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] InstitucionLookupDto dto)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            await con.ExecuteAsync("Instituciones_Update", new { IdInstitucion = id, Nombre = dto.Nombre }, commandType: CommandType.StoredProcedure);
+            return NoContent();
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            await con.ExecuteAsync("Instituciones_Delete", new { IdInstitucion = id }, commandType: CommandType.StoredProcedure);
+            return NoContent();
+        }
     }
 }
+

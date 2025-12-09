@@ -1,15 +1,49 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-// Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", p =>
+    {
+        p.WithOrigins(
+            "https://localhost:7272", // host frontend
+            "https://localhost:7238"  // host api
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials(); 
+    });
+});
+
+string key = builder.Configuration["Valores:KeyJWT"]!;
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        var config = builder.Configuration;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Manejo global de excepciones
+app.UseExceptionHandler("/api/v1/Error/RegistrarError");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -17,6 +51,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

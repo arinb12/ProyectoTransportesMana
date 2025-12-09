@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProyectoTransportesMana.Models;
 using ProyectoTransportesMana.Contracts.Busetas;
-using System.Net.Http.Json;
+using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Models.Filters;
 using System.Net;
+using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
+    [Seguridad]
     public class BusetasController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;

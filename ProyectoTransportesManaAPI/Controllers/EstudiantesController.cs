@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ProyectoTransportesMana.Contracts.Estudiantes;
@@ -6,6 +7,7 @@ using System.Data;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/estudiantes")]
     public class EstudiantesController : ControllerBase
@@ -178,5 +180,40 @@ namespace ProyectoTransportesManaAPI.Controllers
             await con.ExecuteAsync("sp_estudiante_actualizar_busetas", new { IdEstudiante = id, Busetas = csv }, commandType: CommandType.StoredProcedure);
             return NoContent();
         }
+
+        [HttpGet("por-encargado/{idEncargado:int}")]
+        [ProducesResponseType(typeof(IEnumerable<EstudianteListItemResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<EstudianteListItemResponse>>> GetPorEncargado(int idEncargado)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var data = await con.QueryAsync<EstudianteListItemResponse>(
+                "sp_estudiantes_listar_por_encargado",
+                new { IdEncargado = idEncargado },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return Ok(data);
+        }
+
+        [HttpGet("{id:int}/detalle-transporte")]
+        public async Task<ActionResult<EstudianteTransporteDetalleResponse>> GetDetalleTransporte(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var result = await con.QuerySingleOrDefaultAsync<EstudianteTransporteDetalleResponse>(
+                "sp_estudiantes_detalle_transporte",
+                new { IdEstudiante = id },
+                commandType: CommandType.StoredProcedure
+            );
+
+            if (result is null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+
+
     }
 }

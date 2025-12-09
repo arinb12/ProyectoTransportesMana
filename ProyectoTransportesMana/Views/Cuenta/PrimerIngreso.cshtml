@@ -1,0 +1,49 @@
+﻿@model ProyectoTransportesMana.Models.CambiarContrasenaPrimerIngresoModel
+
+@{
+    ViewData["Title"] = "Primer ingreso";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <h3 class="mb-4 text-center">Bienvenido</h3>
+            <p class="text-muted text-center">
+                Para continuar debes cambiar tu contraseña y aceptar los términos.
+            </p>
+
+            <form asp-action="PrimerIngreso" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="IdUsuario" />
+
+                <div class="mb-3">
+                    <label asp-for="NuevaContrasena" class="form-label"></label>
+                    <input asp-for="NuevaContrasena" class="form-control" />
+                    <span asp-validation-for="NuevaContrasena" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmarContrasena" class="form-label"></label>
+                    <input asp-for="ConfirmarContrasena" class="form-control" />
+                    <span asp-validation-for="ConfirmarContrasena" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="AceptoTerminos" class="form-check-input" />
+                    <label asp-for="AceptoTerminos" class="form-check-label"></label>
+                    <span asp-validation-for="AceptoTerminos" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Guardar y continuar</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Models.Filters;
 using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
+    [Seguridad]
     public class AsistenteController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -84,7 +86,7 @@ namespace ProyectoTransportesMana.Controllers
             return RedirectToAction("ConsultarAsistente");
         }
 
-        // trae busetas desde la API y convierte a SelectList
+
         private async Task<IEnumerable<SelectListItem>> GetBusetasSelectList()
         {
             var cliente = _httpClientFactory.CreateClient("Api");
@@ -92,7 +94,7 @@ namespace ProyectoTransportesMana.Controllers
             return lista.Select(b => new SelectListItem { Value = b.Id.ToString(), Text = b.Texto });
         }
 
-        // para usae el endpoint de API/Busetas
+ 
         private class BusetaVm
         {
             public int Id { get; set; }
@@ -123,7 +125,7 @@ namespace ProyectoTransportesMana.Controllers
                 Telefono = detalle.Telefono,
                 Cedula = detalle.Cedula,
                 Correo = detalle.Correo,
-                Salario = detalle.Salario,     // int
+                Salario = detalle.Salario,     
                 BusetaId = detalle.BusetaId,
                 Activo = detalle.Activo,
                 BusetasSelectList = await GetBusetasSelectList()
@@ -156,7 +158,7 @@ namespace ProyectoTransportesMana.Controllers
                 Telefono = model.Telefono,
                 Cedula = model.Cedula,
                 Correo = model.Correo,
-                Salario = model.Salario,        // int
+                Salario = model.Salario,        
                 BusetaId = model.BusetaId!.Value
             };
 
@@ -172,6 +174,48 @@ namespace ProyectoTransportesMana.Controllers
             }
 
             return RedirectToAction("ConsultarAsistente");
+        }
+        [HttpPost]
+        public async Task<IActionResult> EliminarAsistente(int id)
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            var resp = await client.DeleteAsync($"api/asistente/{id}");
+
+
+            if (resp.IsSuccessStatusCode)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Ok(new
+                    {
+                        ok = true,
+                        title = "Asistente eliminado",
+                        message = "El asistente fue eliminado correctamente."
+                    });
+                }
+
+                TempData["SwalType"] = "success";
+                TempData["SwalTitle"] = "Asistente eliminado";
+                TempData["SwalText"] = "El asistente fue eliminado correctamente.";
+                return RedirectToAction(nameof(ConsultarAsistente));
+            }
+
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    title = "Error al eliminar",
+                    message = "No se pudo eliminar el asistente."
+                });
+            }
+
+
+            TempData["SwalType"] = "error";
+            TempData["SwalTitle"] = "Error al eliminar";
+            TempData["SwalText"] = "No se pudo eliminar el asistente.";
+            return RedirectToAction(nameof(ConsultarAsistente));
         }
     }
 }

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using ProyectoTransportesMana.Contracts.Busetas;
 using ProyectoTransportesMana.Contracts.Estudiantes;
 using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Models.Filters;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
+    [Seguridad]
     public class EstudiantesController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;

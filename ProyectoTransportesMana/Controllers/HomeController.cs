@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Models.Filters;
 using System.Diagnostics;
 using System.Net.Http.Json;
 
@@ -14,7 +15,10 @@ namespace ProyectoTransportesMana.Controllers
             _http = http;
             _config = config;
         }
-        public IActionResult Index() { 
+
+        [HttpGet]
+        public IActionResult Index()
+        {   
             return View();
         }
 
@@ -23,7 +27,6 @@ namespace ProyectoTransportesMana.Controllers
         {
             using (var context = _http.CreateClient())
             {
-
                 var urlApi = _config["Api:BaseUrl"] + "api/Home/ValidarSesion";
                 var respuesta = context.PostAsJsonAsync(urlApi, usuario).Result;
 
@@ -32,15 +35,51 @@ namespace ProyectoTransportesMana.Controllers
                     var datosApi = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
                     if (datosApi != null)
                     {
-                        //HttpContext.Session.SetString("NombreUsuario", datosApi.Nombre);
-                        
+                        var nombreCompleto = $"{datosApi.Nombre} {datosApi.PrimerApellido}";
 
-                        return RedirectToAction("Principal", "Home");
+                        HttpContext.Session.SetString("NombreUsuario", nombreCompleto);
+                        HttpContext.Session.SetString("RolUsuario", datosApi.NombreRol);
+                        HttpContext.Session.SetInt32("IdUsuario", datosApi.IdUsuario ?? 0);
+                        HttpContext.Session.SetInt32("IdRol", datosApi.RolId);
+                        HttpContext.Session.SetString("Token", datosApi.Token);
+                        HttpContext.Session.SetString("AceptoTerminos", datosApi.AceptoTerminos == true ? "1" : "0");
+
+                        
+                        if (datosApi.RolId == 2)
+                        {
+                            HttpContext.Session.SetString("AceptoTerminos", datosApi.AceptoTerminos == true ? "1" : "0");
+
+                            if (datosApi.AceptoTerminos == false)
+                                return RedirectToAction("PrimerIngreso", "Cuenta");
+
+                            return RedirectToAction("Index", "PortalPadres");
+                        }
+                        else
+                        {
+                            
+                            HttpContext.Session.Remove("AceptoTerminos");
+                            return RedirectToAction("Principal", "Home");
+                        }
+
                     }
                 }
                 ViewBag.Mensaje = "Usuario o contraseña incorrecta.";
                 return View();
             }
+        }
+
+        [Seguridad]
+        public IActionResult Principal()
+        {
+            return View();
+        }
+
+        [Seguridad]
+        [HttpGet]
+        public IActionResult CerrarSesion()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Home");
         }
 
 
@@ -70,11 +109,6 @@ namespace ProyectoTransportesMana.Controllers
             return View();
         }
 
-
-        public IActionResult Principal()
-        {
-            return View();
-        }
 
         public IActionResult Registro()
         {

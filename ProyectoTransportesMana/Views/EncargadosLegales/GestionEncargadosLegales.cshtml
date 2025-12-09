@@ -1,0 +1,343 @@
+﻿@using ProyectoTransportesMana.Contracts.EncargadosLegales
+@model ProyectoTransportesMana.Models.EncargadoLegalModel
+
+@{
+    ViewData["Title"] = "Gestión Padres";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+
+    var encargados = ViewBag.Encargados as List<EncargadoLegalListItemResponse> ?? new();
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-dark">Gestión de Padres</h1>
+        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEncargado"
+                onclick="nuevoEncargado()">
+            <i class="bi bi-person-plus me-1"></i>Nuevo Padre
+        </button>
+    </div>
+
+    <div id="alertaEncargado" class="alert alert-success @(TempData["created"] != null ? "" : "d-none")" role="alert">
+        Padre guardado correctamente.
+    </div>
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-info text-dark fw-bold">
+            <i class="fas fa-users me-2"></i>Listado de Padres
+        </div>
+        <div class="card-body">
+            <table id="tablaEncargados" class="table pastel-table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>Estudiante</th>
+                        <th>Estado Contrato</th>
+                        <th>Fecha Inicio</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Activo</th>
+                        <th>Credenciales</th>   @* nueva columna *@
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (encargados.Any())
+                    {
+                        foreach (var e in encargados)
+                        {
+                            <tr>
+                                <td>@e.NombreCompleto</td>
+
+                                
+                                <td>@(string.IsNullOrWhiteSpace(e.Estudiantes) ? "-" : e.Estudiantes)</td>
+
+                               
+                                <td>@e.EstadoContrato</td>
+
+                               
+                                <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
+
+                                
+                                <td>@e.Direccion</td>
+
+                                
+                                <td>@e.Telefono</td>
+
+                               
+                                <td class="text-center">
+                                    <input type="checkbox"
+                                           class="form-check-input toggle-estado"
+                                           data-id="@e.IdUsuario"
+                                           @(e.Activo ? "checked" : "") />
+                                </td>
+
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            onclick="enviarContrasena(@e.IdUsuario)">
+                                        Enviar contraseña
+                                    </button>
+                                </td>
+
+                                <td>
+                                    <a href="javascript:void(0)" class="text-primary ms-2" title="Editar"
+                                       onclick="editarEncargado(@e.IdUsuario)">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="text-danger ms-2" title="Eliminar"
+                                       onclick="eliminarEncargado(@e.IdUsuario)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+
+                                
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">
+                                No hay padres registrados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Registro/Edición -->
+<div class="modal fade" id="modalEncargado" tabindex="-1" aria-labelledby="modalEncargadoLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark fw-bold" id="modalEncargadoLabel">
+                    <i class="fas fa-user-graduate me-2"></i>Registrar Padre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="encargadoForm"
+                      asp-action="RegistrarEncargado"
+                      asp-controller="EncargadosLegales"
+                      method="post"
+                      class="row g-3 needs-validation" novalidate>
+
+                    @Html.AntiForgeryToken()
+                    <input asp-for="IdUsuario" type="hidden" id="IdUsuario" />
+
+                    <div class="col-md-4">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="PrimerApellido" class="form-label"></label>
+                        <input asp-for="PrimerApellido" class="form-control" />
+                        <span asp-validation-for="PrimerApellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="SegundoApellido" class="form-label"></label>
+                        <input asp-for="SegundoApellido" class="form-control" />
+                        <span asp-validation-for="SegundoApellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Correo" class="form-label"></label>
+                        <input asp-for="Correo" class="form-control" />
+                        <span asp-validation-for="Correo" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6" id="rowContrasena">
+                        <label asp-for="Contrasena" class="form-label"></label>
+                        <input asp-for="Contrasena" class="form-control" />
+                        <span asp-validation-for="Contrasena" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DireccionResidencia" class="form-label"></label>
+                        <input asp-for="DireccionResidencia" class="form-control" />
+                        <span asp-validation-for="DireccionResidencia" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="FirmaContrato" class="form-label"></label>
+                        <input asp-for="FirmaContrato" class="form-control" type="date" />
+                        <span asp-validation-for="FirmaContrato" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-center">
+                        <label asp-for="AceptoTerminos" class="form-check-label"></label>
+                        <input asp-for="AceptoTerminos" class="form-check-input" type="checkbox" />
+                        
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-center">
+                        <label asp-for="Activo" class="form-check-label me-2"></label>
+                        <input asp-for="Activo" class="form-check-input" id="Activo" />
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function nuevoEncargado() {
+            $('#IdUsuario').val(0);
+            $('#Nombre').val('');
+            $('#PrimerApellido').val('');
+            $('#SegundoApellido').val('');
+            $('#Correo').val('');
+            $('#Contrasena').val('');
+            $('#DireccionResidencia').val('');
+            $('#Telefono').val('');
+            $('#FirmaContrato').val('');
+            $('#AceptoTerminos').prop('checked', false);
+            $('#Activo').prop('checked', true);
+            $('#modalEncargadoLabel').text('Registrar Padre');
+
+            // Mostrar campo contraseña en modo creación
+            $('#rowContrasena').hide();
+
+            // Form en modo crear: post normal a RegistrarEncargado
+            $('#encargadoForm').off('submit');
+            $('#encargadoForm').attr('action', '@Url.Action("RegistrarEncargado", "EncargadosLegales")');
+        }
+
+                function editarEncargado(id) {
+            $.get('@Url.Action("ObtenerParaEditar", "EncargadosLegales")', { id: id })
+                .done(function (resp) {
+                    if (!resp.ok) {
+                        alert(resp.message || 'No se pudo cargar el padre.');
+                        return;
+                    }
+
+                    const m = resp.data;
+                    console.log(m); // opcional, para ver el objeto en consola
+
+                    // Ojo: propiedades en camelCase, no PascalCase
+                    $('#IdUsuario').val(m.idUsuario);
+                    $('#Nombre').val(m.nombre);
+                    $('#PrimerApellido').val(m.primerApellido);
+                    $('#SegundoApellido').val(m.segundoApellido);
+                    $('#Correo').val(m.correo || '');
+                    $('#Contrasena').val('');
+                    $('#DireccionResidencia').val(m.direccionResidencia || '');
+                    $('#Telefono').val(m.telefono || '');
+                    $('#FirmaContrato').val(m.firmaContrato ? m.firmaContrato.substring(0, 10) : '');
+                    $('#AceptoTerminos').prop('checked', m.aceptoTerminos === true);
+                    $('#Activo').prop('checked', m.activo === true);
+
+                    $('#modalEncargadoLabel').text('Editar Padre');
+
+                    // Ocultar contraseña en edición
+                    $('#rowContrasena').hide();
+
+                    // Form en modo edición: usar AJAX
+                    $('#encargadoForm').off('submit').on('submit', function (e) {
+                        e.preventDefault();
+                        actualizarEncargado();
+                    });
+
+                    var modal = new bootstrap.Modal(document.getElementById('modalEncargado'));
+                    modal.show();
+                })
+                .fail(function () {
+                    alert('Error al consultar la API.');
+                });
+        }
+
+
+        function actualizarEncargado() {
+            const data = {
+                IdUsuario: parseInt($('#IdUsuario').val()),
+                Nombre: $('#Nombre').val(),
+                PrimerApellido: $('#PrimerApellido').val(),
+                SegundoApellido: $('#SegundoApellido').val(),
+                Correo: $('#Correo').val(),
+                Activo: $('#Activo').is(':checked'),
+                DireccionResidencia: $('#DireccionResidencia').val(),
+                AceptoTerminos: $('#AceptoTerminos').is(':checked'),
+                FirmaContrato: $('#FirmaContrato').val(),
+                Telefono: $('#Telefono').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("ActualizarEncargado", "EncargadosLegales")',
+                type: 'POST',
+                data: data
+            }).done(function (resp) {
+                if (!resp.ok) {
+                    alert(resp.message || 'No se pudo actualizar el padre.');
+                    return;
+                }
+                location.reload();
+            }).fail(function () {
+                alert('Error al actualizar el padre.');
+            });
+        }
+
+        function eliminarEncargado(id) {
+            if (!confirm('¿Deseas eliminar este padre?')) return;
+
+            $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
+                .done(function (resp) {
+                    if (resp.ok === false) {
+                        alert(resp.message || 'No se pudo eliminar.');
+                        return;
+                    }
+                    location.reload();
+                }).fail(function () {
+                    alert('Error al eliminar.');
+                });
+        }
+
+        // Cambiar estado desde el checkbox
+        $(document).on('change', '.toggle-estado', function () {
+            const id = $(this).data('id');
+            const activo = $(this).is(':checked');
+
+            $.post('@Url.Action("CambiarEstado", "EncargadosLegales")', { id: id, activo: activo })
+                .done(function (resp) {
+                    if (!resp.ok) {
+                        alert(resp.message || 'No se pudo cambiar el estado.');
+                    }
+                }).fail(function () {
+                    alert('Error al cambiar el estado.');
+                });
+        });
+
+        function enviarContrasena(id) {
+            // Por ahora solo mensaje informativo
+            alert('Funcionalidad para enviar contraseña temporal al correo del padre ' + id + ' se implementará después.');
+        }
+    </script>
+}

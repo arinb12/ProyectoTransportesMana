@@ -1,8 +1,11 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using ProyectoTransportesMana.Contracts.Estudiantes;
 using ProyectoTransportesManaAPI.Models;
 using System.Data;
+using System.Net.Http;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
@@ -11,8 +14,10 @@ namespace ProyectoTransportesManaAPI.Controllers
     public class AsistenteController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        public AsistenteController(IConfiguration configuration) => _configuration = configuration;
-
+        public AsistenteController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
         [HttpGet("Busetas")]
         public async Task<IActionResult> GetBusetas()
         {
@@ -29,16 +34,15 @@ namespace ProyectoTransportesManaAPI.Controllers
         [HttpGet("Listar")]
         public async Task<IActionResult> Listar()
         {
-            const string sql = @"
-                SELECT *
-                FROM dbo.vw_asistentes_listado
-                ORDER BY Nombre, PrimerApellido;";
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var lista = await con.QueryAsync<AsistenteListItemResponse>(sql);
-            return Ok(lista);
+            var data = await con.QueryAsync<AsistenteListItemResponse>(
+               "sp_asistentes_listar",
+               commandType: CommandType.StoredProcedure
+           );
+            return Ok(data);
         }
 
-        
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> ObtenerPorId(int id)
         {
@@ -51,7 +55,7 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             if (row is null) return NotFound();
 
-            
+
             var res = new AsistenteResponse
             {
                 Id = row.Id,
@@ -63,7 +67,7 @@ namespace ProyectoTransportesManaAPI.Controllers
                 Telefono = row.Telefono,
                 Cedula = row.Cedula,
                 Correo = row.Correo,
-                Salario = (int)Math.Round(row.Salario) 
+                Salario = (int)Math.Round(row.Salario)
             };
 
             return Ok(res);
@@ -86,7 +90,7 @@ namespace ProyectoTransportesManaAPI.Controllers
                 p.Add("@Telefono", asistente.Telefono);
                 p.Add("@Cedula", asistente.Cedula);
                 p.Add("@Correo", asistente.Correo);
-                p.Add("@Salario", asistente.Salario);   
+                p.Add("@Salario", asistente.Salario);
                 p.Add("@IdBuseta", asistente.BusetaId);
 
                 var newId = await con.QuerySingleAsync<int>(
@@ -118,7 +122,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             p.Add("@Telefono", req.Telefono);
             p.Add("@Cedula", req.Cedula);
             p.Add("@Correo", req.Correo);
-            p.Add("@Salario", req.Salario); 
+            p.Add("@Salario", req.Salario);
             p.Add("@IdBuseta", req.BusetaId);
 
             try
@@ -139,5 +143,40 @@ namespace ProyectoTransportesManaAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> EliminarEstudiante(int id)
+        {
+            using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+
+            var rows = await con.ExecuteAsync(
+                "sp_usuarios_eliminar_logico",
+                new { IdUsuario = id },
+                commandType: CommandType.StoredProcedure
+            );
+
+            if (rows == 0)
+                return NotFound(new { Message = "No se encontró el usuario o ya fue eliminado." });
+
+            return NoContent();
+        }
     }
 }
+
+public record AsistenteListItemResponse()
+{
+    public int Id { get; init; }
+    public string Nombre { get; init; }
+    public string PrimerApellido { get; init; }
+    public string? SegundoApellido { get; init; }
+    public string Telefono { get; init; }
+    public string Cedula { get; init; }
+    public string? Correo { get; init; }
+    public decimal Salario { get; init; }
+    public string? BusetaTexto { get; init; }
+    public DateTime? FechaInicio { get; init; }
+    public bool Activo { get; init; }
+    public bool Eliminado { get; init; }
+   }

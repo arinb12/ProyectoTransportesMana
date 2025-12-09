@@ -8,6 +8,55 @@
     --pastel-accent: #726cf8;
 }
 
+.pastel-card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+.pastel-header {
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    color: #1f1f1f;
+}
+
+/* fondo neutro para el cuerpo */
+.pastel-card .card-body {
+    background: var(--pastel-gray);
+}
+
+/* tabla con estilo suave */
+.pastel-table thead th {
+    background: rgba(255,255,255,0.6);
+    border-bottom: 2px solid rgba(0,0,0,0.06);
+    font-weight: 600;
+    color: #333;
+}
+
+/* filas con alternado muy sutil */
+.pastel-table tbody tr:nth-child(odd) {
+    background: rgba(255,255,255,0.0);
+}
+
+.pastel-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.02);
+}
+
+/* celdas de acciones centradas */
+.pastel-table td.text-center {
+    vertical-align: middle;
+}
+
+/* hover */
+.pastel-table tbody tr:hover {
+    background: rgba(114,108,248,0.06); /* un toque del accent */
+}
+
+/* clases utilitarias si las quieres usar */
+.bg-pastel-accent {
+    background: var(--pastel-accent);
+    color: #fff;
+} 
 /* === SIDEBAR === */
 .pastel-sidebar {
     width: 250px;

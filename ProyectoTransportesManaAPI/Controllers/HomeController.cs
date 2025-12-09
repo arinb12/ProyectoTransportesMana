@@ -1,11 +1,17 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using ProyectoTransportesManaAPI.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
@@ -19,6 +25,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             _enviroment = enviroment;
         }
 
+
         [HttpPost]
         [Route("ValidarSesion")]
         public IActionResult ValidarSesion(ValidarSesionRequestModel usuario)
@@ -27,20 +34,47 @@ namespace ProyectoTransportesManaAPI.Controllers
             {
                 var parametros = new DynamicParameters();
                 parametros.Add("@Correo", usuario.Correo);
-                parametros.Add("@ContrasenaHash", usuario.ContrasenaHash);
 
                 var resultado = context.QueryFirstOrDefault<DatosUsuarioResponseModel>("ValidarSesion", parametros);
 
-                if (resultado != null)
-                {
-                    return Ok(resultado);
-                }
-                else
-                {
+                if (resultado == null)
                     return Unauthorized("Credenciales inválidas.");
-                }
+
+                bool passwordValida =
+                    Helpers.PasswordHasher.VerifyPassword(usuario.ContrasenaHash, resultado.ContrasenaHash);
+
+                if (!passwordValida)
+                    return Unauthorized("Credenciales inválidas.");
+
+                resultado.Token = GenerarToken(resultado.IdUsuario, resultado.Nombre, resultado.RolId);
+
+                return Ok(resultado);
             }
-            
         }
+
+
+        private string GenerarToken(int usuarioId, string nombre, int rol)
+        {
+            var key = _config["Valores:KeyJWT"]!;
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim("id", usuarioId.ToString()),
+                new Claim("nombre", nombre),
+                new Claim("rol", rol.ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(60),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
     }
 }

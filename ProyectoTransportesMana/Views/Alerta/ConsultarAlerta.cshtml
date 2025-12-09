@@ -1,0 +1,367 @@
+﻿@{
+    ViewData["Title"] = "Consultar Alertas";
+    Layout = "_LayoutInterno";
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-dark">Alertas Informativas</h1>
+        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalAlerta">
+            <i class="bi bi-bell-fill me-1"></i> Generar Alerta
+        </button>
+    </div>
+
+    <!-- Tabla de alertas -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-dark fw-bold">
+            <i class="bi bi-megaphone me-2"></i>Listado de Alertas
+        </div>
+        <div class="card-body">
+            <table id="tablaAlertas" class="table table-hover table-bordered pastel-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th><i class="bi bi-pencil-square me-1"></i>Título</th>
+                        <th><i class="bi bi-calendar-event me-1"></i>Fecha de Publicación</th>
+                        <th><i class="bi bi-eye me-1"></i>Visibilidad</th>
+                        <th><i class="bi bi-bullseye me-1"></i>Tipo</th>
+                        <th><i class="bi bi-tools me-1"></i>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rellenar dinámicamente con GetAlertasParaUsuario si implementas carga -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalAlerta" tabindex="-1" aria-labelledby="modalAlertaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info">
+                    <h5 class="modal-title text-dark" id="modalAlertaLabel">
+                        <i class="bi bi-bell me-2"></i>Registrar Nueva Alerta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formAlerta">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="tipoAlerta" class="form-label">Tipo de Alerta</label>
+                                <select id="tipoAlerta" class="form-select" required>
+                                    <option selected disabled>Seleccione un tipo</option>
+                                    <option>Retraso</option>
+                                    <option>Cambio Ruta</option>
+                                    <option>Evento Especial</option>
+                                    <option>Otro</option>
+                                </select>
+
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fechaPublicacion" class="form-label">Fecha de Publicación</label>
+                                <input type="date" id="fechaPublicacion" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tituloAlerta" class="form-label">Título <span class="text-danger">*</span></label>
+                            <input type="text" id="tituloAlerta" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contenidoAlerta" class="form-label">Mensaje / Contenido</label>
+                            <textarea class="form-control" id="contenidoAlerta" rows="5"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="publico" class="form-label">Público Destinatario</label>
+                            <select id="publico" class="form-select">
+                                <option value="todos">Todos (Masiva)</option>
+                                <option value="buseta">Por Buseta</option>
+                                <option value="encargado">Por Encargado Legal</option>
+                            </select>
+                        </div>
+
+                        <!-- Select Condicionales -->
+
+                        <div class="mb-3 d-none" id="grupoBuseta">
+                            <label for="buseta" class="form-label">Selecciona una Buseta</label>
+                            <select id="buseta" class="form-select">
+                                <option disabled selected value="">Selecciona una buseta</option>
+                                <!-- options se llenan desde JS -->
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="grupoEncargado">
+                            <label for="encargado" class="form-label">Selecciona un Encargado Legal</label>
+                            <select id="encargado" class="form-select">
+                                <option disabled selected value="">Selecciona un encargado</option>
+                                <!-- options se llenan desde JS -->
+                            </select>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn pastel-btn">Guardar Alerta</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // usa window.CURRENT_USER_ID y window.API_BASE (definidos en el layout)
+        const CURRENT_USER_ID = window.CURRENT_USER_ID || '0';
+        const API_BASE = (window.API_BASE || '').replace(/\/+$/, ''); // elimina slash final si lo hay
+        console.log('API_BASE=', API_BASE, 'CURRENT_USER_ID=', CURRENT_USER_ID);
+
+        // mapas para convertir ids -> nombres (usados cuando mostramos la tabla)
+        const encargadosMap = new Map();
+        const busetasMap = new Map();
+
+        // muestra/oculta selects condicionales cuando cambia "publico"
+        function togglePublicoGroups() {
+          const publico = document.getElementById('publico')?.value;
+          const grupoBuseta = document.getElementById('grupoBuseta');
+          const grupoEncargado = document.getElementById('grupoEncargado');
+          if (!grupoBuseta || !grupoEncargado) return;
+          grupoBuseta.classList.add('d-none');
+          grupoEncargado.classList.add('d-none');
+
+          if (publico === 'buseta') {
+            grupoBuseta.classList.remove('d-none');
+          } else if (publico === 'encargado') {
+            grupoEncargado.classList.remove('d-none');
+          }
+        }
+
+        // carga dropdowns (busetas y encargados) y llena los mapas
+        async function cargarLookups() {
+          try {
+            const [busRes, encRes] = await Promise.all([
+              fetch(`${API_BASE}/api/alerta/busetas`, { credentials: 'include' }),
+              fetch(`${API_BASE}/api/alerta/encargados`, { credentials: 'include' })
+            ]);
+
+            if (busRes.ok) {
+              const busetas = await busRes.json();
+              const sel = document.getElementById('buseta');
+              if (sel) {
+                sel.innerHTML = '<option disabled selected value="">Selecciona una buseta</option>';
+                busetas.forEach(b => {
+                  const opt = document.createElement('option');
+                  opt.value = b.Id ?? b.id ?? ''; 
+                  opt.textContent = b.Texto ?? b.texto ?? ('Buseta - ' + (b.Placa ?? b.placa ?? ''));
+                  sel.appendChild(opt);
+
+                 
+                  const key = String(opt.value || '');
+                  busetasMap.set(key, opt.textContent);
+                });
+              }
+            } else {
+              console.warn('No se pudo cargar busetas', busRes.status);
+            }
+
+         
+            if (encRes.ok) {
+              const encargados = await encRes.json();
+              const sel2 = document.getElementById('encargado');
+              if (sel2) {
+                sel2.innerHTML = '<option disabled selected value="">Selecciona un encargado</option>';
+                encargados.forEach(e => {
+                  const opt = document.createElement('option');
+                  // la API devuelve IdUsuario y NombreCompleto según tu controlador; toleramos variantes
+                  const idVal = e.IdUsuario ?? e.idUsuario ?? e.Id ?? e.id ?? '';
+                  const txt = e.NombreCompleto ?? e.nombreCompleto ?? e.Nombre ?? e.nombre ?? '';
+                  opt.value = idVal;
+                  opt.textContent = txt || 'Encargado ' + idVal;
+                  sel2.appendChild(opt);
+
+                  const key = String(opt.value || '');
+                  encargadosMap.set(key, opt.textContent);
+                });
+              }
+            } else {
+              console.warn('No se pudo cargar encargados', encRes.status);
+            }
+          } catch (err) {
+            console.error('cargarLookups error', err);
+          }
+        }
+        document.getElementById('formAlerta')?.addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          const tipo = document.getElementById('tipoAlerta')?.value || '';
+          const fecha = document.getElementById('fechaPublicacion')?.value || null;
+          const titulo = document.getElementById('tituloAlerta')?.value.trim();
+          const mensaje = document.getElementById('contenidoAlerta')?.value.trim();
+          const publico = document.getElementById('publico')?.value;
+
+          if (!titulo) {
+            Swal?.fire ? Swal.fire('Atención','Ingrese un título','warning') : alert('Ingrese un título');
+            return;
+          }
+
+          let publicoDestino = 'todos';
+
+          if (publico === 'buseta') {
+            const sel = document.getElementById('buseta');
+            const busetaVal = sel ? (sel.value || '') : '';
+            if (!busetaVal) { Swal?.fire ? Swal.fire('Atención','Seleccione una buseta','warning') : alert('Seleccione una buseta'); return; }
+            publicoDestino = `buseta:${busetaVal}`;
+          } else if (publico === 'encargado') {
+            const sel = document.getElementById('encargado');
+            const encargadoVal = sel ? (sel.value || '') : '';
+            if (!encargadoVal) { Swal?.fire ? Swal.fire('Atención','Seleccione un encargado','warning') : alert('Seleccione un encargado'); return; }
+            publicoDestino = `usuario:${encargadoVal}`;
+          } else {
+            publicoDestino = 'todos';
+          }
+
+          const payload = {
+            EnviadoPor: Number(CURRENT_USER_ID) || 0,
+            Titulo: titulo,
+            TipoAlerta: tipo || 'Otro',
+            Mensaje: mensaje,
+            PublicoDestino: publicoDestino,
+            FechaPublicacion: fecha || null
+          };
+
+          try {
+            const resp = await fetch(`${API_BASE}/api/alerta`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify(payload)
+            });
+
+            const txt = await resp.text();
+            if (resp.ok) {
+              Swal?.fire ? Swal.fire('Listo','Alerta creada','success') : alert('Alerta creada');
+              const modalEl = document.getElementById('modalAlerta');
+              const modal = bootstrap.Modal.getInstance(modalEl);
+              modal?.hide();
+              this.reset();
+              // resetar selects condicionales visualmente
+              togglePublicoGroups();
+              await actualizarContadorAlertas(); 
+              await cargarAlertas(); 
+            } else {
+              console.error('Error al crear alerta', resp.status, txt);
+              Swal?.fire ? Swal.fire('Error','No se pudo crear la alerta','error') : alert('Error creando alerta');
+            }
+          } catch (err) {
+            console.error('Error petición crear alerta', err);
+            Swal?.fire ? Swal.fire('Error','Ocurrió un error','error') : alert('Error en la petición.');
+          }
+        });
+
+        async function cargarAlertas() {
+          try {
+            if (!CURRENT_USER_ID || CURRENT_USER_ID === '0') return;
+            const resp = await fetch(`${API_BASE}/api/alerta/user/${CURRENT_USER_ID}/today`, { credentials: 'include' });
+            if (!resp.ok) {
+              console.warn('Error cargando alertas', resp.status);
+              return;
+            }
+            const rows = await resp.json();
+            const tbody = document.querySelector('#tablaAlertas tbody');
+            tbody.innerHTML = '';
+            for (const r of rows) {
+              // crear una representación legible de público_destino
+              const pd = (r.publico_destino ?? r.PublicoDestino ?? '') + '';
+              let publicoLabel = pd;
+              if (pd.startsWith('usuario:')) {
+                const id = pd.split(':')[1] || '';
+                publicoLabel = encargadosMap.get(String(id)) ?? `Usuario:${id}`;
+              } else if (pd.startsWith('buseta:')) {
+                const id = pd.split(':')[1] || '';
+                publicoLabel = busetasMap.get(String(id)) ?? `Buseta:${id}`;
+              } else if (/^todos$/i.test(pd)) {
+                publicoLabel = 'Todos';
+              }
+
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${r.id_alerta ?? r.Id_Alerta ?? ''}</td>
+                <td>${r.titulo ?? r.Titulo ?? ''}</td>
+                <td>${r.fecha_publicacion ? (new Date(r.fecha_publicacion)).toLocaleString() : (r.FechaPublicacion ? (new Date(r.FechaPublicacion)).toLocaleString() : '')}</td>
+                <td>${escapeHtml(publicoLabel)}</td>
+                <td>${r.tipo_alerta ?? r.Tipo_Alerta ?? r.TipoAlerta ?? ''}</td>
+                <td>
+                  <a href="#" class="text-danger me-2" data-id="${r.id_alerta ?? r.Id_Alerta ?? ''}" onclick="borrarAlerta(this)"><i class="fas fa-trash-alt"></i></a>
+                </td>`;
+              tbody.appendChild(tr);
+            }
+          } catch (err) {
+            console.error('cargarAlertas error', err);
+          }
+        }
+
+        async function borrarAlerta(el) {
+          const id = el.getAttribute('data-id');
+          if (!confirm('¿Eliminar alerta?')) return;
+          try {
+            const resp = await fetch(`${API_BASE}/api/alerta/${id}`, { method: 'DELETE', credentials: 'include' });
+            if (resp.ok) {
+              await cargarAlertas();
+              await actualizarContadorAlertas();
+            } else {
+              const t = await resp.text();
+              console.error('Error borrar', resp.status, t);
+            }
+          } catch (err) {
+            console.error('borrar error', err);
+          }
+        }
+
+        async function actualizarContadorAlertas() {
+          try {
+            if (!CURRENT_USER_ID || CURRENT_USER_ID === '0') {
+              const span = document.getElementById('notifsCount');
+              if (span) span.style.display = 'none';
+              return;
+            }
+
+            const resp = await fetch(`${API_BASE}/api/alerta/user/${CURRENT_USER_ID}/count`, { credentials: 'include' });
+
+            if (!resp.ok) {
+              console.warn('Error conteo alertas', resp.status);
+              return;
+            }
+            const data = await resp.json();
+            const count = (data && (data.count ?? 0)) || 0;
+            const span = document.getElementById('notifsCount');
+            if (!span) return;
+            span.textContent = count;
+            span.style.display = count > 0 ? 'inline-block' : 'none';
+          } catch (err) {
+            console.error('actualizarContadorAlertas error:', err);
+          }
+        }
+
+   
+        function escapeHtml(s) { if (s == null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+    
+        document.addEventListener('DOMContentLoaded', () => {
+          const publicoSel = document.getElementById('publico');
+          publicoSel?.addEventListener('change', togglePublicoGroups);
+
+       
+          cargarLookups().then(() => {
+         
+            actualizarContadorAlertas();
+            cargarAlertas();
+          });
+
+        
+          setInterval(actualizarContadorAlertas, 60 * 1000);
+        });
+    </script>
+}
