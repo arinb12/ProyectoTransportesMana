@@ -41,7 +41,6 @@ namespace ProyectoTransportesMana.Controllers
 
             var client = CreateClient();
 
-            // 1) Obtener hijos del padre
             var respHijos = await client.GetAsync($"api/v1/estudiantes/por-encargado/{idEncargado}");
 
             var hijosApi = new List<EstudianteListItemResponse>();
@@ -55,7 +54,6 @@ namespace ProyectoTransportesMana.Controllers
 
             var model = new PortalPadresViewModel();
 
-            // 2) Si hay al menos un hijo, consultamos su detalle de transporte
             if (hijosApi.Any())
             {
                 var primerHijo = hijosApi.First();
@@ -68,35 +66,29 @@ namespace ProyectoTransportesMana.Controllers
 
                     if (detalle != null)
                     {
-                        // Conductor
                         if (!string.IsNullOrWhiteSpace(detalle.ConductorNombre))
                         {
                             model.Conductor = new PersonaSimpleModel
                             {
-                                Id = detalle.IdBuseta ?? 0, 
+                                Id = detalle.IdBuseta ?? 0,
                                 NombreCompleto = detalle.ConductorNombre,
-                               
                                 Telefono = detalle.ConductorCedula
                             };
                         }
-
 
                         if (detalle.IdAsistente.HasValue)
                         {
                             model.Ayudante = new PersonaSimpleModel
                             {
                                 Id = detalle.IdAsistente.Value,
-                                NombreCompleto = detalle.AsistenteNombre, // ← el nombre real del asistente
+                                NombreCompleto = detalle.AsistenteNombre,
                                 Telefono = detalle.AsistenteTelefono
                             };
                         }
-
-
                     }
                 }
             }
 
-            
             foreach (var h in hijosApi)
             {
                 model.Hijos.Add(new HijoHorarioViewModel
@@ -104,13 +96,55 @@ namespace ProyectoTransportesMana.Controllers
                     IdEstudiante = h.Id,
                     NombreEstudiante = h.NombreCompletoEstudiante,
                     Institucion = h.Institucion ?? string.Empty,
-                    CambiosHorario = new List<CambioHorarioViewModel>()
-                    
+                    CambiosHorario = new List<CambioHorarioViewModel>(),
+                    HorarioAnual = new List<HorarioDiaViewModel>()
                 });
+            }
+
+            var clientHorarios = CreateClient();
+
+            foreach (var hijo in model.Hijos)
+            {
+                var respHorario = await clientHorarios.GetAsync($"api/v1/horarios/por-estudiante/{hijo.IdEstudiante}");
+                var horarioApi = new List<HorarioListItemResponse>();
+
+                if (respHorario.IsSuccessStatusCode)
+                {
+                    var data = await respHorario.Content.ReadFromJsonAsync<List<HorarioListItemResponse>>();
+                    if (data != null)
+                        horarioApi = data;
+                }
+
+                for (int dia = 1; dia <= 5; dia++)
+                {
+                    string nombreDia = dia switch
+                    {
+                        1 => "Lunes",
+                        2 => "Martes",
+                        3 => "Miércoles",
+                        4 => "Jueves",
+                        5 => "Viernes",
+                        _ => ""
+                    };
+
+                    var existente = horarioApi.FirstOrDefault(x => x.DiaSemana == nombreDia);
+
+                    hijo.HorarioAnual.Add(new HorarioDiaViewModel
+                    {
+                        IdHorario = existente?.IdHorario ?? 0,
+                        DiaSemana = dia,
+                        HoraEntrada = existente?.HoraEntrada,
+                        HoraSalida = existente?.HoraSalida
+                    });
+                }
             }
 
             return View(model);
         }
+
+
+
+
 
         [HttpGet]
         public async Task<IActionResult> GestionHijos()

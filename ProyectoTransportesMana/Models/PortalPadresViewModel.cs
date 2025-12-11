@@ -20,6 +20,7 @@
         public string NombreEstudiante { get; set; } = string.Empty;
         public string Institucion { get; set; } = string.Empty;
         public List<CambioHorarioViewModel> CambiosHorario { get; set; } = new();
+        public List<HorarioDiaViewModel> HorarioAnual { get; set; } = new();
     }
 
     public class CambioHorarioViewModel
