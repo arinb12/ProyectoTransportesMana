@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
@@ -25,7 +24,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             _enviroment = enviroment;
         }
 
-
         [HttpPost]
         [Route("ValidarSesion")]
         public IActionResult ValidarSesion(ValidarSesionRequestModel usuario)
@@ -35,7 +33,11 @@ namespace ProyectoTransportesManaAPI.Controllers
                 var parametros = new DynamicParameters();
                 parametros.Add("@Correo", usuario.Correo);
 
-                var resultado = context.QueryFirstOrDefault<DatosUsuarioResponseModel>("ValidarSesion", parametros);
+                var resultado = context.QueryFirstOrDefault<DatosUsuarioResponseModel>(
+                    "ValidarSesion",
+                    parametros,
+                    commandType: System.Data.CommandType.StoredProcedure
+                );
 
                 if (resultado == null)
                     return Unauthorized("Credenciales inválidas.");
@@ -46,12 +48,20 @@ namespace ProyectoTransportesManaAPI.Controllers
                 if (!passwordValida)
                     return Unauthorized("Credenciales inválidas.");
 
-                resultado.Token = GenerarToken(resultado.IdUsuario, resultado.Nombre, resultado.RolId);
+                resultado.ContrasenaPendiente =
+                    resultado.ContrasenaHash == "_PENDIENTE_";
+
+                resultado.ContrasenaHash = null;
+
+                resultado.Token = GenerarToken(
+                    resultado.IdUsuario,
+                    resultado.Nombre,
+                    resultado.RolId
+                );
 
                 return Ok(resultado);
             }
         }
-
 
         private string GenerarToken(int usuarioId, string nombre, int rol)
         {
@@ -75,6 +85,5 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
     }
 }

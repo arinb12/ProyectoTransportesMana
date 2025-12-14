@@ -34,9 +34,7 @@ namespace ProyectoTransportesMana.Controllers
         {
             var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             if (idUsuario is null || idUsuario == 0)
-            {
                 return RedirectToAction("Index", "Home");
-            }
 
             var model = new CambiarContrasenaPrimerIngresoModel
             {
@@ -51,9 +49,7 @@ namespace ProyectoTransportesMana.Controllers
         public async Task<IActionResult> PrimerIngreso(CambiarContrasenaPrimerIngresoModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var client = CreateClient();
 
@@ -71,13 +67,62 @@ namespace ProyectoTransportesMana.Controllers
 
             if (!resp.IsSuccessStatusCode)
             {
-                ModelState.AddModelError(string.Empty, "No se pudo actualizar la contraseña. Intente de nuevo.");
+                ModelState.AddModelError(string.Empty, "No se pudo actualizar la contraseña.");
                 return View(model);
             }
 
             HttpContext.Session.SetString("AceptoTerminos", "1");
-
             return RedirectToAction("Index", "PortalPadres");
+        }
+
+        [HttpGet]
+        public IActionResult CambiarContrasena()
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            if (idUsuario is null || idUsuario == 0)
+                return RedirectToAction("Index", "Home");
+
+            var model = new CambiarContrasenaSimpleModel
+            {
+                IdUsuario = idUsuario.Value
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarContrasena(CambiarContrasenaSimpleModel model)
+        {
+            var idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            if (idUsuario is null || idUsuario == 0)
+                return RedirectToAction("Index", "Home");
+
+            model.IdUsuario = idUsuario.Value;
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var client = CreateClient();
+
+            var payload = new
+            {
+                IdUsuario = model.IdUsuario,
+                NuevaContrasena = model.NuevaContrasena
+            };
+
+            var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
+            var urlApi = $"{baseUrl}api/v1/cuenta/cambiar-contrasena";
+
+            var resp = await client.PostAsJsonAsync(urlApi, payload);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError(string.Empty, "No se pudo cambiar la contraseña.");
+                return View(model);
+            }
+
+            return RedirectToAction("Principal", "Home");
         }
     }
 }
