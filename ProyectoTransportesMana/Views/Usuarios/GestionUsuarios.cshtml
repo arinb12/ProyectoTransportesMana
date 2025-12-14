@@ -32,7 +32,6 @@
         .modal-footer {
             background-color: #f8fbff;
         }
-
     </style>
 }
 
@@ -40,9 +39,6 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="text-dark">Gestión de Usuarios</h1>
-        @* <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="nuevoUsuario()"> *@
-            @* <i class="fas fa-plus me-1"></i> Agregar *@
-        @* </button> *@
     </div>
 
     <div class="mb-3">
@@ -80,7 +76,6 @@
                             <td>@u.RolNombre</td>
                             <td>@(string.IsNullOrWhiteSpace(u.Correo) ? "-" : u.Correo)</td>
                             <td>@u.FechaRegistro.ToString("dd/MM/yyyy")</td>
-
                             <td class="text-center">
                                 @if (u.Activo)
                                 {
@@ -91,15 +86,11 @@
                                     <span class="badge badge-inactivo">Inactivo</span>
                                 }
                             </td>
-
                             <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1"
-                                        onclick="editarUsuario(@u.IdUsuario)">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editarUsuario(@u.IdUsuario)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-
-                                <button class="btn btn-sm btn-outline-danger"
-                                        onclick="eliminarUsuario(@u.IdUsuario)">
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarUsuario(@u.IdUsuario)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -113,18 +104,18 @@
 
 <div class="modal fade" id="modalUsuario" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow" style="border: 1px solid #cfe8ff;">
+        <div class="modal-content rounded-4 shadow">
             <div class="modal-header bg-info d-flex align-items-center">
                 <i class="fas fa-users me-2 text-dark"></i>
-                <h5 class="modal-title text-dark fw-bold mb-0" id="modalUsuarioLabel">
-                    Registrar Usuario
-                </h5>
+                <h5 class="modal-title text-dark fw-bold mb-0" id="modalUsuarioLabel">Editar Usuario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body" style="background-color:#ffffff;">
+            <div class="modal-body">
                 <form id="usuarioForm" class="row g-3">
-                    <input type="hidden" id="IdUsuario" value="0" />
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" id="IdUsuario" />
 
                     <div class="col-md-4">
                         <label class="form-label">Nombre</label>
@@ -181,7 +172,6 @@
     </div>
 </div>
 
-
 @section Scripts {
     <script>
         let tablaUsuarios;
@@ -200,34 +190,72 @@
                     paginate: { next: "Siguiente", previous: "Anterior" }
                 }
             });
+
+            $('#usuarioForm').on('submit', async function (e) {
+                e.preventDefault();
+
+                const id = parseInt($('#IdUsuario').val() || '0');
+
+                const r = await Swal.fire({
+                    icon: 'question',
+                    title: 'Confirmar cambios',
+                    text: '¿Desea guardar los cambios del usuario?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, guardar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!r.isConfirmed) return;
+
+                const pass = ($('#Contrasena').val() || '').trim();
+
+                const correo = ($('#Correo').val() || '').trim();
+
+                const payload = {
+                    IdUsuario: id,
+                    Nombre: ($('#Nombre').val() || '').trim(),
+                    PrimerApellido: ($('#PrimerApellido').val() || '').trim(),
+                    SegundoApellido: ($('#SegundoApellido').val() || '').trim(),
+                    Correo: correo === '' ? null : correo,
+                    RolId: parseInt($('#RolId').val() || '1'),
+                    Activo: ($('#Activo').val() === 'true'),
+                    Contrasena: pass === '' ? null : pass
+                };
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                const resp = await fetch('@Url.Action("ActualizarUsuario", "Usuarios")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const json = await resp.json().catch(() => null);
+
+                if (!resp.ok || !json || json.ok === false) {
+                    Swal.fire('Error', json?.message || 'No se pudo actualizar el usuario.', 'error');
+                    return;
+                }
+
+                Swal.fire('Listo', json.message, 'success')
+                    .then(() => location.reload());
+            });
         });
 
         $(document).on('click', '.filtro-rol', function () {
             const rol = $(this).data('rol');
 
-            $('.filtro-rol')
-                .removeClass('btn-primary')
-                .addClass('btn-outline-secondary');
+            $('.filtro-rol').removeClass('btn-primary').addClass('btn-outline-secondary');
+            $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
 
-            $(this)
-                .removeClass('btn-outline-secondary')
-                .addClass('btn-primary');
-
-            if (!rol) {
-                tablaUsuarios.column(1).search('').draw();
-            } else {
-                tablaUsuarios.column(1).search('^' + rol + '$', true, false).draw();
-            }
+            if (!rol) tablaUsuarios.column(1).search('').draw();
+            else tablaUsuarios.column(1).search('^' + rol + '$', true, false).draw();
         });
 
-        function nuevoUsuario() {
-            $('#usuarioForm')[0].reset();
-            $('#IdUsuario').val(0);
-            $('#Activo').val("true");
-            $('#modalUsuarioLabel').text('Registrar Usuario');
-        }
-
-                async function editarUsuario(id) {
+        async function editarUsuario(id) {
             const resp = await fetch(`@Url.Action("ObtenerParaEditar", "Usuarios")?id=${id}`);
             const json = await resp.json();
 
@@ -238,19 +266,17 @@
 
             const u = json.data;
 
-            $('#IdUsuario').val(u.idUsuario ?? u.IdUsuario ?? id);
-            $('#Nombre').val(u.nombre ?? u.Nombre ?? '');
-            $('#PrimerApellido').val(u.primerApellido ?? u.PrimerApellido ?? '');
-            $('#SegundoApellido').val(u.segundoApellido ?? u.SegundoApellido ?? '');
-            $('#Correo').val(u.correo ?? u.Correo ?? '');
-            $('#RolId').val(((u.rolId ?? u.RolId) ?? 1).toString());
-            $('#Activo').val(((u.activo ?? u.Activo) === true) ? "true" : "false");
+            $('#IdUsuario').val(u.idUsuario);
+            $('#Nombre').val(u.nombre);
+            $('#PrimerApellido').val(u.primerApellido);
+            $('#SegundoApellido').val(u.segundoApellido);
+            $('#Correo').val(u.correo);
+            $('#RolId').val(u.rolId.toString());
+            $('#Activo').val(u.activo ? 'true' : 'false');
             $('#Contrasena').val('');
 
-            $('#modalUsuarioLabel').text('Editar Usuario');
             bootstrap.Modal.getOrCreateInstance(document.getElementById('modalUsuario')).show();
         }
-
 
         async function eliminarUsuario(id) {
             const r = await Swal.fire({
@@ -264,10 +290,7 @@
 
             if (!r.isConfirmed) return;
 
-            const resp = await fetch(`@Url.Action("EliminarUsuario", "Usuarios")?id=${id}`, {
-                method: 'POST'
-            });
-
+            const resp = await fetch(`@Url.Action("EliminarUsuario", "Usuarios")?id=${id}`, { method: 'POST' });
             const json = await resp.json();
 
             if (!json.ok) {
@@ -279,6 +302,4 @@
                 .then(() => location.reload());
         }
     </script>
-
-    @Html.AntiForgeryToken()
 }
