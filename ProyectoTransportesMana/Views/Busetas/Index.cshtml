@@ -5,104 +5,155 @@
     Layout = "~/Views/Shared/_LayoutInterno.cshtml";
 }
 
-<h1 class="mb-4">
-    <i class="bi bi-bus-front"></i> Gestión de Busetas
-</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+    <style>
+        .pastel-table thead th {
+            background: #e8f4ff;
+        }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+        .badge-activo {
+            background-color: #28a745;
+        }
+
+        .badge-inactivo {
+            background-color: #dc3545;
+        }
+    </style>
 }
 
-<div class="row mb-4">
-    <div class="col-md-6">
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Nueva Buseta
-        </a>
-        <a asp-action="Activas" class="btn btn-success">
-            <i class="bi bi-eye"></i> Ver Solo Activas
-        </a>
-    </div>
-    <div class="col-md-6 text-end">
-        <span class="badge bg-success me-2">
-            <i class="bi bi-circle-fill"></i> Activa
-        </span>
-        <span class="badge bg-secondary">
-            <i class="bi bi-circle"></i> Inactiva
-        </span>
-    </div>
-</div>
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-dark">
+            <i class="bi bi-bus-front me-2"></i>Gestión de Busetas
+        </h1>
 
-<div class="table-responsive">
-    <table class="table table-hover table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Estado</th>
-                <th>@Html.DisplayNameFor(model => model.Id)</th>
-                <th>@Html.DisplayNameFor(model => model.Placa)</th>
-                <th>@Html.DisplayNameFor(model => model.Capacidad)</th>
-                <th>@Html.DisplayNameFor(model => model.NombreConductor)</th>
-                <th>@Html.DisplayNameFor(model => model.Jornada)</th>
-                <th>@Html.DisplayNameFor(model => model.HorarioServicio)</th>
-                <th>@Html.DisplayNameFor(model => model.CedulaConductor)</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+        <div class="text-end">
+            <a asp-action="Create" class="btn pastel-btn me-2">
+                <i class="fas fa-plus me-1"></i> Nueva Buseta
+            </a>
+            <a asp-action="Activas" class="btn btn-outline-success">
+                <i class="fas fa-eye me-1"></i> Ver Solo Activas
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-info d-flex align-items-center">
+            <i class="fas fa-table me-2 text-dark"></i>
+            <span class="text-dark fw-bold">Listado Busetas</span>
+            
+        </div>
+
+        <div class="card-body">
+            <table id="tablaBusetas" class="table table-hover table-bordered pastel-table align-middle">
+                <thead>
+                    <tr>
+                        <th class="text-center">Estado</th>
+                        <th>@Html.DisplayNameFor(model => model.Id)</th>
+                        <th>@Html.DisplayNameFor(model => model.Placa)</th>
+                        <th>@Html.DisplayNameFor(model => model.Capacidad)</th>
+                        <th>@Html.DisplayNameFor(model => model.NombreConductor)</th>
+                        <th>@Html.DisplayNameFor(model => model.Jornada)</th>
+                        <th>@Html.DisplayNameFor(model => model.HorarioServicio)</th>
+                        <th>@Html.DisplayNameFor(model => model.CedulaConductor)</th>
+                        <th class="text-center" style="width:110px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                @if (item.Activa)
+                                {
+                                    <span class="badge badge-activo" title="Buseta Activa">
+                                        <i class="bi bi-circle-fill"></i>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactivo" title="Buseta Inactiva">
+                                        <i class="bi bi-circle"></i>
+                                    </span>
+                                }
+                            </td>
+                            <td>@item.Id</td>
+                            <td><strong>@item.Placa</strong></td>
+                            <td>@item.Capacidad</td>
+                            <td>@item.NombreConductor</td>
+                            <td>@item.Jornada</td>
+                            <td>@item.HorarioServicio</td>
+                            <td>@item.CedulaConductor</td>
+                            <td class="text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary me-1"
+                                        title="Editar"
+                                        onclick="location.href='@Url.Action("Edit", "Busetas", new { id = item.Id })'">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="Eliminar"
+                                        onclick="location.href='@Url.Action("Delete", "Busetas", new { id = item.Id })'">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
             {
-                <tr class="@(item.Activa ? "" : "table-secondary")">
-                    <td class="text-center">
-                        @if (item.Activa)
-                        {
-                            <span class="badge bg-success" title="Buseta Activa">
-                                <i class="bi bi-circle-fill"></i>
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary" title="Buseta Inactiva">
-                                <i class="bi bi-circle"></i>
-                            </span>
-                        }
-                    </td>
-                    <td>@item.Id</td>
-                    <td>
-                        <strong>@item.Placa</strong>
-                    </td>
-                    <td>@item.Capacidad</td>
-                    <td>@item.NombreConductor</td>
-                    <td>@item.Jornada</td>
-                    <td>@item.HorarioServicio</td>
-                    <td>@item.CedulaConductor</td>
-                    <td>
-                        <div class="btn-group" role="group">
-                            
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
+                <div class="text-center py-5">
+                    <i class="bi bi-bus-front text-muted" style="font-size: 3rem;"></i>
+                    <h4 class="text-muted mt-3">No hay busetas registradas</h4>
+                    <p class="text-muted">Comienza agregando una nueva buseta al sistema.</p>
+                    <a asp-action="Create" class="btn pastel-btn">
+                        <i class="fas fa-plus me-1"></i> Agregar Primera Buseta
+                    </a>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>
 
-@if (!Model.Any())
-{
-    <div class="text-center py-5">
-        <i class="bi bi-bus-front text-muted" style="font-size: 3rem;"></i>
-        <h4 class="text-muted mt-3">No hay busetas registradas</h4>
-        <p class="text-muted">Comienza agregando una nueva buseta al sistema.</p>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Agregar Primera Buseta
-        </a>
-    </div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ($.fn.DataTable.isDataTable('#tablaBusetas')) {
+                $('#tablaBusetas').DataTable().destroy();
+            }
+
+            $('#tablaBusetas').DataTable({
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50, 100],
+                order: [],
+                language: {
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    search: "Buscar:",
+                    zeroRecords: "No hay datos para mostrar",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                    infoFiltered: "(filtrado de _MAX_ registros totales)",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+        });
+    </script>
 }

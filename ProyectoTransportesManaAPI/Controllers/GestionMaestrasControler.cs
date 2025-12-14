@@ -6,7 +6,7 @@ using System.Data;
 namespace ProyectoTransportesManaAPI.Controllers
 {
     [ApiController]
-    [Route("api/v1/gestion-maestras")]  // ← RUTA CAMBIADA
+    [Route("api/v1/gestion-maestras")]
     public class GestionMaestrasController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -16,60 +16,59 @@ namespace ProyectoTransportesManaAPI.Controllers
             _config = config;
         }
 
-        // ============================================
-        // LISTAR
-        // ============================================
-        public sealed class MaestraListDto
+        public sealed record MaestraDto(
+            int IdMaestra,
+            string Nombre,
+            int IdInstitucion,
+            string Institucion,
+            string Seccion,
+            bool Activo
+        );
+
+        public sealed class CreateMaestraDto
+        {
+            public string Nombre { get; set; } = "";
+            public int IdInstitucion { get; set; }
+            public string Seccion { get; set; } = "";
+        }
+
+        public sealed class UpdateMaestraDto
         {
             public int IdMaestra { get; set; }
-            public string Nombre { get; set; }
-            public string Seccion { get; set; }
+            public string Nombre { get; set; } = "";
+            public int IdInstitucion { get; set; }
+            public string Seccion { get; set; } = "";
             public bool Activo { get; set; }
         }
 
         [HttpGet]
-        public async Task<IEnumerable<MaestraListDto>> Get()
+        public async Task<IActionResult> GetAll()
         {
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
 
-            return await con.QueryAsync<MaestraListDto>(
+            var data = await con.QueryAsync<MaestraDto>(
                 "sp_maestras_lookup_full",
                 commandType: CommandType.StoredProcedure
             );
-        }
 
-        // ============================================
-        // OBTENER POR ID
-        // ============================================
-        public sealed class MaestraDto
-        {
-            public int IdMaestra { get; set; }
-            public string Nombre { get; set; }
-            public string Seccion { get; set; }
-            public bool Activo { get; set; }
+            return Ok(data);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<MaestraDto>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
 
-            var m = await con.QuerySingleOrDefaultAsync<MaestraDto>(
+            var data = await con.QueryFirstOrDefaultAsync<MaestraDto>(
                 "sp_maestras_obtener",
                 new { Id = id },
                 commandType: CommandType.StoredProcedure
             );
 
-            return m is null ? NotFound() : Ok(m);
-        }
+            if (data == null)
+                return NotFound();
 
-        // ============================================
-        // CREAR
-        // ============================================
-        public sealed class CreateMaestraDto
-        {
-            public string Nombre { get; set; }
-            public string Seccion { get; set; }
+            return Ok(data);
         }
 
         [HttpPost]
@@ -82,23 +81,13 @@ namespace ProyectoTransportesManaAPI.Controllers
                 new
                 {
                     dto.Nombre,
-                    dto.Seccion
+                    dto.Seccion,
+                    dto.IdInstitucion
                 },
                 commandType: CommandType.StoredProcedure
             );
 
             return Created("", new { IdMaestra = newId });
-        }
-
-        // ============================================
-        // EDITAR
-        // ============================================
-        public sealed class UpdateMaestraDto
-        {
-            public int IdMaestra { get; set; }
-            public string Nombre { get; set; }
-            public string Seccion { get; set; }
-            public bool Activo { get; set; }
         }
 
         [HttpPut("{id:int}")]
@@ -116,7 +105,8 @@ namespace ProyectoTransportesManaAPI.Controllers
                     dto.IdMaestra,
                     dto.Nombre,
                     dto.Seccion,
-                    dto.Activo
+                    dto.Activo,
+                    dto.IdInstitucion
                 },
                 commandType: CommandType.StoredProcedure
             );
@@ -124,9 +114,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             return rows == 0 ? NotFound() : NoContent();
         }
 
-        // ============================================
-        // ELIMINAR
-        // ============================================
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
