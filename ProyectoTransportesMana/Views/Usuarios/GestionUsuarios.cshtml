@@ -1,0 +1,284 @@
+﻿@using ProyectoTransportesMana.Contracts.Usuarios
+@model ProyectoTransportesMana.Models.Usuarios.UsuariosGestionViewModel
+
+@{
+    ViewData["Title"] = "Gestión Usuarios";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+    <style>
+        .pastel-table thead th {
+            background: #e8f4ff;
+        }
+
+        .badge-activo {
+            background-color: #28a745;
+        }
+
+        .badge-inactivo {
+            background-color: #dc3545;
+        }
+
+        .modal-content {
+            border: 1px solid #cfe8ff;
+        }
+
+        .modal-body {
+            background-color: #ffffff;
+        }
+
+        .modal-footer {
+            background-color: #f8fbff;
+        }
+
+    </style>
+}
+
+<div class="container-fluid p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-dark">Gestión de Usuarios</h1>
+        @* <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="nuevoUsuario()"> *@
+            @* <i class="fas fa-plus me-1"></i> Agregar *@
+        @* </button> *@
+    </div>
+
+    <div class="mb-3">
+        <button class="btn btn-sm btn-primary me-1 filtro-rol" data-rol="">Todos</button>
+        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Admin">Admin</button>
+        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Encargado">Encargado</button>
+        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Maestra">Maestra</button>
+        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Estudiante">Estudiante</button>
+        <button class="btn btn-sm btn-outline-secondary filtro-rol" data-rol="Asistente">Asistente</button>
+    </div>
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-info d-flex align-items-center">
+            <i class="fas fa-users me-2 text-dark"></i>
+            <span class="text-dark fw-bold">Listado de Usuarios</span>
+        </div>
+
+        <div class="card-body">
+            <table id="tablaUsuarios" class="table table-hover table-bordered pastel-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>Rol</th>
+                        <th>Correo</th>
+                        <th>Fecha Registro</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center" style="width:110px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Usuarios)
+                    {
+                        <tr>
+                            <td>@($"{u.Nombre} {u.PrimerApellido} {u.SegundoApellido}".Replace("  ", " ").Trim())</td>
+                            <td>@u.RolNombre</td>
+                            <td>@(string.IsNullOrWhiteSpace(u.Correo) ? "-" : u.Correo)</td>
+                            <td>@u.FechaRegistro.ToString("dd/MM/yyyy")</td>
+
+                            <td class="text-center">
+                                @if (u.Activo)
+                                {
+                                    <span class="badge badge-activo">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactivo">Inactivo</span>
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary me-1"
+                                        onclick="editarUsuario(@u.IdUsuario)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-danger"
+                                        onclick="eliminarUsuario(@u.IdUsuario)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalUsuario" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow" style="border: 1px solid #cfe8ff;">
+            <div class="modal-header bg-info d-flex align-items-center">
+                <i class="fas fa-users me-2 text-dark"></i>
+                <h5 class="modal-title text-dark fw-bold mb-0" id="modalUsuarioLabel">
+                    Registrar Usuario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" style="background-color:#ffffff;">
+                <form id="usuarioForm" class="row g-3">
+                    <input type="hidden" id="IdUsuario" value="0" />
+
+                    <div class="col-md-4">
+                        <label class="form-label">Nombre</label>
+                        <input id="Nombre" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Primer Apellido</label>
+                        <input id="PrimerApellido" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Segundo Apellido</label>
+                        <input id="SegundoApellido" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Correo</label>
+                        <input id="Correo" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Rol</label>
+                        <select id="RolId" class="form-select">
+                            @foreach (var r in Model.Roles)
+                            {
+                                <option value="@r.Value">@r.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select id="Activo" class="form-select">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Contraseña</label>
+                        <input id="Contrasena" type="password" class="form-control" />
+                        <small class="text-muted">En edición, dejar vacío para no cambiar</small>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        let tablaUsuarios;
+
+        $(document).ready(function () {
+            tablaUsuarios = $('#tablaUsuarios').DataTable({
+                pageLength: 10,
+                order: [],
+                language: {
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    search: "Buscar:",
+                    zeroRecords: "No hay datos",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_",
+                    infoEmpty: "Mostrando 0 a 0 de 0",
+                    infoFiltered: "(filtrado de _MAX_ registros)",
+                    paginate: { next: "Siguiente", previous: "Anterior" }
+                }
+            });
+        });
+
+        $(document).on('click', '.filtro-rol', function () {
+            const rol = $(this).data('rol');
+
+            $('.filtro-rol')
+                .removeClass('btn-primary')
+                .addClass('btn-outline-secondary');
+
+            $(this)
+                .removeClass('btn-outline-secondary')
+                .addClass('btn-primary');
+
+            if (!rol) {
+                tablaUsuarios.column(1).search('').draw();
+            } else {
+                tablaUsuarios.column(1).search('^' + rol + '$', true, false).draw();
+            }
+        });
+
+        function nuevoUsuario() {
+            $('#usuarioForm')[0].reset();
+            $('#IdUsuario').val(0);
+            $('#Activo').val("true");
+            $('#modalUsuarioLabel').text('Registrar Usuario');
+        }
+
+                async function editarUsuario(id) {
+            const resp = await fetch(`@Url.Action("ObtenerParaEditar", "Usuarios")?id=${id}`);
+            const json = await resp.json();
+
+            if (!json.ok) {
+                Swal.fire('Error', json.message || 'No se pudo cargar el usuario.', 'error');
+                return;
+            }
+
+            const u = json.data;
+
+            $('#IdUsuario').val(u.idUsuario ?? u.IdUsuario ?? id);
+            $('#Nombre').val(u.nombre ?? u.Nombre ?? '');
+            $('#PrimerApellido').val(u.primerApellido ?? u.PrimerApellido ?? '');
+            $('#SegundoApellido').val(u.segundoApellido ?? u.SegundoApellido ?? '');
+            $('#Correo').val(u.correo ?? u.Correo ?? '');
+            $('#RolId').val(((u.rolId ?? u.RolId) ?? 1).toString());
+            $('#Activo').val(((u.activo ?? u.Activo) === true) ? "true" : "false");
+            $('#Contrasena').val('');
+
+            $('#modalUsuarioLabel').text('Editar Usuario');
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalUsuario')).show();
+        }
+
+
+        async function eliminarUsuario(id) {
+            const r = await Swal.fire({
+                icon: 'warning',
+                title: 'Eliminar',
+                text: '¿Deseas eliminar este usuario?',
+                showCancelButton: true,
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!r.isConfirmed) return;
+
+            const resp = await fetch(`@Url.Action("EliminarUsuario", "Usuarios")?id=${id}`, {
+                method: 'POST'
+            });
+
+            const json = await resp.json();
+
+            if (!json.ok) {
+                Swal.fire('Error', json.message, 'error');
+                return;
+            }
+
+            Swal.fire('Listo', json.message, 'success')
+                .then(() => location.reload());
+        }
+    </script>
+
+    @Html.AntiForgeryToken()
+}
