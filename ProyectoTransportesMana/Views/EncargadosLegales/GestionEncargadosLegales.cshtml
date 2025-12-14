@@ -41,7 +41,7 @@
                         <th>Dirección</th>
                         <th>Teléfono</th>
                         <th>Activo</th>
-                        <th>Credenciales</th>   @* nueva columna *@
+                        <th>Credenciales</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -53,23 +53,12 @@
                         {
                             <tr>
                                 <td>@e.NombreCompleto</td>
-
-                                
                                 <td>@(string.IsNullOrWhiteSpace(e.Estudiantes) ? "-" : e.Estudiantes)</td>
-
-                               
                                 <td>@e.EstadoContrato</td>
-
-                               
                                 <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
-
-                                
                                 <td>@e.Direccion</td>
-
-                                
                                 <td>@e.Telefono</td>
 
-                               
                                 <td class="text-center">
                                     <input type="checkbox"
                                            class="form-check-input toggle-estado"
@@ -95,8 +84,6 @@
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </td>
-
-                                
                             </tr>
                         }
                     }
@@ -114,7 +101,6 @@
     </div>
 </div>
 
-<!-- Modal Registro/Edición -->
 <div class="modal fade" id="modalEncargado" tabindex="-1" aria-labelledby="modalEncargadoLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -186,7 +172,6 @@
                     <div class="col-md-3 d-flex align-items-center">
                         <label asp-for="AceptoTerminos" class="form-check-label"></label>
                         <input asp-for="AceptoTerminos" class="form-check-input" type="checkbox" />
-                        
                     </div>
 
                     <div class="col-md-3 d-flex align-items-center">
@@ -210,6 +195,41 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        window.__swalPayload = {
+            type: '@Html.Raw(TempData["SwalType"] ?? ViewData["SwalType"] ?? "")',
+            title: '@Html.Raw(TempData["SwalTitle"] ?? ViewData["SwalTitle"] ?? "")',
+            text: '@Html.Raw(TempData["SwalText"] ?? ViewData["SwalText"] ?? "")'
+        };
+    </script>
+
+    <script>
+        function swalInfo(title, text) {
+            if (window.Swal) return Swal.fire({ icon: 'info', title: title || 'Información', text: text || '' });
+            alert((title ? title + ': ' : '') + (text || ''));
+        }
+
+        function swalError(text) {
+            if (window.Swal) return Swal.fire({ icon: 'error', title: 'Error', text: text || 'Ocurrió un error.' });
+            alert(text || 'Ocurrió un error.');
+        }
+
+        function swalSuccess(text) {
+            if (window.Swal) return Swal.fire({ icon: 'success', title: 'Listo', text: text || '' });
+            alert(text || 'Listo');
+        }
+
+        function swalConfirm(title, text) {
+            if (!window.Swal) return Promise.resolve(confirm((title ? title + '\n' : '') + (text || '¿Confirmar?')));
+            return Swal.fire({
+                icon: 'warning',
+                title: title || 'Confirmación',
+                text: text || '¿Deseas continuar?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar'
+            }).then(function (r) { return r.isConfirmed; });
+        }
+
         function nuevoEncargado() {
             $('#IdUsuario').val(0);
             $('#Nombre').val('');
@@ -224,26 +244,22 @@
             $('#Activo').prop('checked', true);
             $('#modalEncargadoLabel').text('Registrar Padre');
 
-            // Mostrar campo contraseña en modo creación
-            $('#rowContrasena').hide();
+            $('#rowContrasena').show();
 
-            // Form en modo crear: post normal a RegistrarEncargado
             $('#encargadoForm').off('submit');
             $('#encargadoForm').attr('action', '@Url.Action("RegistrarEncargado", "EncargadosLegales")');
         }
 
-                function editarEncargado(id) {
+        function editarEncargado(id) {
             $.get('@Url.Action("ObtenerParaEditar", "EncargadosLegales")', { id: id })
                 .done(function (resp) {
                     if (!resp.ok) {
-                        alert(resp.message || 'No se pudo cargar el padre.');
+                        swalError(resp.message || 'No se pudo cargar el padre.');
                         return;
                     }
 
                     const m = resp.data;
-                    console.log(m); // opcional, para ver el objeto en consola
 
-                    // Ojo: propiedades en camelCase, no PascalCase
                     $('#IdUsuario').val(m.idUsuario);
                     $('#Nombre').val(m.nombre);
                     $('#PrimerApellido').val(m.primerApellido);
@@ -258,10 +274,8 @@
 
                     $('#modalEncargadoLabel').text('Editar Padre');
 
-                    // Ocultar contraseña en edición
                     $('#rowContrasena').hide();
 
-                    // Form en modo edición: usar AJAX
                     $('#encargadoForm').off('submit').on('submit', function (e) {
                         e.preventDefault();
                         actualizarEncargado();
@@ -271,10 +285,9 @@
                     modal.show();
                 })
                 .fail(function () {
-                    alert('Error al consultar la API.');
+                    swalError('Error al consultar la API.');
                 });
         }
-
 
         function actualizarEncargado() {
             const data = {
@@ -296,48 +309,63 @@
                 data: data
             }).done(function (resp) {
                 if (!resp.ok) {
-                    alert(resp.message || 'No se pudo actualizar el padre.');
+                    swalError(resp.message || 'No se pudo actualizar el padre.');
                     return;
                 }
-                location.reload();
+                swalSuccess('Padre actualizado.').then(function () { location.reload(); });
             }).fail(function () {
-                alert('Error al actualizar el padre.');
+                swalError('Error al actualizar el padre.');
             });
         }
 
         function eliminarEncargado(id) {
-            if (!confirm('¿Deseas eliminar este padre?')) return;
+            swalConfirm('Confirmación', '¿Deseas eliminar este padre?')
+                .then(function (ok) {
+                    if (!ok) return;
 
-            $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
-                .done(function (resp) {
-                    if (resp.ok === false) {
-                        alert(resp.message || 'No se pudo eliminar.');
-                        return;
-                    }
-                    location.reload();
-                }).fail(function () {
-                    alert('Error al eliminar.');
+                    $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
+                        .done(function (resp) {
+                            if (resp && resp.ok === false) {
+                                swalError(resp.message || 'No se pudo eliminar.');
+                                return;
+                            }
+                            swalSuccess('Padre eliminado.').then(function () { location.reload(); });
+                        })
+                        .fail(function () {
+                            swalError('Error al eliminar.');
+                        });
                 });
         }
 
-        // Cambiar estado desde el checkbox
         $(document).on('change', '.toggle-estado', function () {
             const id = $(this).data('id');
             const activo = $(this).is(':checked');
 
-            $.post('@Url.Action("CambiarEstado", "EncargadosLegales")', { id: id, activo: activo })
-                .done(function (resp) {
-                    if (!resp.ok) {
-                        alert(resp.message || 'No se pudo cambiar el estado.');
+            swalConfirm('Confirmación', activo ? '¿Deseas activar este padre?' : '¿Deseas desactivar este padre?')
+                .then(function (ok) {
+                    if (!ok) {
+                        $(this).prop('checked', !activo);
+                        return;
                     }
-                }).fail(function () {
-                    alert('Error al cambiar el estado.');
-                });
+
+                    $.post('@Url.Action("CambiarEstado", "EncargadosLegales")', { id: id, activo: activo })
+                        .done(function (resp) {
+                            if (!resp.ok) {
+                                swalError(resp.message || 'No se pudo cambiar el estado.');
+                                $(this).prop('checked', !activo);
+                            } else {
+                                swalSuccess('Estado actualizado.');
+                            }
+                        }.bind(this))
+                        .fail(function () {
+                            swalError('Error al cambiar el estado.');
+                            $(this).prop('checked', !activo);
+                        }.bind(this));
+                }.bind(this));
         });
 
         function enviarContrasena(id) {
-            // Por ahora solo mensaje informativo
-            alert('Funcionalidad para enviar contraseña temporal al correo del padre ' + id + ' se implementará después.');
+            swalInfo('Información', 'Funcionalidad para enviar contraseña temporal al correo del padre ' + id + ' se implementará después.');
         }
     </script>
 }
