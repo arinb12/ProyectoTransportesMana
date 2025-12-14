@@ -10,6 +10,7 @@ namespace ProyectoTransportesMana.Controllers
     {
         private readonly IHttpClientFactory _http;
         private readonly IConfiguration _config;
+
         public HomeController(IHttpClientFactory http, IConfiguration config)
         {
             _http = http;
@@ -18,7 +19,7 @@ namespace ProyectoTransportesMana.Controllers
 
         [HttpGet]
         public IActionResult Index()
-        {   
+        {
             return View();
         }
 
@@ -44,7 +45,13 @@ namespace ProyectoTransportesMana.Controllers
                         HttpContext.Session.SetString("Token", datosApi.Token);
                         HttpContext.Session.SetString("AceptoTerminos", datosApi.AceptoTerminos == true ? "1" : "0");
 
-                        
+                        var claveFijaAsistente = _config["Valores:ClaveFijaAsistente"] ?? string.Empty;
+
+                        if (datosApi.RolId == 5 && !string.IsNullOrWhiteSpace(claveFijaAsistente) && usuario.ContrasenaHash == claveFijaAsistente)
+                        {
+                            return RedirectToAction("CambiarContrasena", "Cuenta");
+                        }
+
                         if (datosApi.RolId == 2)
                         {
                             HttpContext.Session.SetString("AceptoTerminos", datosApi.AceptoTerminos == true ? "1" : "0");
@@ -56,13 +63,12 @@ namespace ProyectoTransportesMana.Controllers
                         }
                         else
                         {
-                            
                             HttpContext.Session.Remove("AceptoTerminos");
                             return RedirectToAction("Principal", "Home");
                         }
-
                     }
                 }
+
                 ViewBag.Mensaje = "Usuario o contraseña incorrecta.";
                 return View();
             }
@@ -81,7 +87,6 @@ namespace ProyectoTransportesMana.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
-
 
         public IActionResult Privacy()
         {
@@ -108,7 +113,6 @@ namespace ProyectoTransportesMana.Controllers
         {
             return View();
         }
-
 
         public IActionResult Registro()
         {
