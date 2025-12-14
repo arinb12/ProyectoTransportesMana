@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ProyectoTransportesMana.Contracts.Maestras;
+using ProyectoTransportesMana.Models.Filters;
+
+[Seguridad]
+[AutorizarRoles(1)]
 
 public class MaestrasController : Controller
 {

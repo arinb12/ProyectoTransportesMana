@@ -9,6 +9,7 @@ using System.Net.Http.Json;
 namespace ProyectoTransportesMana.Controllers
 {
     [Seguridad]
+    [AutorizarRoles(1)]
     public class EncargadosLegalesController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;

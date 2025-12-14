@@ -5,6 +5,7 @@ using ProyectoTransportesMana.Models.Filters;
 using System.Text.Json;
 
 [Seguridad]
+[AutorizarRoles(1)]
 public class InstitucionesController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
