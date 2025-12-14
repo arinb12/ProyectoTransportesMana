@@ -161,5 +161,84 @@ namespace ProyectoTransportesManaAPI.Controllers
                 });
             }
         }
+
+        [HttpPost("reset-credenciales")]
+        public async Task<IActionResult> ResetCredenciales([FromBody] ResetCredencialesRequest request)
+        {
+            if (request.IdUsuario <= 0)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Id de usuario inválido",
+                    Detail = "Debe enviarse un IdUsuario válido."
+                });
+            }
+
+            var tempPassword = GenerarPasswordTemporal();
+            var hash = PasswordHasher.HashPassword(tempPassword);
+
+            using var connection = CreateConnection();
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdUsuario", request.IdUsuario);
+            parameters.Add("@ContrasenaHash", hash);
+
+            try
+            {
+                await connection.ExecuteAsync(
+                    "sp_EncargadosLegales_ResetCredenciales",
+                    parameters,
+                    commandType: CommandType.StoredProcedure);
+
+                return Ok(new
+                {
+                    ok = true,
+                    tempPassword
+                });
+            }
+            catch (SqlException ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Error al resetear credenciales",
+                    Detail = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "Error inesperado al resetear credenciales",
+                    Detail = ex.Message
+                });
+            }
+        }
+
+
+
+        public sealed class ResetCredencialesRequest
+        {
+            public int IdUsuario { get; set; }
+        }
+
+        private string GenerarPasswordTemporal()
+        {
+            const int longitud = 10;
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789";
+
+            var random = new Random();
+            var buffer = new char[longitud];
+
+            for (int i = 0; i < longitud; i++)
+                buffer[i] = chars[random.Next(chars.Length)];
+
+            return new string(buffer);
+        }
+
+
+
+
     }
 }
