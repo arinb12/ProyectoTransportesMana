@@ -63,7 +63,6 @@
                             <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
                             <td>@e.Direccion</td>
                             <td>@e.Telefono</td>
-
                             <td class="text-center">
                                 @if (e.Activo)
                                 {
@@ -74,23 +73,16 @@
                                     <span class="badge badge-inactivo">Inactivo</span>
                                 }
                             </td>
-
                             <td class="text-center">
                                 <button class="btn btn-sm btn-outline-secondary" onclick="enviarContrasena(@e.IdUsuario)">
                                     Enviar contraseña
                                 </button>
                             </td>
-
                             <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1"
-                                        title="Editar"
-                                        onclick="editarEncargado(@e.IdUsuario)">
+                                <button class="btn btn-sm btn-outline-primary me-1" title="Editar" onclick="editarEncargado(@e.IdUsuario)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-
-                                <button class="btn btn-sm btn-outline-danger"
-                                        title="Eliminar"
-                                        onclick="eliminarEncargado(@e.IdUsuario)">
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="eliminarEncargado(@e.IdUsuario)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -113,7 +105,11 @@
             </div>
             <div class="modal-body">
                 <form id="encargadoForm" class="row g-3">
+                    @Html.AntiForgeryToken()
+
                     <input type="hidden" id="IdUsuario" />
+                    <input type="hidden" id="AceptoTerminos" />
+                    <input type="hidden" id="Activo" />
 
                     <div class="col-md-4">
                         <label class="form-label">Nombre</label>
@@ -140,7 +136,12 @@
                         <input id="Telefono" class="form-control" />
                     </div>
 
-                    <div class="col-md-12">
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de inicio</label>
+                        <input id="FirmaContrato" type="date" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
                         <label class="form-label">Dirección</label>
                         <input id="DireccionResidencia" class="form-control" />
                     </div>
@@ -168,20 +169,165 @@
                     info: "Mostrando _START_ a _END_ de _TOTAL_",
                     infoEmpty: "Mostrando 0 a 0 de 0",
                     infoFiltered: "(filtrado de _MAX_ registros)",
-                    paginate: {
-                        next: "Siguiente",
-                        previous: "Anterior"
-                    }
+                    paginate: { next: "Siguiente", previous: "Anterior" }
                 }
+            });
+
+                    $('#encargadoForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const id = parseInt($('#IdUsuario').val() || '0');
+            const esEdicion = id > 0;
+
+            const titulo = esEdicion ? 'Confirmar cambios' : 'Confirmar registro';
+            const texto = esEdicion
+                ? '¿Desea guardar los cambios del padre?'
+                : '¿Desea registrar este nuevo padre?';
+
+            Swal.fire({
+                icon: 'question',
+                title: titulo,
+                text: texto,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                const url = esEdicion
+                    ? '@Url.Action("ActualizarEncargado", "EncargadosLegales")'
+                    : '@Url.Action("RegistrarEncargado", "EncargadosLegales")';
+
+                const firma = $('#FirmaContrato').val();
+
+                const payload = {
+                    IdUsuario: id,
+                    Nombre: $('#Nombre').val(),
+                    PrimerApellido: $('#PrimerApellido').val(),
+                    SegundoApellido: $('#SegundoApellido').val(),
+                    Correo: $('#Correo').val(),
+                    Telefono: $('#Telefono').val(),
+                    DireccionResidencia: $('#DireccionResidencia').val(),
+                    Activo: ($('#Activo').val() || 'false') === 'true',
+                    AceptoTerminos: ($('#AceptoTerminos').val() || 'false') === 'true',
+                    FirmaContrato: (firma && firma.trim() !== '') ? firma : null
+                };
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: payload,
+                    headers: { 'RequestVerificationToken': token }
+                }).done(function (r) {
+                    if (r && r.ok === false) {
+                        Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: esEdicion ? 'Actualizado' : 'Registrado',
+                        text: esEdicion
+                            ? 'Los cambios se guardaron correctamente.'
+                            : 'El padre fue registrado correctamente.'
+                    }).then(() => {
+                        $('#modalEncargado').modal('hide');
+                        location.reload();
+                    });
+
+                }).fail(function (xhr) {
+                    let msg = 'Error de datos. Revisa campos requeridos.';
+                    if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
+
+                    Swal.fire('Error', msg, 'error');
+                });
             });
         });
 
-        function enviarContrasena(id) {
-            Swal.fire('Información', 'Funcionalidad pendiente para el usuario ' + id, 'info');
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: payload,
+                    headers: { 'RequestVerificationToken': token }
+                }).done(function (r) {
+                    if (r && r.ok === false) {
+                        Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
+                        return;
+                    }
+                    $('#modalEncargado').modal('hide');
+                    location.reload();
+                }).fail(function (xhr) {
+                    let msg = 'Error de datos. Revisa campos requeridos y formato.';
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        if (xhr.responseJSON.errors) {
+                            const e = xhr.responseJSON.errors;
+                            const detalle = Object.keys(e).map(k => `${k}: ${e[k].join(', ')}`).join('<br/>');
+                            msg = `${msg}<br/><br/>${detalle}`;
+                        }
+                    }
+                    Swal.fire('Error', msg, 'error');
+                });
+            });
+       
+
+        function nuevoEncargado() {
+            $('#encargadoForm')[0].reset();
+            $('#IdUsuario').val(0);
+            $('#AceptoTerminos').val('false');
+            $('#Activo').val('true');
+            $('#FirmaContrato').val('');
+            $('#modalEncargadoLabel').text('Registrar Padre');
         }
 
         function editarEncargado(id) {
-            Swal.fire('Editar', 'Editar padre ' + id, 'info');
+            $.get('@Url.Action("ObtenerParaEditar", "EncargadosLegales")', { id: id })
+                .done(function (r) {
+                    if (!r || r.ok !== true) {
+                        Swal.fire('Error', (r && r.message) ? r.message : 'No se pudo cargar el encargado.', 'error');
+                        return;
+                    }
+
+                    const e = r.data;
+                    $('#IdUsuario').val(e.idUsuario);
+                    $('#Nombre').val(e.nombre);
+                    $('#PrimerApellido').val(e.primerApellido);
+                    $('#SegundoApellido').val(e.segundoApellido);
+                    $('#Correo').val(e.correo);
+                    $('#Telefono').val(e.telefono);
+                    $('#DireccionResidencia').val(e.direccionResidencia);
+
+                    $('#AceptoTerminos').val((e.aceptoTerminos === true).toString());
+                    $('#Activo').val((e.activo === true).toString());
+
+                    if (e.firmaContrato) {
+                        let iso = '';
+                        if (typeof e.firmaContrato === 'string') {
+                            if (e.firmaContrato.includes('T')) {
+                                iso = e.firmaContrato.split('T')[0];
+                            } else if (e.firmaContrato.includes('/')) {
+                                const p = e.firmaContrato.split('/');
+                                if (p.length === 3) iso = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                            } else {
+                                iso = e.firmaContrato;
+                            }
+                        }
+                        $('#FirmaContrato').val(iso);
+                    } else {
+                        $('#FirmaContrato').val('');
+                    }
+
+                    $('#modalEncargadoLabel').text('Editar Padre');
+                    $('#modalEncargado').modal('show');
+                })
+                .fail(function () {
+                    Swal.fire('Error', 'No se pudo cargar la información para editar.', 'error');
+                });
         }
 
         function eliminarEncargado(id) {
@@ -193,13 +339,47 @@
                 confirmButtonText: 'Eliminar',
                 cancelButtonText: 'Cancelar'
             }).then(r => {
-                if (r.isConfirmed) location.reload();
+                if (!r.isConfirmed) return;
+
+                $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
+                    .done(function (resp) {
+                        if (resp && resp.ok === false) {
+                            Swal.fire('Error', resp.message || 'No se pudo eliminar.', 'error');
+                            return;
+                        }
+                        location.reload();
+                    })
+                    .fail(function () {
+                        Swal.fire('Error', 'No se pudo eliminar el encargado.', 'error');
+                    });
             });
         }
 
-        function nuevoEncargado() {
-            $('#encargadoForm')[0].reset();
-            $('#IdUsuario').val(0);
+                function enviarContrasena(id) {
+            Swal.fire({
+                icon: 'question',
+                title: 'Enviar contraseña temporal',
+                text: '¿Desea resetear la contraseña y enviar una contraseña temporal por correo?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Cancelar'
+            }).then(r => {
+                if (!r.isConfirmed) return;
+
+                $.post('@Url.Action("ResetCredencialesEncargado", "Cuenta")', { idUsuario: id })
+                    .done(function (resp) {
+                        if (resp && resp.ok === false) {
+                            Swal.fire('Error', resp.message || 'No se pudo enviar.', 'error');
+                            return;
+                        }
+                        Swal.fire('Listo', (resp && resp.message) ? resp.message : 'Correo enviado.', 'success');
+                    })
+                    .fail(function (xhr) {
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'No se pudo enviar el correo.';
+                        Swal.fire('Error', msg, 'error');
+                    });
+            });
         }
+
     </script>
 }

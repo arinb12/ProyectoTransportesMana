@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProyectoTransportesMana.Contracts.EncargadosLegales;
 using ProyectoTransportesMana.Models;
+using ProyectoTransportesMana.Services;
 using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
@@ -8,11 +10,13 @@ namespace ProyectoTransportesMana.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _config;
+        private readonly IEmailService _emailService;
 
-        public CuentaController(IHttpClientFactory httpClientFactory, IConfiguration config)
+        public CuentaController(IHttpClientFactory httpClientFactory, IConfiguration config, IEmailService emailService)
         {
             _httpClientFactory = httpClientFactory;
             _config = config;
+            _emailService = emailService;
         }
 
         private HttpClient CreateClient()
@@ -124,5 +128,58 @@ namespace ProyectoTransportesMana.Controllers
 
             return RedirectToAction("Principal", "Home");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetCredencialesEncargado(int idUsuario)
+        {
+            if (idUsuario <= 0)
+                return BadRequest(new { ok = false, message = "Id de usuario inválido." });
+
+            var client = CreateClient();
+
+            var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
+            var urlReset = $"{baseUrl}api/v1/cuenta/reset-credenciales";
+
+            var respReset = await client.PostAsJsonAsync(urlReset, new { IdUsuario = idUsuario });
+
+            if (!respReset.IsSuccessStatusCode)
+                return BadRequest(new { ok = false, message = "No se pudo resetear la contraseña." });
+
+            var data = await respReset.Content.ReadFromJsonAsync<ResetCredencialesResponse>();
+            if (data == null || data.Ok != true || string.IsNullOrWhiteSpace(data.TempPassword))
+                return BadRequest(new { ok = false, message = "Respuesta inválida del API." });
+
+            var urlUsuario = $"{baseUrl}api/v1/encargados-legales/{idUsuario}";
+            var respUser = await client.GetAsync(urlUsuario);
+
+            if (!respUser.IsSuccessStatusCode)
+                return BadRequest(new { ok = false, message = "No se pudo obtener el correo del encargado." });
+
+            var encargado = await respUser.Content.ReadFromJsonAsync<EncargadoLegalResponse>();
+            if (encargado == null || string.IsNullOrWhiteSpace(encargado.Correo))
+                return BadRequest(new { ok = false, message = "El encargado no tiene correo registrado." });
+
+            var asunto = "Recuperación de acceso - Transportes Maná";
+            var cuerpoHtml = $@"
+<p>Hola {encargado.Nombre} {encargado.PrimerApellido},</p>
+<p>Se generó una contraseña temporal para tu cuenta.</p>
+<ul>
+    <li><strong>Usuario:</strong> {encargado.Correo}</li>
+    <li><strong>Contraseña temporal:</strong> {data.TempPassword}</li>
+</ul>
+<p>Cuando inicies sesión, se te solicitará cambiar la contraseña y aceptar términos y condiciones.</p>
+<p>Saludos,<br/>Equipo Transportes Maná</p>";
+
+            await _emailService.EnviarEmailAsync(encargado.Correo, asunto, cuerpoHtml);
+
+            return Ok(new { ok = true, message = "Se envió la contraseña temporal al correo." });
+        }
+
+        public sealed class ResetCredencialesResponse
+        {
+            public bool Ok { get; set; }
+            public string TempPassword { get; set; } = string.Empty;
+        }
+
     }
 }
