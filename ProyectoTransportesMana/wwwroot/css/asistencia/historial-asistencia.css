@@ -1,0 +1,40 @@
+﻿/* Panel de filtros con estilo pastel */
+.historial-filtros {
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Tarjetas de resumen */
+.resumen-card {
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--pastel-gray);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+}
+
+    .resumen-card h2 {
+        font-size: 2rem;
+    }
+
+/* Tabla pastel */
+#tablaHistorial thead th {
+    background: var(--pastel-blue) !important;
+    color: #000;
+    font-weight: 600;
+}
+
+#tablaHistorial tbody tr:hover {
+    background: rgba(114,108,248,0.08) !important;
+}
+
+
+@media (max-width: 768px) {
+    .filtros-panel {
+        flex-direction: column;
+    }
+
+    .resumen-cards {
+        flex-direction: column;
+    }
+}

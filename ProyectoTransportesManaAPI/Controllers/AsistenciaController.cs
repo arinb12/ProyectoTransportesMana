@@ -111,5 +111,34 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             return Ok(data);
         }
+
+        [HttpGet("historial")]
+        public async Task<ActionResult<IEnumerable<AsistenciaHistorialRowResponse>>> GetHistorial(
+        [FromQuery] DateTime? fecha,
+        [FromQuery] int? institucionId,
+        [FromQuery] int? busetaId,
+        [FromQuery] string? tipoViaje
+)
+        {
+            if (fecha is null)
+                return BadRequest(new { Message = "La fecha es obligatoria." });
+
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var data = await con.QueryAsync<AsistenciaHistorialRowResponse>(
+                "dbo.sp_asistencia_historial_listar",
+                new
+                {
+                    Fecha = fecha.Value.Date,
+                    IdInstitucion = institucionId,
+                    IdBuseta = busetaId,
+                    TipoViaje = tipoViaje
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return Ok(data);
+        }
+
     }
 }
