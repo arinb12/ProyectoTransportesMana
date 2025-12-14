@@ -24,7 +24,6 @@ namespace ProyectoTransportesMana.Models
 
         public bool? AceptoTerminos { get; set; }
 
-        public bool ContrasenaPendiente { get; set; }
 
         [JsonPropertyName("nombre_rol")]
         public string NombreRol { get; set; } = string.Empty;

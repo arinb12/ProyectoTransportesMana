@@ -1,8 +1,11 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using ProyectoTransportesMana.Contracts.Estudiantes;
 using ProyectoTransportesManaAPI.Models;
 using System.Data;
+using System.Net.Http;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
@@ -11,12 +14,10 @@ namespace ProyectoTransportesManaAPI.Controllers
     public class AsistenteController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-
         public AsistenteController(IConfiguration configuration)
         {
             _configuration = configuration;
         }
-
         [HttpGet("Busetas")]
         public async Task<IActionResult> GetBusetas()
         {
@@ -25,7 +26,6 @@ namespace ProyectoTransportesManaAPI.Controllers
                        CONCAT('Buseta - ', b.placa) AS Texto
                 FROM dbo.busetas b
                 ORDER BY b.placa;";
-
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
             var lista = await con.QueryAsync<BusetaDto>(sql);
             return Ok(lista);
@@ -36,11 +36,12 @@ namespace ProyectoTransportesManaAPI.Controllers
         {
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
             var data = await con.QueryAsync<AsistenteListItemResponse>(
-                "sp_asistentes_listar",
-                commandType: CommandType.StoredProcedure
-            );
+               "sp_asistentes_listar",
+               commandType: CommandType.StoredProcedure
+           );
             return Ok(data);
         }
+
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> ObtenerPorId(int id)
@@ -53,6 +54,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             );
 
             if (row is null) return NotFound();
+
 
             var res = new AsistenteResponse
             {
@@ -76,12 +78,6 @@ namespace ProyectoTransportesManaAPI.Controllers
         {
             if (asistente is null) return BadRequest("Payload vacío.");
 
-            var claveFija = _configuration["Valores:ClaveFijaAsistente"];
-            if (string.IsNullOrWhiteSpace(claveFija))
-                return BadRequest("No está configurada la clave fija de asistentes.");
-
-            var hash = Helpers.PasswordHasher.HashPassword(claveFija);
-
             try
             {
                 using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
@@ -89,14 +85,13 @@ namespace ProyectoTransportesManaAPI.Controllers
                 var p = new DynamicParameters();
                 p.Add("@Nombre", asistente.Nombre);
                 p.Add("@PrimerApellido", asistente.PrimerApellido);
-                p.Add("@SegundoApellido", string.IsNullOrWhiteSpace(asistente.SegundoApellido) ? null : asistente.SegundoApellido);
+                p.Add("@SegundoApellido", asistente.SegundoApellido);
                 p.Add("@Activo", asistente.Activo);
                 p.Add("@Telefono", asistente.Telefono);
                 p.Add("@Cedula", asistente.Cedula);
                 p.Add("@Correo", asistente.Correo);
                 p.Add("@Salario", asistente.Salario);
                 p.Add("@IdBuseta", asistente.BusetaId);
-                p.Add("@ContrasenaHash", hash);
 
                 var newId = await con.QuerySingleAsync<int>(
                     "dbo.sp_asistentes_crear",
@@ -122,7 +117,7 @@ namespace ProyectoTransportesManaAPI.Controllers
             p.Add("@Id", req.Id);
             p.Add("@Nombre", req.Nombre);
             p.Add("@PrimerApellido", req.PrimerApellido);
-            p.Add("@SegundoApellido", string.IsNullOrWhiteSpace(req.SegundoApellido) ? null : req.SegundoApellido);
+            p.Add("@SegundoApellido", req.SegundoApellido);
             p.Add("@Activo", req.Activo);
             p.Add("@Telefono", req.Telefono);
             p.Add("@Cedula", req.Cedula);
@@ -184,4 +179,4 @@ public record AsistenteListItemResponse()
     public DateTime? FechaInicio { get; init; }
     public bool Activo { get; init; }
     public bool Eliminado { get; init; }
-}
+   }
