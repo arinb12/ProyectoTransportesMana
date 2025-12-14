@@ -25,9 +25,6 @@
         <a asp-action="Activas" class="btn btn-success">
             <i class="bi bi-eye"></i> Ver Solo Activas
         </a>
-        <a asp-action="DetalleAsignaciones" class="btn btn-info">
-            <i class="bi bi-people"></i> Ver Asignaciones
-        </a>
     </div>
     <div class="col-md-6 text-end">
         <span class="badge bg-success me-2">
@@ -83,9 +80,7 @@
                     <td>@item.CedulaConductor</td>
                     <td>
                         <div class="btn-group" role="group">
-                            <a asp-action="Asignaciones" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Ver Asignaciones">
-                                <i class="bi bi-people"></i>
-                            </a>
+                            
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
