@@ -238,6 +238,88 @@ namespace ProyectoTransportesManaAPI.Controllers
         }
 
 
+        public sealed class ForgotPasswordRequest
+        {
+            public string Correo { get; set; } = string.Empty;
+        }
+
+        public sealed class ForgotPasswordResponse
+        {
+            public bool Ok { get; set; }
+            public string? Token { get; set; }
+        }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var correo = (request.Correo ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(correo))
+                return BadRequest(new ProblemDetails { Title = "Correo requerido", Detail = "Debe indicar un correo." });
+
+            var token = Guid.NewGuid().ToString("N");
+
+            using var connection = CreateConnection();
+
+            var p = new DynamicParameters();
+            p.Add("@Correo", correo);
+            p.Add("@Token", token);
+            p.Add("@Ok", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+
+            await connection.ExecuteAsync("sp_password_reset_crear", p, commandType: CommandType.StoredProcedure);
+
+            var ok = p.Get<bool>("@Ok");
+
+            return Ok(new ForgotPasswordResponse
+            {
+                Ok = true,
+                Token = ok ? token : null
+            });
+        }
+
+        public sealed class ResetPasswordRequest
+        {
+            public string Token { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var token = (request.Token ?? "").Trim();
+            var pass = (request.NewPassword ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(pass))
+                return BadRequest(new ProblemDetails { Title = "Datos requeridos", Detail = "Token y contraseña son requeridos." });
+
+            var hash = ProyectoTransportesManaAPI.Helpers.PasswordHasher.HashPassword(pass);
+
+            using var connection = CreateConnection();
+
+            try
+            {
+                await connection.ExecuteAsync(
+                    "sp_password_reset_aplicar",
+                    new { Token = token, ContrasenaHash = hash },
+                    commandType: CommandType.StoredProcedure);
+
+                return Ok(new { ok = true, message = "Contraseña actualizada correctamente." });
+            }
+            catch (SqlException ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "No se pudo restablecer",
+                    Detail = ex.Message
+                });
+            }
+        }
+
+
+
+
 
 
     }
