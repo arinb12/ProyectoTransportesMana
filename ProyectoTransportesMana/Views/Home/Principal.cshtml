@@ -66,13 +66,9 @@
                 return;
             }
 
-            // cerrar modal
             bootstrap.Modal.getInstance(document.getElementById("modalEscuela")).hide();
 
-            // limpiar input
             document.getElementById("nombreEscuela").value = "";
-
-            // refrescar escuelas
             await loadAllSimple();
 
             alert("Escuela agregada exitosamente.");
@@ -88,8 +84,8 @@
 
 @inject IConfiguration Configuration
 <script>
-    window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "")';
- window.API_BASE = "https://localhost:7238";
+       window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "")';
+    window.API_BASE = "https://localhost:7238";
 </script>
 
 
@@ -114,10 +110,8 @@
 
        for (const ins of instituciones) {
 
-    // paleta pastel infinita
     const paletas = ['--pastel-purple', '--pastel-blue', '--pastel-pink', '--pastel-green'];
 
-    // índice automático según ID
     const idx = Math.abs(ins.idInstitucion) % paletas.length;
     const varColor = paletas[idx];
 
@@ -150,7 +144,7 @@
 
     cont.appendChild(card);
 
-          // trae estudiantes/horarios para esa institucion
+          // trae estudiantes/horarios para esa escuela
           const stRes = await fetch(`${base}/api/v1/instituciones/${ins.idInstitucion}/estudiantes`);
           if (!stRes.ok) {
             console.warn(`No se pudieron cargar estudiantes de institucion ${ins.idInstitucion}. status=${stRes.status}`);
@@ -232,15 +226,12 @@
       });
     }
 
-      /** Validación simple de hora HH:mm (00:00 - 23:59) */
     function validarHoraSimple(h) {
-        if (!h) return true; // permitir vacío (se interpreta como sin hora)
-        // aceptar formatos con o sin cero delante: 9:05 o 09:05 -> pero aquí pedimos 2 dígitos para consistencia
+        if (!h) return true;
         const re = /^([01]\d|2[0-3]):([0-5]\d)$/;
         return re.test(h);
     }
 
-    /** Muestra texto para cada cambio y confirma con Swal antes de mandar */
     async function guardarHorarioSimple(aElem) {
         const tr = aElem.closest('tr');
         const idEstudiante = tr.dataset.idEstudiante;
@@ -248,7 +239,6 @@
 
         const base = window.API_BASE || '';
 
-        // recopilar cambios
         const cambios = [];
         tr.querySelectorAll('td[data-dia]').forEach(td => {
             const inputE = td.querySelector('.hora-entrada');
@@ -259,10 +249,10 @@
             const entrada = inputE ? inputE.value.trim() : '';
             const salida  = inputS ? inputS.value.trim() : '';
 
-            // si ambos vacíos => ignorar
+
             if (!entrada && !salida) return;
 
-            // validar formato
+
             if (!validarHoraSimple(entrada) || !validarHoraSimple(salida)) {
                 cambios.push({ dia, entrada, salida, valido: false });
             } else {
@@ -275,10 +265,8 @@
             return;
         }
 
-        // construir resumen para confirmar
         const resumenHtml = cambios.map(c => `<strong>${c.dia}</strong>: ${c.entrada || '-'} ${c.salida ? ' / ' + c.salida : ''}`).join('<br>');
 
-        // mostrar confirmación similar a eliminarEstudiante
         const res = await Swal.fire({
             title: 'Guardar horarios',
             html: `Se guardarán los siguientes horarios para el estudiante:<br><br>${resumenHtml}`,
@@ -292,7 +280,6 @@
 
         if (!res.isConfirmed) return;
 
-        // enviar todas las peticiones (paralelas)
         try {
             const promises = cambios.map(c => {
                 const body = {
@@ -301,7 +288,6 @@
                     horaEntrada: c.entrada,
                     horaSalida: c.salida
                 };
-                // fetch PUT al endpoint
                 return fetch(`${base}/api/v1/horarios`, {
                     method: 'PUT',
                     headers: {
@@ -310,8 +296,6 @@
                     body: JSON.stringify(body)
                 }).then(async r => {
                     if (r.ok) return r;
-                    // si devuelve 204 No Content (algunas APIs usan esto), r.ok también es true para 204
-                    // manejar / lanzar error con mensaje cuando no sea ok
                     let texto = '';
                     try { texto = await r.text(); } catch {}
                     throw new Error(`Error ${r.status} al guardar ${c.dia}: ${texto || r.statusText}`);
@@ -325,7 +309,6 @@
 
             Swal.fire({ icon: 'success', title: 'Horarios guardados', timer: 1400, showConfirmButton: false });
 
-            // actualizar la UI: reemplazar inputs por texto
             tr.querySelectorAll('td[data-dia]').forEach(td => {
                 const inputE = td.querySelector('.hora-entrada');
                 const inputS = td.querySelector('.hora-salida');

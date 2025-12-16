@@ -22,7 +22,6 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
             var parameters = new DynamicParameters();
-            parameters.Add("@IdHorario", dto.IdHorario, DbType.Int32);
             parameters.Add("@IdEstudiante", dto.IdEstudiante);
             parameters.Add("@DiaSemana", dto.DiaSemana);
             parameters.Add("@HoraEntradaText", dto.HoraEntrada);
