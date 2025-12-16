@@ -98,9 +98,24 @@
                     </a> *@
                 </div>
             }
-            else if (rol == 2 || rol == 5)
+            else if (rol == 2)
             {
-                @* Encargado (2) y Asistente (5): ven Comunicados + Viajes *@
+                @* Encargado (Padre de Familia): Solo ve Comunicados, SIN Viajes *@
+                <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+                <div class="list-group list-group-flush">
+
+                    <a asp-controller="Alerta" asp-action="ConsultarAlerta"
+                       class="list-group-item list-group-item-action pastel-link d-flex align-items-center">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Comunicados</span>
+                        <span id="notifsCount" class="badge bg-danger ms-2" style="display:none; font-size:0.8rem;">0</span>
+                    </a>
+
+                </div>
+            }
+            else if (rol == 5)
+            {
+                @* Asistente (5): ve Comunicados + Viajes *@
                 <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
                 <div class="list-group list-group-flush">
 

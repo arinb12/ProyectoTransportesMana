@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Consultar Alertas";
     Layout = "_LayoutInterno";
+    int? rolActual = Context.Session.GetInt32("IdRol");
 }
 
 
@@ -11,9 +12,13 @@
 <div class="container-fluid p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="text-dark">Alertas Informativas</h1>
-        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalAlerta">
-            <i class="bi bi-bell-fill me-1"></i> Generar Alerta
-        </button>
+        @* Solo mostrar el botón si el rol es Admin (1) o Asistente (5) *@
+        @if (rolActual == 1 || rolActual == 5)
+        {
+            <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalAlerta">
+                <i class="bi bi-bell-fill me-1"></i> Generar Alerta
+            </button>
+        }
     </div>
 
     <div class="card shadow-sm mb-4">
