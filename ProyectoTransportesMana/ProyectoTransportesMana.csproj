@@ -22,6 +22,7 @@
   <ItemGroup>
     <Folder Include="Views\Usuario\" />
     <Folder Include="wwwroot\css\asistentes\" />
+    <Folder Include="wwwroot\imagenes\perfiles\" />
   </ItemGroup>
 
 </Project>
