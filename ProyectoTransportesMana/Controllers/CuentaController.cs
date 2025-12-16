@@ -65,7 +65,7 @@ namespace ProyectoTransportesMana.Controllers
             };
 
             var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
-            var urlApi = $"{baseUrl}api/v1/cuenta/primer-ingreso";
+            var urlApi = $"{baseUrl}/api/v1/cuenta/primer-ingreso";
 
             var resp = await client.PostAsJsonAsync(urlApi, payload);
 
@@ -116,7 +116,7 @@ namespace ProyectoTransportesMana.Controllers
             };
 
             var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
-            var urlApi = $"{baseUrl}api/v1/cuenta/cambiar-contrasena";
+            var urlApi = $"{baseUrl}/api/v1/cuenta/cambiar-contrasena";
 
             var resp = await client.PostAsJsonAsync(urlApi, payload);
 
@@ -138,7 +138,7 @@ namespace ProyectoTransportesMana.Controllers
             var client = CreateClient();
 
             var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
-            var urlReset = $"{baseUrl}api/v1/cuenta/reset-credenciales";
+            var urlReset = $"{baseUrl}/api/v1/cuenta/reset-credenciales";
 
             var respReset = await client.PostAsJsonAsync(urlReset, new { IdUsuario = idUsuario });
 
@@ -149,7 +149,7 @@ namespace ProyectoTransportesMana.Controllers
             if (data == null || data.Ok != true || string.IsNullOrWhiteSpace(data.TempPassword))
                 return BadRequest(new { ok = false, message = "Respuesta inválida del API." });
 
-            var urlUsuario = $"{baseUrl}api/v1/encargados-legales/{idUsuario}";
+            var urlUsuario = $"{baseUrl}/api/v1/encargados-legales/{idUsuario}";
             var respUser = await client.GetAsync(urlUsuario);
 
             if (!respUser.IsSuccessStatusCode)
