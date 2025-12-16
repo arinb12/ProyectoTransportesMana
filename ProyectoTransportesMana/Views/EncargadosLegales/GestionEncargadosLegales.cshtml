@@ -213,7 +213,13 @@
                     FirmaContrato: (firma && firma.trim() !== '') ? firma : null
                 };
 
-                
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: payload,
+                    headers: { 'RequestVerificationToken': token }
                 }).done(function (r) {
                     if (r && r.ok === false) {
                         Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
