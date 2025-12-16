@@ -29,7 +29,7 @@ namespace ProyectoTransportesMana.Controllers
         {
             using (var context = _http.CreateClient())
             {
-                var urlApi = _config["Api:BaseUrl"] + "api/Home/ValidarSesion";
+                var urlApi = _config["Api:BaseUrl"] + "/api/Home/ValidarSesion";
                 var respuesta = context.PostAsJsonAsync(urlApi, usuario).Result;
 
                 if (respuesta.IsSuccessStatusCode)
@@ -126,7 +126,7 @@ namespace ProyectoTransportesMana.Controllers
             var client = _http.CreateClient();
 
             var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
-            var url = $"{baseUrl}api/v1/cuenta/forgot-password";
+            var url = $"{baseUrl}/api/v1/cuenta/forgot-password";
 
             HttpResponseMessage resp;
 
@@ -251,7 +251,7 @@ namespace ProyectoTransportesMana.Controllers
             var client = _http.CreateClient();
 
             var baseUrl = _config["Api:BaseUrl"] ?? string.Empty;
-            var url = $"{baseUrl}api/v1/cuenta/reset-password";
+            var url = $"{baseUrl}/api/v1/cuenta/reset-password";
 
             var resp = await client.PostAsJsonAsync(url, new { Token = token, NewPassword = new_password });
 
