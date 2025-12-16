@@ -36,11 +36,11 @@
 </head>
 
 <body>
+    @Html.AntiForgeryToken()
     <div class="d-flex" id="wrapper">
         <!-- Sidebar -->
         <nav class="bg-white pastel-sidebar border-end" id="sidebar-wrapper">
 
-            @* =================== SECCIÓN MAIN (según rol) =================== *@
             @if (rol == 1)
             {  @* Admin: ve todo el menú principal *@
                 <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
@@ -49,7 +49,6 @@
                         <i class="bi bi-house-door me-2"></i>Inicio
                     </a>
 
-                    <!-- Link Comunicados con badge -->
                     <a asp-controller="Alerta" asp-action="ConsultarAlerta" class="list-group-item list-group-item-action pastel-link d-flex align-items-center">
                         <i class="bi bi-journal-text me-2"></i>
                         <span>Comunicados</span>
@@ -64,14 +63,18 @@
                     <div class="collapse" id="gestionMenu">
                         <a asp-controller="Estudiantes" asp-action="GestionEstudiantes"
                            class="list-group-item list-group-item-action pastel-sublink ps-5">Estudiantes</a>
+                        <a asp-controller="GestionMaestras" asp-action="Maestras"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Maestras</a>
                         <a asp-controller="EncargadosLegales" asp-action="GestionEncargadosLegales"
                            class="list-group-item list-group-item-action pastel-sublink ps-5">Padres</a>
                         <a asp-controller="Busetas" asp-action="Index"
                            class="list-group-item list-group-item-action pastel-sublink ps-5">Busetas</a>
                         <a asp-controller="Asistente" asp-action="ConsultarAsistente"
                            class="list-group-item list-group-item-action pastel-sublink ps-5">Asistentes</a>
-                        <a asp-controller="Alerta" asp-action="ConsultarAlerta"
-                           class="list-group-item list-group-item-action pastel-sublink ps-5">Alertas</a>
+                        <a asp-controller="Instituciones" asp-action="ConsultarInstitucion"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Escuelas</a>
+                        <a asp-controller="Usuarios" asp-action="GestionUsuarios"
+                           class="list-group-item list-group-item-action pastel-sublink ps-5">Usuarios</a>
                     </div>
 
                     <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
@@ -80,29 +83,70 @@
                         <i class="bi bi-chevron-down small"></i>
                     </a>
                     <div class="collapse" id="viajesMenu">
-                        <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Reservar</a>
-                        <a href="#" class="list-group-item list-group-item-action pastel-sublink ps-5">Mis Viajes</a>
-                        <a asp-controller="Asistencia" asp-action="GestionAsistencia" class="list-group-item list-group-item-action pastel-link ps-5">Control de Asistencia</a>
-                        <a href="Viajes/historial-asistencia.html" class="list-group-item list-group-item-action pastel-link"><i class="bi bi-journal-text me-2"></i>Historial de Asistencia</a>
+                        <a asp-controller="Asistencia" asp-action="GestionAsistencia"
+                           class="list-group-item list-group-item-action pastel-link ps-5">
+                            <i class="bi bi-journal-check me-2"></i>Control de Asistencia
+                        </a>
+                        <a asp-controller="Asistencia" asp-action="HistorialAsistencia"
+                           class="list-group-item list-group-item-action pastel-link ps-5">
+                            <i class="bi bi-journal-text me-2"></i>Historial de Asistencia
+                        </a>
                     </div>
 
-                    <a href="Reportes/gestion-reportes.html" class="list-group-item list-group-item-action pastel-link">
+                    @* <a href="Reportes/gestion-reportes.html" class="list-group-item list-group-item-action pastel-link">
                         <i class="bi bi-clipboard-data me-2"></i>Reportes
-                    </a>
+                    </a> *@
                 </div>
             }
             else if (rol == 2)
             {
+                @* Encargado (Padre de Familia): Solo ve Comunicados, SIN Viajes *@
                 <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
                 <div class="list-group list-group-flush">
-                    <a asp-controller="Alerta" asp-action="ConsultarAlerta" class="list-group-item list-group-item-action pastel-link">
-                        <i class="bi bi-journal-text me-2"></i>Comunicados
+
+                    <a asp-controller="Alerta" asp-action="ConsultarAlerta"
+                       class="list-group-item list-group-item-action pastel-link d-flex align-items-center">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Comunicados</span>
+                        <span id="notifsCount" class="badge bg-danger ms-2" style="display:none; font-size:0.8rem;">0</span>
                     </a>
+
+                </div>
+            }
+            else if (rol == 5)
+            {
+                @* Asistente (5): ve Comunicados + Viajes *@
+                <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
+                <div class="list-group list-group-flush">
+
+                    <a asp-controller="Alerta" asp-action="ConsultarAlerta"
+                       class="list-group-item list-group-item-action pastel-link d-flex align-items-center">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Comunicados</span>
+                        <span id="notifsCount" class="badge bg-danger ms-2" style="display:none; font-size:0.8rem;">0</span>
+                    </a>
+
+                    <a class="list-group-item list-group-item-action pastel-link d-flex justify-content-between align-items-center"
+                       data-bs-toggle="collapse" href="#viajesMenu" role="button">
+                        <div><i class="bi bi-scissors me-2"></i>Viajes</div>
+                        <i class="bi bi-chevron-down small"></i>
+                    </a>
+
+                    <div class="collapse" id="viajesMenu">
+                        <a asp-controller="Asistencia" asp-action="GestionAsistencia"
+                           class="list-group-item list-group-item-action pastel-link ps-5">
+                            <i class="bi bi-journal-check me-2"></i>Control de Asistencia
+                        </a>
+                        <a asp-controller="Asistencia" asp-action="HistorialAsistencia"
+                           class="list-group-item list-group-item-action pastel-link ps-5">
+                            <i class="bi bi-journal-text me-2"></i>Historial de Asistencia
+                        </a>
+                    </div>
+
                 </div>
             }
             else
             {
-                @* Otros roles: mostrar versión reducida del menú *@
                 <div class="sidebar-heading text-uppercase fw-bold py-3 text-muted px-3 small">Main</div>
                 <div class="list-group list-group-flush">
                     <a asp-controller="Home" asp-action="Principal" class="list-group-item list-group-item-action pastel-link">
@@ -137,7 +181,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
                         <li><h6 class="dropdown-header">@nombreRol</h6></li>
-                        <li><a class="dropdown-item" asp-action="Perfil" asp-controller="Usuarios">Mi Perfil</a></li>
+                        <li><a class="dropdown-item" asp-action="Index" asp-controller="Perfil">Mi Perfil</a></li>
                         <li><hr class="dropdown-divider" /></li>
                         <li><a class="dropdown-item text-danger" asp-action="CerrarSesion" asp-controller="Home">Cerrar Sesión</a></li>
                     </ul>
@@ -163,20 +207,18 @@
     @using Microsoft.AspNetCore.Http
 
     <script>
-        // lee la configuración o usa fallback a https://localhost:7238
         window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';
-        // expone el id del usuario en sesión (ajusta la clave de session si usas otra)
-        (function(){
-          var uid = 0;
-          try {
-            // Si guardas IdUsuario en Session:
-            @* Ejemplo usando ViewBag: window.CURRENT_USER_ID = '@(ViewBag.CurrentUserId ?? 0)'; *@
-          } catch(e){}
-          window.CURRENT_USER_ID = window.CURRENT_USER_ID || '0';
+        (function () {
+            var uid = 0;
+            try {
+            } catch (e) { }
+            window.CURRENT_USER_ID = window.CURRENT_USER_ID || '0';
         })();
-        console.log('layout: window.API_BASE=', window.API_BASE, ' window.CURRENT_USER_ID=', window.CURRENT_USER_ID);
-    </script>
 
+        window.ROL_ACTUAL = @((rol ?? 0));
+
+        console.log('layout: window.API_BASE=', window.API_BASE, ' window.CURRENT_USER_ID=', window.CURRENT_USER_ID, ' ROL=', window.ROL_ACTUAL);
+    </script>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -233,7 +275,6 @@
               return;
             }
 
-   
             let data;
             try { data = JSON.parse(text); } catch (e) { data = null; }
 
@@ -255,7 +296,6 @@
     <script src="~/js/scripts.js" asp-append-version="true"></script>
     <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
     <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
-
 
     <script src="https://unpkg.com/imask"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

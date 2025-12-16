@@ -1,0 +1,102 @@
+﻿body {
+}
+/* ===========================
+   PERFIL – ESTILO PASTEL PRO
+   =========================== */
+
+.perfil-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+    background-color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+    /* Header */
+    .perfil-card .card-header {
+        background: linear-gradient( 135deg, var(--pastel-blue), var(--pastel-purple) );
+        color: #1f1f1f;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border-bottom: none;
+    }
+
+    /* Cuerpo */
+    .perfil-card .card-body {
+        background-color: var(--pastel-gray);
+        padding: 2rem;
+    }
+
+/* Avatar */
+.perfil-avatar {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+/* Nombre usuario */
+.perfil-nombre {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #222;
+}
+
+.perfil-id {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Inputs */
+.perfil-card .form-control {
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 0.6rem 0.75rem;
+}
+
+    .perfil-card .form-control:focus {
+        border-color: var(--pastel-accent);
+        box-shadow: 0 0 0 0.15rem rgba(114,108,248,0.25);
+    }
+
+/* Labels */
+.perfil-card .form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Botón guardar */
+.perfil-btn-guardar {
+    background: linear-gradient( 135deg, var(--pastel-accent), #8f8af8 );
+    border: none;
+    border-radius: 14px;
+    padding: 0.65rem;
+    font-weight: 600;
+    color: #fff;
+    transition: all 0.25s ease;
+}
+
+    .perfil-btn-guardar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(114,108,248,0.35);
+    }
+
+/* Alertas */
+.perfil-alerta {
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .perfil-card .card-body {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .perfil-nombre {
+        font-size: 1.1rem;
+    }
+}

@@ -1,0 +1,212 @@
+﻿@model List<ProyectoTransportesMana.Models.InstitucionModel>
+
+@{
+    ViewData["Title"] = "Instituciones";
+    Layout = "_LayoutInterno";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+    <style>
+        .pastel-table thead th {
+            background: #e8f4ff;
+        }
+    </style>
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-dark">Gestión de Instituciones</h1>
+        <button class="btn pastel-btn" onclick="abrirModalNuevo()">
+            <i class="fas fa-plus me-1"></i> Agregar
+        </button>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info d-flex align-items-center">
+            <i class="fas fa-school me-2 text-dark"></i>
+            <span class="text-dark fw-bold">Listado de Instituciones</span>
+        </div>
+
+        <div class="card-body">
+            <table id="tablaInstituciones" class="table table-hover table-bordered pastel-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th class="text-center" style="width:110px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in Model)
+                    {
+                        <tr>
+                            <td>@i.Nombre</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary me-1"
+                                        title="Editar"
+                                        onclick="abrirModalEditar(@i.IdInstitucion, '@i.Nombre')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-danger"
+                                        title="Eliminar"
+                                        onclick="eliminarInstitucion(@i.IdInstitucion)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-school text-muted" style="font-size: 3rem;"></i>
+                    <h4 class="text-muted mt-3">No hay instituciones registradas</h4>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalInstitucion" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i class="fas fa-building me-2"></i>
+                    <span id="tituloModal">Nueva Institución</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="formInstitucion">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-body">
+                    <input type="hidden" id="IdInstitucion" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input id="Nombre" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn pastel-btn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        let antiToken = "";
+
+        async function cargarToken() {
+            const resp = await fetch("/Instituciones/Token");
+            const data = await resp.json();
+            antiToken = data.token;
+        }
+
+        function abrirModalNuevo() {
+            document.getElementById("tituloModal").innerText = "Nueva Institución";
+            document.getElementById("IdInstitucion").value = "";
+            document.getElementById("Nombre").value = "";
+            new bootstrap.Modal(document.getElementById("modalInstitucion")).show();
+        }
+
+        function abrirModalEditar(id, nombre) {
+            document.getElementById("tituloModal").innerText = "Editar Institución";
+            document.getElementById("IdInstitucion").value = id;
+            document.getElementById("Nombre").value = nombre;
+            new bootstrap.Modal(document.getElementById("modalInstitucion")).show();
+        }
+
+        document.getElementById("formInstitucion").addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const payload = {
+                IdInstitucion: document.getElementById("IdInstitucion").value,
+                Nombre: document.getElementById("Nombre").value
+            };
+
+            const isEdit = payload.IdInstitucion && payload.IdInstitucion > 0;
+            const url = isEdit
+                ? "/Instituciones/ActualizarInstitucion"
+                : "/Instituciones/CrearInstitucion";
+
+            const resp = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": antiToken
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Guardado",
+                    text: "La institución se guardó correctamente.",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                setTimeout(() => location.reload(), 1600);
+            } else {
+                Swal.fire("Error", "No se pudo guardar la institución", "error");
+            }
+        });
+
+        function eliminarInstitucion(id) {
+            Swal.fire({
+                icon: "warning",
+                title: "¿Eliminar institución?",
+                text: "Esta acción no se puede deshacer.",
+                showCancelButton: true,
+                confirmButtonText: "Eliminar",
+                cancelButtonText: "Cancelar"
+            }).then(r => {
+                if (!r.isConfirmed) return;
+
+                $.ajax({
+                    url: "/Instituciones/EliminarInstitucion?id=" + id,
+                    type: "DELETE",
+                    success: function (resp) {
+                        if (resp.success) {
+                            Swal.fire("Eliminada", resp.message, "success");
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            Swal.fire("Error", resp.message, "error");
+                        }
+                    }
+                });
+            });
+        }
+
+        $(document).ready(async function () {
+            await cargarToken();
+
+            $('#tablaInstituciones').DataTable({
+                pageLength: 10,
+                order: [],
+                language: {
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    search: "Buscar:",
+                    zeroRecords: "No hay datos",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_",
+                    infoEmpty: "Mostrando 0 a 0 de 0",
+                    infoFiltered: "(filtrado de _MAX_ registros)",
+                    paginate: {
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+        });
+    </script>
+}

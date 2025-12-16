@@ -1,0 +1,56 @@
+﻿@model ProyectoTransportesMana.Models.EditarHorarioEstudianteViewModel
+
+<form asp-action="EditarHorario" method="post">
+    @Html.HiddenFor(m => m.IdEstudiante)
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Día</th>
+                <th>Hora entrada</th>
+                <th>Hora salida</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Horario.Count; i++)
+            {
+                <tr>
+                    @Html.HiddenFor(m => m.Horario[i].IdHorario)
+                    @Html.HiddenFor(m => m.Horario[i].DiaSemana)
+
+                    <td>
+                        @{
+                            var dia = Model.Horario[i].DiaSemana;
+                            string nombreDia = dia switch
+                            {
+                                1 => "Lunes",
+                                2 => "Martes",
+                                3 => "Miércoles",
+                                4 => "Jueves",
+                                5 => "Viernes",
+                                6 => "Sábado",
+                                7 => "Domingo",
+                                _ => "Día"
+                            };
+                        }
+                        @nombreDia
+                    </td>
+
+                    <td>
+                        <input type="time" class="form-control"
+                               name="Horario[@i].HoraEntrada"
+                               value="@(Model.Horario[i].HoraEntrada?.ToString(@"hh\:mm"))" />
+                    </td>
+
+                    <td>
+                        <input type="time" class="form-control"
+                               name="Horario[@i].HoraSalida"
+                               value="@(Model.Horario[i].HoraSalida?.ToString(@"hh\:mm"))" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Guardar horario</button>
+</form>

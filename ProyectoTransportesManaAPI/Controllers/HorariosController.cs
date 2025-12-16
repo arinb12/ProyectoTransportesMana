@@ -15,13 +15,14 @@ namespace ProyectoTransportesManaAPI.Controllers
         public HorariosController(IConfiguration config) => _config = config;
 
         [HttpPut]
-        public async Task<IActionResult> UpdateHorario([FromBody] HorarioUpdateDtoSimple dto)
+        public async Task<IActionResult> UpdateHorario([FromBody] HorarioUpdateDtoSimple? dto)
         {
-            if (dto == null) return BadRequest("Datos inválidos.");
+            if (dto is null)
+                return StatusCode(StatusCodes.Status400BadRequest, "Datos inválidos.");
 
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
             var parameters = new DynamicParameters();
-            parameters.Add("@IdHorario", dbType: DbType.Int32, value: null);
+            parameters.Add("@IdHorario", dto.IdHorario, DbType.Int32);
             parameters.Add("@IdEstudiante", dto.IdEstudiante);
             parameters.Add("@DiaSemana", dto.DiaSemana);
             parameters.Add("@HoraEntradaText", dto.HoraEntrada);
@@ -29,13 +30,34 @@ namespace ProyectoTransportesManaAPI.Controllers
 
             try
             {
-                await con.ExecuteAsync("Horarios_Insert_Update", parameters, commandType: CommandType.StoredProcedure);
+                await con.ExecuteAsync(
+                    "Horarios_Insert_Update",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
                 return NoContent();
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, "Error guardando horario.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error guardando horario.");
             }
         }
+
+        [HttpGet("por-estudiante/{idEstudiante:int}")]
+        public async Task<ActionResult<IEnumerable<HorarioListItemResponse>>> GetPorEstudiante(int idEstudiante)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+
+            var data = await con.QueryAsync<HorarioListItemResponse>(
+                "Horarios_ListarPorEstudiante",
+                new { IdEstudiante = idEstudiante },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return Ok(data);
+        }
+
+
     }
 }

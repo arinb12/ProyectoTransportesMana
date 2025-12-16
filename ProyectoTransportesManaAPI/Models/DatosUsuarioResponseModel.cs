@@ -20,5 +20,8 @@ namespace ProyectoTransportesManaAPI.Models
 
         public bool? AceptoTerminos { get; set; }
 
+        public bool ContrasenaPendiente { get; set; }
+
+
     }
 }

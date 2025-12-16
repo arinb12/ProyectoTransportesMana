@@ -9,29 +9,37 @@
 }
 
 @section Styles {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+    <style>
+        .pastel-table thead th {
+            background: #e8f4ff;
+        }
+
+        .badge-activo {
+            background-color: #28a745;
+        }
+
+        .badge-inactivo {
+            background-color: #dc3545;
+        }
+    </style>
 }
 
 <div class="container-fluid p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="text-dark">Gestión de Padres</h1>
-        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEncargado"
-                onclick="nuevoEncargado()">
-            <i class="bi bi-person-plus me-1"></i>Nuevo Padre
+        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEncargado" onclick="nuevoEncargado()">
+            <i class="fas fa-plus me-1"></i> Agregar
         </button>
     </div>
 
-    <div id="alertaEncargado" class="alert alert-success @(TempData["created"] != null ? "" : "d-none")" role="alert">
-        Padre guardado correctamente.
-    </div>
-
     <div class="card mb-4 shadow">
-        <div class="card-header bg-info text-dark fw-bold">
-            <i class="fas fa-users me-2"></i>Listado de Padres
+        <div class="card-header bg-info d-flex align-items-center">
+            <i class="fas fa-users me-2 text-dark"></i>
+            <span class="text-dark fw-bold">Listado de Padres</span>
         </div>
         <div class="card-body">
-            <table id="tablaEncargados" class="table pastel-table table-hover table-bordered">
+            <table id="tablaEncargados" class="table table-hover table-bordered pastel-table align-middle">
                 <thead>
                     <tr>
                         <th>Nombre Completo</th>
@@ -40,71 +48,43 @@
                         <th>Fecha Inicio</th>
                         <th>Dirección</th>
                         <th>Teléfono</th>
-                        <th>Activo</th>
-                        <th>Credenciales</th>   @* nueva columna *@
-                        <th>Acciones</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Credenciales</th>
+                        <th class="text-center" style="width:110px;">Acciones</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @if (encargados.Any())
-                    {
-                        foreach (var e in encargados)
-                        {
-                            <tr>
-                                <td>@e.NombreCompleto</td>
-
-                                
-                                <td>@(string.IsNullOrWhiteSpace(e.Estudiantes) ? "-" : e.Estudiantes)</td>
-
-                               
-                                <td>@e.EstadoContrato</td>
-
-                               
-                                <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
-
-                                
-                                <td>@e.Direccion</td>
-
-                                
-                                <td>@e.Telefono</td>
-
-                               
-                                <td class="text-center">
-                                    <input type="checkbox"
-                                           class="form-check-input toggle-estado"
-                                           data-id="@e.IdUsuario"
-                                           @(e.Activo ? "checked" : "") />
-                                </td>
-
-                                <td class="text-center">
-                                    <button type="button"
-                                            class="btn btn-sm btn-outline-secondary"
-                                            onclick="enviarContrasena(@e.IdUsuario)">
-                                        Enviar contraseña
-                                    </button>
-                                </td>
-
-                                <td>
-                                    <a href="javascript:void(0)" class="text-primary ms-2" title="Editar"
-                                       onclick="editarEncargado(@e.IdUsuario)">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="javascript:void(0)" class="text-danger ms-2" title="Eliminar"
-                                       onclick="eliminarEncargado(@e.IdUsuario)">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                </td>
-
-                                
-                            </tr>
-                        }
-                    }
-                    else
+                    @foreach (var e in encargados)
                     {
                         <tr>
-                            <td colspan="8" class="text-center text-muted">
-                                No hay padres registrados.
+                            <td>@e.NombreCompleto</td>
+                            <td>@(string.IsNullOrWhiteSpace(e.Estudiantes) ? "-" : e.Estudiantes)</td>
+                            <td>@e.EstadoContrato</td>
+                            <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>@e.Direccion</td>
+                            <td>@e.Telefono</td>
+                            <td class="text-center">
+                                @if (e.Activo)
+                                {
+                                    <span class="badge badge-activo">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactivo">Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="enviarContrasena(@e.IdUsuario)">
+                                    Enviar contraseña
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary me-1" title="Editar" onclick="editarEncargado(@e.IdUsuario)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="eliminarEncargado(@e.IdUsuario)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -114,91 +94,61 @@
     </div>
 </div>
 
-<!-- Modal Registro/Edición -->
-<div class="modal fade" id="modalEncargado" tabindex="-1" aria-labelledby="modalEncargadoLabel"
-     aria-hidden="true">
+<div class="modal fade" id="modalEncargado" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4">
             <div class="modal-header bg-info">
                 <h5 class="modal-title text-dark fw-bold" id="modalEncargadoLabel">
-                    <i class="fas fa-user-graduate me-2"></i>Registrar Padre
+                    <i class="fas fa-user-graduate me-2"></i> Registrar Padre
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="encargadoForm"
-                      asp-action="RegistrarEncargado"
-                      asp-controller="EncargadosLegales"
-                      method="post"
-                      class="row g-3 needs-validation" novalidate>
-
+                <form id="encargadoForm" class="row g-3">
                     @Html.AntiForgeryToken()
-                    <input asp-for="IdUsuario" type="hidden" id="IdUsuario" />
+
+                    <input type="hidden" id="IdUsuario" />
+                    <input type="hidden" id="AceptoTerminos" />
+                    <input type="hidden" id="Activo" />
 
                     <div class="col-md-4">
-                        <label asp-for="Nombre" class="form-label"></label>
-                        <input asp-for="Nombre" class="form-control" />
-                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                        <label class="form-label">Nombre</label>
+                        <input id="Nombre" class="form-control" />
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="PrimerApellido" class="form-label"></label>
-                        <input asp-for="PrimerApellido" class="form-control" />
-                        <span asp-validation-for="PrimerApellido" class="text-danger"></span>
+                        <label class="form-label">Primer Apellido</label>
+                        <input id="PrimerApellido" class="form-control" />
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="SegundoApellido" class="form-label"></label>
-                        <input asp-for="SegundoApellido" class="form-control" />
-                        <span asp-validation-for="SegundoApellido" class="text-danger"></span>
+                        <label class="form-label">Segundo Apellido</label>
+                        <input id="SegundoApellido" class="form-control" />
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="Correo" class="form-label"></label>
-                        <input asp-for="Correo" class="form-control" />
-                        <span asp-validation-for="Correo" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6" id="rowContrasena">
-                        <label asp-for="Contrasena" class="form-label"></label>
-                        <input asp-for="Contrasena" class="form-control" />
-                        <span asp-validation-for="Contrasena" class="text-danger"></span>
+                        <label class="form-label">Correo</label>
+                        <input id="Correo" class="form-control" />
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="DireccionResidencia" class="form-label"></label>
-                        <input asp-for="DireccionResidencia" class="form-control" />
-                        <span asp-validation-for="DireccionResidencia" class="text-danger"></span>
+                        <label class="form-label">Teléfono</label>
+                        <input id="Telefono" class="form-control" />
                     </div>
 
-                    <div class="col-md-3">
-                        <label asp-for="Telefono" class="form-label"></label>
-                        <input asp-for="Telefono" class="form-control" />
-                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de inicio</label>
+                        <input id="FirmaContrato" type="date" class="form-control" />
                     </div>
 
-                    <div class="col-md-3">
-                        <label asp-for="FirmaContrato" class="form-label"></label>
-                        <input asp-for="FirmaContrato" class="form-control" type="date" />
-                        <span asp-validation-for="FirmaContrato" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-3 d-flex align-items-center">
-                        <label asp-for="AceptoTerminos" class="form-check-label"></label>
-                        <input asp-for="AceptoTerminos" class="form-check-input" type="checkbox" />
-                        
-                    </div>
-
-                    <div class="col-md-3 d-flex align-items-center">
-                        <label asp-for="Activo" class="form-check-label me-2"></label>
-                        <input asp-for="Activo" class="form-check-input" id="Activo" />
+                    <div class="col-md-6">
+                        <label class="form-label">Dirección</label>
+                        <input id="DireccionResidencia" class="form-control" />
                     </div>
 
                     <div class="col-12 text-end">
                         <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancelar
-                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -207,137 +157,229 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
     <script>
-        function nuevoEncargado() {
-            $('#IdUsuario').val(0);
-            $('#Nombre').val('');
-            $('#PrimerApellido').val('');
-            $('#SegundoApellido').val('');
-            $('#Correo').val('');
-            $('#Contrasena').val('');
-            $('#DireccionResidencia').val('');
-            $('#Telefono').val('');
-            $('#FirmaContrato').val('');
-            $('#AceptoTerminos').prop('checked', false);
-            $('#Activo').prop('checked', true);
-            $('#modalEncargadoLabel').text('Registrar Padre');
+        $(document).ready(function () {
+            $('#tablaEncargados').DataTable({
+                pageLength: 10,
+                order: [],
+                language: {
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    search: "Buscar:",
+                    zeroRecords: "No hay datos",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_",
+                    infoEmpty: "Mostrando 0 a 0 de 0",
+                    infoFiltered: "(filtrado de _MAX_ registros)",
+                    paginate: { next: "Siguiente", previous: "Anterior" }
+                }
+            });
 
-            // Mostrar campo contraseña en modo creación
-            $('#rowContrasena').hide();
+                    $('#encargadoForm').on('submit', function (e) {
+            e.preventDefault();
 
-            // Form en modo crear: post normal a RegistrarEncargado
-            $('#encargadoForm').off('submit');
-            $('#encargadoForm').attr('action', '@Url.Action("RegistrarEncargado", "EncargadosLegales")');
-        }
+            const id = parseInt($('#IdUsuario').val() || '0');
+            const esEdicion = id > 0;
 
-                function editarEncargado(id) {
-            $.get('@Url.Action("ObtenerParaEditar", "EncargadosLegales")', { id: id })
-                .done(function (resp) {
-                    if (!resp.ok) {
-                        alert(resp.message || 'No se pudo cargar el padre.');
+            const titulo = esEdicion ? 'Confirmar cambios' : 'Confirmar registro';
+            const texto = esEdicion
+                ? '¿Desea guardar los cambios del padre?'
+                : '¿Desea registrar este nuevo padre?';
+
+            Swal.fire({
+                icon: 'question',
+                title: titulo,
+                text: texto,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                const url = esEdicion
+                    ? '@Url.Action("ActualizarEncargado", "EncargadosLegales")'
+                    : '@Url.Action("RegistrarEncargado", "EncargadosLegales")';
+
+                const firma = $('#FirmaContrato').val();
+
+                const payload = {
+                    IdUsuario: id,
+                    Nombre: $('#Nombre').val(),
+                    PrimerApellido: $('#PrimerApellido').val(),
+                    SegundoApellido: $('#SegundoApellido').val(),
+                    Correo: $('#Correo').val(),
+                    Telefono: $('#Telefono').val(),
+                    DireccionResidencia: $('#DireccionResidencia').val(),
+                    Activo: ($('#Activo').val() || 'false') === 'true',
+                    AceptoTerminos: ($('#AceptoTerminos').val() || 'false') === 'true',
+                    FirmaContrato: (firma && firma.trim() !== '') ? firma : null
+                };
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: payload,
+                    headers: { 'RequestVerificationToken': token }
+                }).done(function (r) {
+                    if (r && r.ok === false) {
+                        Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
                         return;
                     }
 
-                    const m = resp.data;
-                    console.log(m); // opcional, para ver el objeto en consola
-
-                    // Ojo: propiedades en camelCase, no PascalCase
-                    $('#IdUsuario').val(m.idUsuario);
-                    $('#Nombre').val(m.nombre);
-                    $('#PrimerApellido').val(m.primerApellido);
-                    $('#SegundoApellido').val(m.segundoApellido);
-                    $('#Correo').val(m.correo || '');
-                    $('#Contrasena').val('');
-                    $('#DireccionResidencia').val(m.direccionResidencia || '');
-                    $('#Telefono').val(m.telefono || '');
-                    $('#FirmaContrato').val(m.firmaContrato ? m.firmaContrato.substring(0, 10) : '');
-                    $('#AceptoTerminos').prop('checked', m.aceptoTerminos === true);
-                    $('#Activo').prop('checked', m.activo === true);
-
-                    $('#modalEncargadoLabel').text('Editar Padre');
-
-                    // Ocultar contraseña en edición
-                    $('#rowContrasena').hide();
-
-                    // Form en modo edición: usar AJAX
-                    $('#encargadoForm').off('submit').on('submit', function (e) {
-                        e.preventDefault();
-                        actualizarEncargado();
+                    Swal.fire({
+                        icon: 'success',
+                        title: esEdicion ? 'Actualizado' : 'Registrado',
+                        text: esEdicion
+                            ? 'Los cambios se guardaron correctamente.'
+                            : 'El padre fue registrado correctamente.'
+                    }).then(() => {
+                        $('#modalEncargado').modal('hide');
+                        location.reload();
                     });
 
-                    var modal = new bootstrap.Modal(document.getElementById('modalEncargado'));
-                    modal.show();
-                })
-                .fail(function () {
-                    alert('Error al consultar la API.');
+                }).fail(function (xhr) {
+                    let msg = 'Error de datos. Revisa campos requeridos.';
+                    if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
+
+                    Swal.fire('Error', msg, 'error');
                 });
+            });
+        });
+
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: payload,
+                    headers: { 'RequestVerificationToken': token }
+                }).done(function (r) {
+                    if (r && r.ok === false) {
+                        Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
+                        return;
+                    }
+                    $('#modalEncargado').modal('hide');
+                    location.reload();
+                }).fail(function (xhr) {
+                    let msg = 'Error de datos. Revisa campos requeridos y formato.';
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        if (xhr.responseJSON.errors) {
+                            const e = xhr.responseJSON.errors;
+                            const detalle = Object.keys(e).map(k => `${k}: ${e[k].join(', ')}`).join('<br/>');
+                            msg = `${msg}<br/><br/>${detalle}`;
+                        }
+                    }
+                    Swal.fire('Error', msg, 'error');
+                });
+            });
+       
+
+        function nuevoEncargado() {
+            $('#encargadoForm')[0].reset();
+            $('#IdUsuario').val(0);
+            $('#AceptoTerminos').val('false');
+            $('#Activo').val('true');
+            $('#FirmaContrato').val('');
+            $('#modalEncargadoLabel').text('Registrar Padre');
         }
 
+        function editarEncargado(id) {
+            $.get('@Url.Action("ObtenerParaEditar", "EncargadosLegales")', { id: id })
+                .done(function (r) {
+                    if (!r || r.ok !== true) {
+                        Swal.fire('Error', (r && r.message) ? r.message : 'No se pudo cargar el encargado.', 'error');
+                        return;
+                    }
 
-        function actualizarEncargado() {
-            const data = {
-                IdUsuario: parseInt($('#IdUsuario').val()),
-                Nombre: $('#Nombre').val(),
-                PrimerApellido: $('#PrimerApellido').val(),
-                SegundoApellido: $('#SegundoApellido').val(),
-                Correo: $('#Correo').val(),
-                Activo: $('#Activo').is(':checked'),
-                DireccionResidencia: $('#DireccionResidencia').val(),
-                AceptoTerminos: $('#AceptoTerminos').is(':checked'),
-                FirmaContrato: $('#FirmaContrato').val(),
-                Telefono: $('#Telefono').val()
-            };
+                    const e = r.data;
+                    $('#IdUsuario').val(e.idUsuario);
+                    $('#Nombre').val(e.nombre);
+                    $('#PrimerApellido').val(e.primerApellido);
+                    $('#SegundoApellido').val(e.segundoApellido);
+                    $('#Correo').val(e.correo);
+                    $('#Telefono').val(e.telefono);
+                    $('#DireccionResidencia').val(e.direccionResidencia);
 
-            $.ajax({
-                url: '@Url.Action("ActualizarEncargado", "EncargadosLegales")',
-                type: 'POST',
-                data: data
-            }).done(function (resp) {
-                if (!resp.ok) {
-                    alert(resp.message || 'No se pudo actualizar el padre.');
-                    return;
-                }
-                location.reload();
-            }).fail(function () {
-                alert('Error al actualizar el padre.');
-            });
+                    $('#AceptoTerminos').val((e.aceptoTerminos === true).toString());
+                    $('#Activo').val((e.activo === true).toString());
+
+                    if (e.firmaContrato) {
+                        let iso = '';
+                        if (typeof e.firmaContrato === 'string') {
+                            if (e.firmaContrato.includes('T')) {
+                                iso = e.firmaContrato.split('T')[0];
+                            } else if (e.firmaContrato.includes('/')) {
+                                const p = e.firmaContrato.split('/');
+                                if (p.length === 3) iso = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                            } else {
+                                iso = e.firmaContrato;
+                            }
+                        }
+                        $('#FirmaContrato').val(iso);
+                    } else {
+                        $('#FirmaContrato').val('');
+                    }
+
+                    $('#modalEncargadoLabel').text('Editar Padre');
+                    $('#modalEncargado').modal('show');
+                })
+                .fail(function () {
+                    Swal.fire('Error', 'No se pudo cargar la información para editar.', 'error');
+                });
         }
 
         function eliminarEncargado(id) {
-            if (!confirm('¿Deseas eliminar este padre?')) return;
+            Swal.fire({
+                icon: 'warning',
+                title: 'Eliminar',
+                text: '¿Deseas eliminar este padre?',
+                showCancelButton: true,
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(r => {
+                if (!r.isConfirmed) return;
 
-            $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
-                .done(function (resp) {
-                    if (resp.ok === false) {
-                        alert(resp.message || 'No se pudo eliminar.');
-                        return;
-                    }
-                    location.reload();
-                }).fail(function () {
-                    alert('Error al eliminar.');
-                });
+                $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
+                    .done(function (resp) {
+                        if (resp && resp.ok === false) {
+                            Swal.fire('Error', resp.message || 'No se pudo eliminar.', 'error');
+                            return;
+                        }
+                        location.reload();
+                    })
+                    .fail(function () {
+                        Swal.fire('Error', 'No se pudo eliminar el encargado.', 'error');
+                    });
+            });
         }
 
-        // Cambiar estado desde el checkbox
-        $(document).on('change', '.toggle-estado', function () {
-            const id = $(this).data('id');
-            const activo = $(this).is(':checked');
+                function enviarContrasena(id) {
+            Swal.fire({
+                icon: 'question',
+                title: 'Enviar contraseña temporal',
+                text: '¿Desea resetear la contraseña y enviar una contraseña temporal por correo?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Cancelar'
+            }).then(r => {
+                if (!r.isConfirmed) return;
 
-            $.post('@Url.Action("CambiarEstado", "EncargadosLegales")', { id: id, activo: activo })
-                .done(function (resp) {
-                    if (!resp.ok) {
-                        alert(resp.message || 'No se pudo cambiar el estado.');
-                    }
-                }).fail(function () {
-                    alert('Error al cambiar el estado.');
-                });
-        });
-
-        function enviarContrasena(id) {
-            // Por ahora solo mensaje informativo
-            alert('Funcionalidad para enviar contraseña temporal al correo del padre ' + id + ' se implementará después.');
+                $.post('@Url.Action("ResetCredencialesEncargado", "Cuenta")', { idUsuario: id })
+                    .done(function (resp) {
+                        if (resp && resp.ok === false) {
+                            Swal.fire('Error', resp.message || 'No se pudo enviar.', 'error');
+                            return;
+                        }
+                        Swal.fire('Listo', (resp && resp.message) ? resp.message : 'Correo enviado.', 'success');
+                    })
+                    .fail(function (xhr) {
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'No se pudo enviar el correo.';
+                        Swal.fire('Error', msg, 'error');
+                    });
+            });
         }
+
     </script>
 }

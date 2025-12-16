@@ -10,6 +10,7 @@ using System.Net.Http.Json;
 namespace ProyectoTransportesMana.Controllers
 {
     [Seguridad]
+    [AutorizarRoles(1)]
     public class EstudiantesController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -28,8 +29,20 @@ namespace ProyectoTransportesMana.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistrarEstudiante(EstudianteModel estudiante)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
             if (!ModelState.IsValid)
             {
+                if (isAjax)
+                {
+                    return BadRequest(new
+                    {
+                        ok = false,
+                        title = "Revisa el formulario",
+                        message = "Hay campos requeridos o con formato inválido."
+                    });
+                }
+
                 await CargarDatosVistaAsync();
                 ViewData["SwalType"] = "warning";
                 ViewData["SwalTitle"] = "Revisa el formulario";
@@ -56,10 +69,34 @@ namespace ProyectoTransportesMana.Controllers
 
             if (resp.IsSuccessStatusCode)
             {
-                return RedirectToAction(nameof(GestionEstudiantes), new { created = true });
+                if (isAjax)
+                {
+                    return Ok(new
+                    {
+                        ok = true,
+                        title = "Estudiante creado",
+                        message = "El estudiante fue registrado correctamente."
+                    });
+                }
+
+                TempData["SwalType"] = "success";
+                TempData["SwalTitle"] = "Estudiante creado";
+                TempData["SwalText"] = "El estudiante fue registrado correctamente.";
+                return RedirectToAction(nameof(GestionEstudiantes));
             }
 
             var problem = await SafeReadProblemDetails(resp);
+
+            if (isAjax)
+            {
+                return BadRequest(new
+                {
+                    ok = false,
+                    title = "Error al registrar",
+                    message = problem?.Detail ?? problem?.Title ?? "No se pudo registrar el estudiante."
+                });
+            }
+
             ModelState.AddModelError(string.Empty,
                 problem?.Detail ?? problem?.Title ?? "No se pudo registrar el estudiante.");
 
@@ -70,9 +107,6 @@ namespace ProyectoTransportesMana.Controllers
             await CargarDatosVistaAsync();
             return View("GestionEstudiantes", estudiante);
         }
-
-
-
 
 
         [HttpPost]

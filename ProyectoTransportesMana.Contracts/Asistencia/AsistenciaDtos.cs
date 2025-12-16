@@ -28,5 +28,21 @@
        string Estado
     );
 
+    public sealed record AsistenciaHistorialRowResponse(
+       DateTime Fecha,
+       int IdInstitucion,
+       string Escuela,
+       int IdBuseta,
+       string PlacaBuseta,
+       string NombreConductor,
+       string TipoViaje,
+       int IdEstudiante,
+       string Nombre,
+       string Apellidos,
+       string? Seccion,
+       string Estado,
+       string? Observaciones
+   );
+
 
 }

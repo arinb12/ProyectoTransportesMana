@@ -1,10 +1,10 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProyectoTransportesMana.Contracts.Asistencia;
 using ProyectoTransportesMana.Contracts.Busetas;
 using ProyectoTransportesMana.Models;
 using ProyectoTransportesMana.Models.Filters;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace ProyectoTransportesMana.Controllers
 {
@@ -91,11 +91,11 @@ namespace ProyectoTransportesMana.Controllers
         }
 
         public sealed record GuardarAsistenciaMvcRequest(
-           int IdInstitucion,
-           int IdBuseta,
-           string TipoViaje,
-           List<AsistenciaDetalleItemRequest> Detalles
-       );
+            int IdInstitucion,
+            int IdBuseta,
+            string TipoViaje,
+            List<AsistenciaDetalleItemRequest> Detalles
+        );
 
         [HttpPost]
         public async Task<IActionResult> GuardarAsistencia([FromBody] GuardarAsistenciaMvcRequest model)
@@ -164,7 +164,7 @@ namespace ProyectoTransportesMana.Controllers
             var client = _httpClientFactory.CreateClient("Api");
 
             var resp = await client.GetAsync(
-                $"api/v1/asistencia/estados?institucionId={institucionId}&busetaId={busetaId}&tipoViaje={tipoViaje}");
+                $"api/v1/asistencia/estados?institucionId={institucionId}&busetaId={busetaId}&tipoViaje={Uri.EscapeDataString(tipoViaje.Trim())}");
 
             if (!resp.IsSuccessStatusCode)
             {
@@ -183,6 +183,48 @@ namespace ProyectoTransportesMana.Controllers
                 ok = true,
                 data
             });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> HistorialAsistencia()
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+
+            var instituciones = await GetOrEmpty<List<InstitucionModel>>(client, "api/v1/instituciones")
+                               ?? new List<InstitucionModel>();
+
+            var busetas = await GetOrEmpty<List<BusetaListItemResponse>>(client, "api/v1/busetas/activas")
+                           ?? new List<BusetaListItemResponse>();
+
+            ViewBag.Instituciones = instituciones;
+            ViewBag.Busetas = busetas;
+
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> BuscarHistorial(DateTime? fecha, int? institucionId, int? busetaId, string? tipoViaje)
+        {
+            if (fecha is null)
+                return BadRequest(new { ok = false, message = "La fecha es obligatoria." });
+
+            var client = _httpClientFactory.CreateClient("Api");
+
+            var url = $"api/v1/asistencia/historial?fecha={fecha.Value:yyyy-MM-dd}";
+
+            if (institucionId.HasValue) url += $"&institucionId={institucionId.Value}";
+            if (busetaId.HasValue) url += $"&busetaId={busetaId.Value}";
+            if (!string.IsNullOrWhiteSpace(tipoViaje)) url += $"&tipoViaje={Uri.EscapeDataString(tipoViaje.Trim())}";
+
+            var resp = await client.GetAsync(url);
+
+            if (!resp.IsSuccessStatusCode)
+                return StatusCode((int)resp.StatusCode, new { ok = false, message = "No se pudo consultar el historial." });
+
+            var data = await resp.Content.ReadFromJsonAsync<List<AsistenciaHistorialRowResponse>>()
+                       ?? new List<AsistenciaHistorialRowResponse>();
+
+            return Json(new { ok = true, data });
         }
 
         private static async Task<T?> GetOrEmpty<T>(HttpClient client, string url)
@@ -210,7 +252,5 @@ namespace ProyectoTransportesMana.Controllers
                 return null;
             }
         }
-
-
     }
 }
