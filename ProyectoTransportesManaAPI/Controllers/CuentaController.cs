@@ -316,11 +316,5 @@ namespace ProyectoTransportesManaAPI.Controllers
                 });
             }
         }
-
-
-
-
-
-
     }
 }
