@@ -37,6 +37,8 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
             section: 'Sección',
             student: 'Estudiante',
             actions: 'Acciones',
+            entrada: 'Entrada',
+            salida: 'Salida',
             save: 'Guardar',
             cancel: 'Cancelar',
             saving: 'Guardando...',
@@ -104,12 +106,6 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
     function isValidTime(time) {
         if (!time) return true;
         return /^([01]\d|2[0-3]):([0-5]\d)$/.test(time);
-    }
-
-    function formatScheduleDisplay(entrada, salida) {
-        if (!entrada && !salida) return '<span class="tm-text-muted">—</span>';
-        if (entrada && salida) return `${entrada} <span class="tm-text-muted">/</span> ${salida}`;
-        return entrada || salida;
     }
 
     function showLoading(show = true) {
@@ -203,6 +199,12 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
         const color = CONFIG.colors[colorIndex % CONFIG.colors.length];
         const T = CONFIG.text;
 
+        // Generate sub-header cells for Entrada/Salida
+        const subHeaderCells = T.dias.map(() => `
+            <th class="text-center header-entrada">${T.entrada}</th>
+            <th class="text-center header-salida">${T.salida}</th>
+        `).join('');
+
         return `
             <div class="tm-card tm-school-card" data-id="${institucion.idInstitucion}">
                 <div class="tm-card-header tm-school-header" style="background: ${color.gradient}; color: white;">
@@ -219,20 +221,23 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
                     <div class="table-responsive">
                         <table id="tabla-inst-${institucion.idInstitucion}" class="table table-hover mb-0 tm-schedule-table">
                             <thead>
-                                <tr>
-                                    <th class="text-center" style="width: 80px;">${T.section}</th>
-                                    <th>${T.student}</th>
-                                    <th class="text-center">${T.dias[0]}</th>
-                                    <th class="text-center">${T.dias[1]}</th>
-                                    <th class="text-center">${T.dias[2]}</th>
-                                    <th class="text-center">${T.dias[3]}</th>
-                                    <th class="text-center">${T.dias[4]}</th>
-                                    <th class="text-center" style="width: 100px;">${T.actions}</th>
+                                <tr class="header-days">
+                                    <th rowspan="2" class="text-center align-middle" style="width: 80px;">${T.section}</th>
+                                    <th rowspan="2" class="align-middle">${T.student}</th>
+                                    <th colspan="2" class="text-center header-day">${T.dias[0]}</th>
+                                    <th colspan="2" class="text-center header-day">${T.dias[1]}</th>
+                                    <th colspan="2" class="text-center header-day">${T.dias[2]}</th>
+                                    <th colspan="2" class="text-center header-day">${T.dias[3]}</th>
+                                    <th colspan="2" class="text-center header-day">${T.dias[4]}</th>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 100px;">${T.actions}</th>
+                                </tr>
+                                <tr class="header-times">
+                                    ${subHeaderCells}
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="loading-row">
-                                    <td colspan="8" class="text-center py-4">
+                                    <td colspan="14" class="text-center py-4">
                                         <div class="spinner-border spinner-border-sm text-primary" role="status">
                                             <span class="visually-hidden">${T.loading}</span>
                                         </div>
@@ -255,8 +260,11 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
             const entrada = horario?.entrada || '';
             const salida = horario?.salida || '';
             return `
-                <td class="text-center schedule-cell" data-dia="${dia}" data-entrada="${escapeAttr(entrada)}" data-salida="${escapeAttr(salida)}">
-                    ${formatScheduleDisplay(entrada, salida)}
+                <td class="text-center schedule-cell schedule-entrada" data-dia="${dia}" data-tipo="entrada" data-value="${escapeAttr(entrada)}">
+                    ${entrada || '<span class="tm-text-muted">—</span>'}
+                </td>
+                <td class="text-center schedule-cell schedule-salida" data-dia="${dia}" data-tipo="salida" data-value="${escapeAttr(salida)}">
+                    ${salida || '<span class="tm-text-muted">—</span>'}
                 </td>
             `;
         }).join('');
@@ -289,7 +297,7 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
         const T = CONFIG.text;
         return `
             <tr>
-                <td colspan="8" class="text-center py-5">
+                <td colspan="14" class="text-center py-5">
                     <div class="tm-empty-state">
                         <i class="bi bi-inbox fs-1 tm-text-muted"></i>
                         <p class="mt-2 mb-0 tm-text-muted">${T.noStudents}</p>
@@ -376,8 +384,11 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
                     badge.textContent = alumnos.size;
                 }
 
+                // Initialize DataTable with updated column count
+                // Columns: Sección(0), Estudiante(1), Lun-Ent(2), Lun-Sal(3), Mar-Ent(4), Mar-Sal(5), 
+                //          Mie-Ent(6), Mie-Sal(7), Jue-Ent(8), Jue-Sal(9), Vie-Ent(10), Vie-Sal(11), Acciones(12)
                 if (typeof initDataTable === 'function') {
-                    initDataTable(`tabla-inst-${idInstitucion}`, [7], {
+                    initDataTable(`tabla-inst-${idInstitucion}`, [12], {
                         pageLength: 10,
                         ordering: true,
                         order: [[0, 'asc'], [1, 'asc']]
@@ -420,14 +431,11 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
         cells.forEach(cell => {
             if (cell.querySelector('input')) return;
 
-            const entrada = cell.dataset.entrada || '';
-            const salida = cell.dataset.salida || '';
+            const value = cell.dataset.value || '';
+            const tipo = cell.dataset.tipo;
 
             cell.innerHTML = `
-                <div class="schedule-inputs">
-                    <input type="time" class="form-control form-control-sm hora-entrada" value="${escapeAttr(entrada)}" placeholder="Entrada">
-                    <input type="time" class="form-control form-control-sm hora-salida" value="${escapeAttr(salida)}" placeholder="Salida">
-                </div>
+                <input type="time" class="form-control form-control-sm hora-${tipo}" value="${escapeAttr(value)}">
             `;
         });
 
@@ -440,9 +448,8 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
         const cells = row.querySelectorAll('.schedule-cell');
 
         cells.forEach(cell => {
-            const entrada = cell.dataset.entrada || '';
-            const salida = cell.dataset.salida || '';
-            cell.innerHTML = formatScheduleDisplay(entrada, salida);
+            const value = cell.dataset.value || '';
+            cell.innerHTML = value || '<span class="tm-text-muted">—</span>';
         });
 
         row.querySelector('.btn-edit').style.display = 'inline-flex';
@@ -459,22 +466,36 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
             return;
         }
 
-        const changes = [];
+        // Group cells by day
+        const horariosPorDia = {};
         const cells = row.querySelectorAll('.schedule-cell');
 
         cells.forEach(cell => {
-            const inputEntrada = cell.querySelector('.hora-entrada');
-            const inputSalida = cell.querySelector('.hora-salida');
-            if (!inputEntrada && !inputSalida) return;
+            const input = cell.querySelector('input');
+            if (!input) return;
 
             const dia = cell.dataset.dia;
-            const entrada = inputEntrada?.value?.trim() || '';
-            const salida = inputSalida?.value?.trim() || '';
+            const tipo = cell.dataset.tipo;
+            const value = input.value?.trim() || '';
 
-            if (entrada || salida) {
-                changes.push({ dia, entrada, salida, cell });
+            if (!horariosPorDia[dia]) {
+                horariosPorDia[dia] = { entrada: '', salida: '', cells: {} };
             }
+            horariosPorDia[dia][tipo] = value;
+            horariosPorDia[dia].cells[tipo] = cell;
         });
+
+        const changes = [];
+        for (const [dia, data] of Object.entries(horariosPorDia)) {
+            if (data.entrada || data.salida) {
+                changes.push({
+                    dia,
+                    entrada: data.entrada,
+                    salida: data.salida,
+                    cells: data.cells
+                });
+            }
+        }
 
         if (changes.length === 0) {
             showToast('info', T.noChanges, T.noChangesMsg);
@@ -512,9 +533,14 @@ NOTE: This file MUST be saved as UTF-8 with BOM to display Spanish characters co
             ));
 
             changes.forEach(c => {
-                c.cell.dataset.entrada = c.entrada;
-                c.cell.dataset.salida = c.salida;
-                c.cell.innerHTML = formatScheduleDisplay(c.entrada, c.salida);
+                if (c.cells.entrada) {
+                    c.cells.entrada.dataset.value = c.entrada;
+                    c.cells.entrada.innerHTML = c.entrada || '<span class="tm-text-muted">—</span>';
+                }
+                if (c.cells.salida) {
+                    c.cells.salida.dataset.value = c.salida;
+                    c.cells.salida.innerHTML = c.salida || '<span class="tm-text-muted">—</span>';
+                }
             });
 
             row.querySelector('.btn-edit').style.display = 'inline-flex';
