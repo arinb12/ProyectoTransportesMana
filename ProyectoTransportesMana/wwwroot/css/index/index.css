@@ -206,3 +206,18 @@
         width: 100%;
     }
 }
+
+
+/* === FIN SIDEBAR === */
+/**
+ * DEPRECATED - Old pastel theme
+ * This file is being phased out in favor of theme.css
+ * DO NOT add new styles here
+ * 
+ * Migration checklist:
+ * [ ] Replace .pastel-card with .tm-card
+ * [ ] Replace .pastel-table with default Bootstrap tables
+ * [ ] Replace .pastel-btn with .tm-btn-*
+ * [ ] Replace .pastel-link with .tm-nav-link
+ * [ ] Remove utility classes (.bg-pastel-*)
+ */
