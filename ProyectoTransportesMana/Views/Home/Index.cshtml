@@ -4,48 +4,136 @@
     Layout = "_LayoutExterno";
 }
 
+<div class="login-page">
+    <!-- Animated Background -->
+    <div class="login-bg">
+        <div class="login-bg-shape login-bg-shape-1"></div>
+        <div class="login-bg-shape login-bg-shape-2"></div>
+        <div class="login-bg-shape login-bg-shape-3"></div>
+    </div>
 
-<div class="login-container">
-    <!-- Fondo con imagen difuminada -->
-    <div class="background-blur"></div>
-
-    <!-- Tarjeta de inicio de sesión -->
-    <div class="login-card shadow-lg">
-        <div class="login-left">
-            <h2 class="brand-title">TRANSPORTE ESCOLAR MANÁ</h2>
-            <h3>¡Hola de nuevo! 🚌 👋</h3>
-            <p>Inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
-            @if (ViewBag.Mensaje != null)
-            {
-                <div class="alert alert-danger text-center">
-                    @ViewBag.Mensaje
-                </div>
-            }
-            <form id="FormInicioSesion" class="login-form" asp-action="Index" asp-controller="Home">
-                <input type="email" placeholder="Correo electrónico" asp-for="Correo" required />
-                <input type="password" placeholder="Contraseña" asp-for="ContrasenaHash" required />
-
-                <div class="remember-section">
-                    <input type="checkbox" id="remember" />
-                    <label for="remember">Recuérdame</label>
+    <!-- Main Container -->
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Left Panel - Form -->
+            <div class="login-form-panel">
+                <!-- Logo & Brand -->
+                <div class="login-brand">
+                    <div class="login-logo">
+                        <i class="bi bi-bus-front-fill"></i>
+                    </div>
+                    <span class="login-brand-text">Transporte Maná</span>
                 </div>
 
-                <button type="submit" class="btn-login">Iniciar Sesión</button>
-            </form>
+                <!-- Welcome Text -->
+                <div class="login-welcome">
+                    <h1>¡Bienvenido de nuevo!</h1>
+                    <p>Inicia sesión para gestionar tus rutas y horarios de transporte escolar.</p>
+                </div>
 
-            <p class="forgot-password">
-                <a asp-controller="Home" asp-action="RecoverPassword">¿Olvidaste tu contraseña?</a>
-            </p>
-            @* <p class="create-account">
-                <a asp-controller="Home" asp-action="Registro">Crear cuenta nueva</a>
-            </p> *@
-        </div>
+                <!-- Error Message -->
+                @if (ViewBag.Mensaje != null)
+                {
+                    <div class="login-alert" role="alert">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>@ViewBag.Mensaje</span>
+                    </div>
+                }
 
-        <div class="login-right">
-            <div class="overlay"></div>
-            <div class="info-text">
-                <h2>Organiza tu transporte escolar</h2>
-                <p>Gestiona rutas, horarios y puntos de abordaje de forma rápida y segura.</p>
+                <!-- Login Form -->
+                <form id="FormInicioSesion" class="login-form" asp-action="Index" asp-controller="Home" novalidate>
+                    <!-- Email Field -->
+                    <div class="form-floating-custom">
+                        <div class="input-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <input type="email"
+                               id="Correo"
+                               name="Correo"
+                               class="form-input"
+                               placeholder="correo@ejemplo.com"
+                               asp-for="Correo"
+                               autocomplete="email"
+                               required />
+                        <label for="Correo">Correo electrónico</label>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-floating-custom">
+                        <div class="input-icon">
+                            <i class="bi bi-lock"></i>
+                        </div>
+                        <input type="password"
+                               id="ContrasenaHash"
+                               name="ContrasenaHash"
+                               class="form-input"
+                               placeholder="••••••••"
+                               asp-for="ContrasenaHash"
+                               autocomplete="current-password"
+                               required />
+                        <label for="ContrasenaHash">Contraseña</label>
+                        <button type="button" class="password-toggle" aria-label="Mostrar contraseña">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+
+                    <!-- Remember & Forgot -->
+                    <div class="login-options">
+                        <label class="remember-check">
+                            <input type="checkbox" id="remember" name="remember" />
+                            <span class="checkmark"></span>
+                            <span class="remember-text">Recordarme</span>
+                        </label>
+                        <a asp-controller="Home" asp-action="RecoverPassword" class="forgot-link">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-login">
+                        <span>Iniciar Sesión</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="login-footer">
+                    <p>© @DateTime.Now.Year Transporte Escolar Maná. Todos los derechos reservados.</p>
+                </div>
+            </div>
+
+            <!-- Right Panel - Illustration -->
+            <div class="login-illustration-panel">
+                <div class="illustration-content">
+                    <div class="illustration-icon">
+                        <i class="bi bi-bus-front"></i>
+                    </div>
+                    <h2>Gestión de Transporte Escolar</h2>
+                    <p>Administra rutas, horarios y puntos de abordaje de forma rápida, segura y eficiente.</p>
+
+                    <!-- Feature List -->
+                    <ul class="feature-list">
+                        <li>
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>Control de asistencia en tiempo real</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-people-fill"></i>
+                            <span>Gestión de estudiantes y horarios</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-shield-check"></i>
+                            <span>Seguridad y confiabilidad</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Decorative Elements -->
+                <div class="illustration-decorations">
+                    <div class="decoration decoration-1"></div>
+                    <div class="decoration decoration-2"></div>
+                    <div class="decoration decoration-3"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -53,8 +141,6 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-
-    <script src="~/js/home/inicio-sesion.js"></script>
+    <script src="~/js/home/inicio-sesion.js" asp-append-version="true"></script>
 }
