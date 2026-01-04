@@ -4,6 +4,12 @@ const busetasMap = new Map();
 let alertaIdToDelete = null;
 let dataTableInstance = null;
 
+// Mobile view state
+let allAlertasData = [];
+let filteredAlertas = [];
+let mobileCurrentPage = 1;
+let mobilePageSize = 10;
+
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
@@ -89,7 +95,7 @@ function isAlertaLeida(leidoValue) {
  */
 function showNotification(type, title, text) {
     if (typeof SwalNotify === 'function') {
-        SwalNotify(type, title, text, true); // true = show as toast
+        SwalNotify(type, title, text, true);
     } else if (typeof Swal !== 'undefined' && Swal.fire) {
         Swal.fire({
             toast: true,
@@ -102,7 +108,6 @@ function showNotification(type, title, text) {
             timerProgressBar: true
         });
     } else {
-        // Fallback to native alert
         alert(`${title}\n${text}`);
     }
 }
@@ -228,6 +233,33 @@ function parsePublicoDestino(publicoRaw) {
 }
 
 /**
+ * Parse public destination and return plain text
+ * @param {string} publicoRaw - Raw public destination value
+ * @returns {string} Plain text string
+ */
+function parsePublicoDestinoText(publicoRaw) {
+    let publicoTexto = publicoRaw ?? '';
+
+    for (let [key, value] of busetasMap.entries()) {
+        if (publicoTexto === `buseta:${key}`) {
+            return `Buseta: ${value}`;
+        }
+    }
+
+    if (String(publicoTexto).startsWith('usuario:')) {
+        const id = String(publicoTexto).split(':')[1];
+        const nombre = encargadosMap.get(id) || 'Desconocido';
+        return `Encargado: ${nombre}`;
+    }
+
+    if (publicoTexto === 'todos') {
+        return 'Todos';
+    }
+
+    return publicoTexto;
+}
+
+/**
  * Get badge HTML for alert type
  * @param {string} tipo - Alert type
  * @returns {string} HTML badge string
@@ -257,16 +289,13 @@ function filtrarAlertasPorRol(allAlertas) {
     const userId = Number(window.CURRENT_USER_ID);
 
     if (rolActual === 1 || rolActual === 5) {
-        // Admin or Assistant: all alerts
         return allAlertas;
     } else if (rolActual === 2) {
-        // Legal Guardian: only massive alerts or alerts directed to this user
         return allAlertas.filter(a => {
             const destino = a.publico_destino ?? a.PublicoDestino ?? '';
             return destino === 'todos' || destino === `usuario:${userId}`;
         });
     } else {
-        // Other roles: only massive alerts
         return allAlertas.filter(a => {
             const destino = a.publico_destino ?? a.PublicoDestino ?? '';
             return destino === 'todos';
@@ -316,8 +345,290 @@ function transformarDatosTabla(alertasFiltradas) {
     });
 }
 
+// ============================================
+// MOBILE VIEW FUNCTIONS
+// ============================================
+
 /**
- * Load and display alerts in the DataTable
+ * Render a single alert card for mobile view
+ * @param {Object} alerta - Alert data object
+ * @param {number} index - Index for unique IDs
+ * @returns {string} HTML string for the card
+ */
+function renderAlertCard(alerta, index) {
+    const id = alerta.id_alerta ?? alerta.Id_Alerta ?? alerta.IdAlerta ?? '';
+    const titulo = alerta.titulo ?? alerta.Titulo ?? '';
+    const mensaje = alerta.mensaje ?? alerta.Mensaje ?? '';
+    const fecha = alerta.fecha_publicacion || alerta.Fecha_Publicacion || alerta.FechaPublicacion;
+    const publicoRaw = alerta.publico_destino ?? alerta.PublicoDestino ?? '';
+    const tipo = alerta.tipo_alerta ?? alerta.TipoAlerta ?? '';
+    const leidoRaw = alerta.Leido ?? alerta.leido;
+    const leidoFlag = isAlertaLeida(leidoRaw);
+
+    const fechaFormateada = fecha ? new Date(fecha).toLocaleDateString('es-CR', {
+        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    }) : '';
+
+    const estadoBadge = leidoFlag
+        ? '<span class="tm-badge tm-badge-success"><i class="bi bi-check-circle me-1"></i>Leído</span>'
+        : '<span class="tm-badge tm-badge-danger"><i class="bi bi-envelope me-1"></i>Pendiente</span>';
+
+    const cardClass = leidoFlag ? 'read' : 'unread';
+    const collapseId = `alertCollapse${index}`;
+
+    return `
+        <div class="tm-alert-card ${cardClass}" data-alert-id="${id}">
+            <div class="tm-alert-card-header" 
+                 data-bs-toggle="collapse" 
+                 data-bs-target="#${collapseId}" 
+                 aria-expanded="false" 
+                 aria-controls="${collapseId}">
+                <div class="tm-alert-info">
+                    <div class="tm-alert-title-row">
+                        <span class="tm-alert-title">${escapeHtml(titulo)}</span>
+                        <span class="tm-alert-type">${getTipoBadge(tipo)}</span>
+                    </div>
+                    <div class="tm-alert-meta">
+                        <span class="tm-alert-meta-item">
+                            <i class="bi bi-calendar3"></i>
+                            ${fechaFormateada}
+                        </span>
+                        <span class="tm-alert-meta-item">
+                            <i class="bi bi-people"></i>
+                            ${escapeHtml(parsePublicoDestinoText(publicoRaw))}
+                        </span>
+                    </div>
+                </div>
+                <div class="tm-alert-preview">
+                    <div class="tm-alert-status">
+                        ${estadoBadge}
+                    </div>
+                    <i class="bi bi-chevron-down tm-expand-icon"></i>
+                </div>
+            </div>
+            <div class="collapse" id="${collapseId}">
+                <div class="tm-alert-card-body">
+                    <div class="tm-alert-message">
+                        ${escapeHtml(mensaje) || '<em class="text-muted">Sin mensaje</em>'}
+                    </div>
+                    <div class="tm-alert-details">
+                        <div class="tm-alert-detail-item">
+                            <span class="tm-alert-detail-label">ID</span>
+                            <span class="tm-alert-detail-value">#${id}</span>
+                        </div>
+                        <div class="tm-alert-detail-item">
+                            <span class="tm-alert-detail-label">Tipo</span>
+                            <span class="tm-alert-detail-value">${escapeHtml(tipo)}</span>
+                        </div>
+                        <div class="tm-alert-detail-item">
+                            <span class="tm-alert-detail-label">Destinatario</span>
+                            <span class="tm-alert-detail-value">${escapeHtml(parsePublicoDestinoText(publicoRaw))}</span>
+                        </div>
+                        <div class="tm-alert-detail-item">
+                            <span class="tm-alert-detail-label">Estado</span>
+                            <span class="tm-alert-detail-value">${leidoFlag ? 'Leído' : 'Pendiente'}</span>
+                        </div>
+                    </div>
+                    <div class="tm-alert-actions">
+                        <button class="tm-btn tm-btn-sm tm-btn-danger" onclick="confirmarEliminar(${id})">
+                            <i class="bi bi-trash me-1"></i>
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Apply filters and search to alerts for mobile view
+ */
+function applyMobileFilters() {
+    const searchTerm = document.getElementById('mobileSearchAlertas')?.value.toLowerCase() || '';
+    const estadoFilter = document.getElementById('mobileFilterEstado')?.value || '';
+
+    filteredAlertas = allAlertasData.filter(alerta => {
+        // Search filter
+        const titulo = (alerta.titulo ?? alerta.Titulo ?? '').toLowerCase();
+        const mensaje = (alerta.mensaje ?? alerta.Mensaje ?? '').toLowerCase();
+        const tipo = (alerta.tipo_alerta ?? alerta.TipoAlerta ?? '').toLowerCase();
+        const matchesSearch = !searchTerm ||
+            titulo.includes(searchTerm) ||
+            mensaje.includes(searchTerm) ||
+            tipo.includes(searchTerm);
+
+        // Status filter
+        const leidoRaw = alerta.Leido ?? alerta.leido;
+        const isLeida = isAlertaLeida(leidoRaw);
+        let matchesEstado = true;
+        if (estadoFilter === 'pendiente') {
+            matchesEstado = !isLeida;
+        } else if (estadoFilter === 'leido') {
+            matchesEstado = isLeida;
+        }
+
+        return matchesSearch && matchesEstado;
+    });
+
+    // Reset to first page when filters change
+    mobileCurrentPage = 1;
+    renderMobileAlerts();
+}
+
+/**
+ * Render mobile alert cards with pagination
+ */
+function renderMobileAlerts() {
+    const container = document.getElementById('alertCardsContainer');
+    if (!container) return;
+
+    const totalItems = filteredAlertas.length;
+    const totalPages = Math.ceil(totalItems / mobilePageSize);
+    const startIndex = (mobileCurrentPage - 1) * mobilePageSize;
+    const endIndex = Math.min(startIndex + mobilePageSize, totalItems);
+    const pageItems = filteredAlertas.slice(startIndex, endIndex);
+
+    // Render cards or empty state
+    if (pageItems.length === 0) {
+        container.innerHTML = `
+            <div class="tm-empty-state-alerts">
+                <i class="bi bi-bell-slash"></i>
+                <p>No se encontraron alertas</p>
+                <small>Intente ajustar los filtros de búsqueda</small>
+            </div>
+        `;
+    } else {
+        container.innerHTML = pageItems.map((alerta, idx) =>
+            renderAlertCard(alerta, startIndex + idx)
+        ).join('');
+    }
+
+    // Update pagination
+    updateMobilePagination(totalItems, totalPages, startIndex, endIndex);
+}
+
+/**
+ * Update mobile pagination controls
+ */
+function updateMobilePagination(totalItems, totalPages, startIndex, endIndex) {
+    // Update info text
+    const infoEl = document.querySelector('.tm-pagination-info');
+    if (infoEl) {
+        if (totalItems === 0) {
+            infoEl.innerHTML = `Mostrando <strong>0</strong> alertas`;
+        } else {
+            infoEl.innerHTML = `Mostrando <strong>${startIndex + 1}-${endIndex}</strong> de <strong>${totalItems}</strong> alertas`;
+        }
+    }
+
+    // Update prev/next buttons
+    const prevBtn = document.querySelector('.tm-page-prev');
+    const nextBtn = document.querySelector('.tm-page-next');
+
+    if (prevBtn) {
+        prevBtn.disabled = mobileCurrentPage <= 1;
+    }
+    if (nextBtn) {
+        nextBtn.disabled = mobileCurrentPage >= totalPages;
+    }
+
+    // Render page numbers
+    const pageNumbersContainer = document.querySelector('.tm-page-numbers');
+    if (pageNumbersContainer) {
+        let pageNumbersHtml = '';
+
+        // Determine which page numbers to show
+        let startPage = Math.max(1, mobileCurrentPage - 2);
+        let endPage = Math.min(totalPages, mobileCurrentPage + 2);
+
+        // Adjust if near the start or end
+        if (mobileCurrentPage <= 3) {
+            endPage = Math.min(5, totalPages);
+        }
+        if (mobileCurrentPage >= totalPages - 2) {
+            startPage = Math.max(1, totalPages - 4);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbersHtml += `
+                <button class="tm-page-btn ${i === mobileCurrentPage ? 'active' : ''}" 
+                        data-page="${i}">${i}</button>
+            `;
+        }
+
+        pageNumbersContainer.innerHTML = pageNumbersHtml;
+
+        // Add click handlers to page number buttons
+        pageNumbersContainer.querySelectorAll('.tm-page-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                mobileCurrentPage = parseInt(this.dataset.page);
+                renderMobileAlerts();
+            });
+        });
+    }
+}
+
+/**
+ * Initialize mobile view event listeners
+ */
+function initMobileEventListeners() {
+    // Search input
+    const searchInput = document.getElementById('mobileSearchAlertas');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyMobileFilters, 300); 
+        });
+    }
+
+    // Status filter
+    const estadoFilter = document.getElementById('mobileFilterEstado');
+    if (estadoFilter) {
+        estadoFilter.addEventListener('change', applyMobileFilters);
+    }
+
+    // Page size selector
+    const pageSizeSelect = document.getElementById('mobilePageSize');
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', function () {
+            mobilePageSize = parseInt(this.value);
+            mobileCurrentPage = 1;
+            renderMobileAlerts();
+        });
+    }
+
+    // Prev/Next buttons
+    const prevBtn = document.querySelector('.tm-page-prev');
+    const nextBtn = document.querySelector('.tm-page-next');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+            if (mobileCurrentPage > 1) {
+                mobileCurrentPage--;
+                renderMobileAlerts();
+            }
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            const totalPages = Math.ceil(filteredAlertas.length / mobilePageSize);
+            if (mobileCurrentPage < totalPages) {
+                mobileCurrentPage++;
+                renderMobileAlerts();
+            }
+        });
+    }
+}
+
+// ============================================
+// MAIN DATA LOADING
+// ============================================
+
+/**
+ * Load and display alerts in both DataTable and Mobile view
  */
 async function cargarAlertas() {
     showLoading(true);
@@ -331,16 +642,17 @@ async function cargarAlertas() {
         }
 
         const allAlertas = await resp.json();
-
         const alertasFiltradas = filtrarAlertasPorRol(allAlertas);
+
+        // Store for mobile view
+        allAlertasData = alertasFiltradas;
+        filteredAlertas = [...alertasFiltradas];
 
         // Update stats
         updateStats(alertasFiltradas);
 
-        // Prepare data for DataTable
+        // Desktop: DataTable
         const tableData = transformarDatosTabla(alertasFiltradas);
-
-        // Initialize or refresh DataTable
         if (dataTableInstance) {
             dataTableInstance.clear().rows.add(tableData).draw();
         } else {
@@ -359,6 +671,8 @@ async function cargarAlertas() {
                 order: [[0, 'desc']]
             });
         }
+
+        renderMobileAlerts();
 
     } catch (error) {
         console.error('Error loading alerts:', error);
@@ -406,9 +720,6 @@ async function borrarAlerta(id) {
     }
 }
 
-/**
- * Reset the alert form to default values
- */
 function resetForm() {
     const form = document.getElementById('formAlerta');
     const publico = document.getElementById('publico');
@@ -419,6 +730,13 @@ function resetForm() {
     if (publico) publico.value = 'todos';
     if (buseta) buseta.value = '';
     if (encargado) encargado.value = '';
+
+    document.querySelectorAll('#tipoAlertaGroup input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    // Also reset the hidden select
+    const tipoAlerta = document.getElementById('tipoAlerta');
+    if (tipoAlerta) tipoAlerta.value = '';
 
     togglePublicoGroups();
 }
@@ -470,10 +788,7 @@ async function handleFormSubmit(e) {
         if (resp.ok) {
             bootstrap.Modal.getInstance(document.getElementById('modalAlerta')).hide();
             resetForm();
-
-            // Show success notification
             showNotification('success', '¡Alerta enviada!', 'La alerta fue creada y enviada correctamente.');
-
             await cargarAlertas();
             if (typeof actualizarContadorAlertas === 'function') {
                 await actualizarContadorAlertas();
@@ -529,6 +844,15 @@ function initEventListeners() {
             }
         });
     }
+
+    document.querySelectorAll('#tipoAlertaGroup input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            document.getElementById('tipoAlerta').value = this.value;
+        });
+    });
+
+    // Initialize mobile-specific event listeners
+    initMobileEventListeners();
 }
 
 // ============================================

@@ -7,6 +7,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/alertas/alertas.css" asp-append-version="true" />
 }
 
 <!-- Loading Overlay -->
@@ -65,7 +66,7 @@
     </div>
 </div>
 
-<!-- Alerts Table Card -->
+<!-- Desktop: Alerts Table Card -->
 <div class="tm-card">
     <div class="tm-card-header">
         <span><i class="bi bi-list-ul me-2"></i>Listado de Alertas</span>
@@ -86,6 +87,57 @@
             </thead>
             <tbody></tbody>
         </table>
+
+        <!-- Mobile View: Alert Cards -->
+        <div class="tm-alerts-mobile">
+            <!-- Mobile Controls -->
+            <div class="tm-mobile-controls">
+                <div class="tm-mobile-search">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="mobileSearchAlertas"
+                               placeholder="Buscar alertas...">
+                    </div>
+                </div>
+                <div class="tm-mobile-filter">
+                    <select class="form-select" id="mobileFilterEstado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="leido">Leídas</option>
+                    </select>
+                    <select class="form-select" id="mobilePageSize">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Alert Cards Container -->
+            <div class="tm-alert-cards" id="alertCardsContainer">
+                <!-- Cards will be rendered here by JavaScript -->
+            </div>
+
+            <!-- Mobile Pagination -->
+            <div class="tm-mobile-pagination" id="mobilePaginationAlertas">
+                <div class="tm-pagination-info">
+                    Mostrando <strong>1-10</strong> de <strong>0</strong> alertas
+                </div>
+                <div class="tm-pagination-controls">
+                    <button class="tm-page-btn tm-page-prev" disabled>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <div class="tm-page-numbers">
+                        <!-- Page numbers rendered by JS -->
+                    </div>
+                    <button class="tm-page-btn tm-page-next" disabled>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -104,11 +156,25 @@
                 <form id="formAlerta">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="tipoAlerta" class="form-label">
+                            <label class="form-label">
                                 Tipo de Alerta <span class="text-danger">*</span>
                             </label>
-                            <select id="tipoAlerta" class="form-select" required>
-                                <option value="" selected disabled>Seleccione un tipo</option>
+                            <div class="tm-btn-group-select" id="tipoAlertaGroup">
+                                <input type="radio" name="tipoAlertaRadio" id="tipoRetraso" value="Retraso">
+                                <label for="tipoRetraso" class="tm-btn-option">Retraso</label>
+                                
+                                <input type="radio" name="tipoAlertaRadio" id="tipoCambio" value="Cambio Ruta">
+                                <label for="tipoCambio" class="tm-btn-option">Cambio Ruta</label>
+                                
+                                <input type="radio" name="tipoAlertaRadio" id="tipoEvento" value="Evento Especial">
+                                <label for="tipoEvento" class="tm-btn-option">Evento</label>
+                                
+                                <input type="radio" name="tipoAlertaRadio" id="tipoOtro" value="Otro">
+                                <label for="tipoOtro" class="tm-btn-option">Otro</label>
+                            </div>
+                            <!-- Keep hidden select for form compatibility -->
+                            <select id="tipoAlerta" class="d-none" required>
+                                <option value="">Seleccione</option>
                                 <option value="Retraso">Retraso</option>
                                 <option value="Cambio Ruta">Cambio Ruta</option>
                                 <option value="Evento Especial">Evento Especial</option>
