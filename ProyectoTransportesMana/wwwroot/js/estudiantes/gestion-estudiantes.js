@@ -1,10 +1,24 @@
-﻿// ============================================
+﻿/**
+ * Gestión de Estudiantes - JavaScript
+ * Handles student management CRUD operations with mobile support
+ */
+
+// ============================================
 // MODULE STATE
 // ============================================
 let dataTableInstance = null;
 let telefonoMask = null;
-let estudianteIdToDelete = null;
 let isPageLoaded = false;
+
+// Mobile pagination state
+const mobileState = {
+    allStudents: [],
+    filteredStudents: [],
+    currentPage: 1,
+    pageSize: 10,
+    searchTerm: '',
+    filterEstado: ''
+};
 
 // DOM Elements (cached on init)
 const DOM = {
@@ -15,7 +29,13 @@ const DOM = {
     institucion: null,
     telefono: null,
     busetas: null,
-    loadingOverlay: null
+    loadingOverlay: null,
+    // Mobile elements
+    studentCardsContainer: null,
+    mobileSearch: null,
+    mobileFilterEstado: null,
+    mobilePageSize: null,
+    mobilePagination: null
 };
 
 // ============================================
@@ -24,14 +44,10 @@ const DOM = {
 
 /**
  * Show or hide the loading overlay
- * @param {boolean} show - Whether to show the overlay
- * @param {string} message - Optional custom message to display
  */
 function showLoading(show = true, message = null) {
     if (DOM.loadingOverlay) {
         DOM.loadingOverlay.style.display = show ? 'flex' : 'none';
-
-        // Update message if provided
         if (message) {
             const messageEl = DOM.loadingOverlay.querySelector('p');
             if (messageEl) {
@@ -43,10 +59,6 @@ function showLoading(show = true, message = null) {
 
 /**
  * Show notification using SweetAlert2
- * @param {string} type - 'success', 'error', 'warning', 'info'
- * @param {string} title - Notification title
- * @param {string} text - Notification message
- * @param {boolean} toast - Show as toast notification
  */
 function showNotification(type, title, text, toast = false) {
     if (typeof SwalNotify === 'function' && !toast) {
@@ -67,11 +79,7 @@ function showNotification(type, title, text, toast = false) {
                 timerProgressBar: true
             });
         } else {
-            Swal.fire({
-                icon: type,
-                title: title,
-                text: text
-            });
+            Swal.fire({ icon: type, title: title, text: text });
         }
     } else {
         alert(`${title}\n${text}`);
@@ -79,22 +87,37 @@ function showNotification(type, title, text, toast = false) {
 }
 
 /**
- * Get anti-forgery token from the page
- * @returns {string} The token value
+ * Get anti-forgery token
  */
 function getAntiForgeryToken() {
     const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
     return tokenInput ? tokenInput.value : '';
 }
 
+/**
+ * Check if we're in mobile view
+ */
+function isMobileView() {
+    return window.innerWidth < 992;
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 // ============================================
 // SELECT2 INITIALIZATION
 // ============================================
 
-/**
- * Initialize Select2 for single select elements
- * @param {jQuery} $el - jQuery element
- */
 function initSelect2($el) {
     if (!$el || !$el.length || !$.fn.select2) return;
 
@@ -109,7 +132,6 @@ function initSelect2($el) {
         }
     }).on('change.select2', function () {
         $(this).trigger('input');
-        // Trigger validation if available
         const $form = $(this).closest('form');
         if ($form.length && $form.data('validator')) {
             $(this).valid();
@@ -117,10 +139,6 @@ function initSelect2($el) {
     });
 }
 
-/**
- * Initialize Select2 for multiple select elements
- * @param {jQuery} $el - jQuery element
- */
 function initSelect2Multiple($el) {
     if (!$el || !$el.length || !$.fn.select2) return;
 
@@ -141,13 +159,9 @@ function initSelect2Multiple($el) {
 // PHONE MASK
 // ============================================
 
-/**
- * Initialize phone number mask
- */
 function initTelefonoMask() {
     if (!DOM.telefono || typeof IMask === 'undefined') return;
 
-    // Destroy existing mask if any
     if (telefonoMask) {
         telefonoMask.destroy();
         telefonoMask = null;
@@ -161,7 +175,6 @@ function initTelefonoMask() {
         lazy: false
     });
 
-    // Trigger validation on input
     $(DOM.telefono).on('input blur', function () {
         $(this).trigger('change');
         const $form = $(this).closest('form');
@@ -171,9 +184,6 @@ function initTelefonoMask() {
     });
 }
 
-/**
- * Destroy phone mask
- */
 function destroyTelefonoMask() {
     if (telefonoMask) {
         telefonoMask.destroy();
@@ -185,10 +195,6 @@ function destroyTelefonoMask() {
 // BUSETAS LOADING
 // ============================================
 
-/**
- * Load busetas from the server
- * @param {boolean} showLoadingOverlay - Whether to show loading overlay
- */
 async function cargarBusetas(showLoadingOverlay = false) {
     if (showLoadingOverlay) {
         showLoading(true, 'Cargando busetas...');
@@ -218,8 +224,357 @@ async function cargarBusetas(showLoadingOverlay = false) {
     }
 }
 
-// Expose for external use
 window.cargarBusetas = cargarBusetas;
+
+// ============================================
+// MOBILE: DATA LOADING
+// ============================================
+
+/**
+ * Load students data from embedded JSON
+ */
+function loadStudentsData() {
+    const dataScript = document.getElementById('estudiantesData');
+    if (!dataScript) return [];
+
+    try {
+        return JSON.parse(dataScript.textContent) || [];
+    } catch (error) {
+        console.error('Error parsing students data:', error);
+        return [];
+    }
+}
+
+// ============================================
+// MOBILE: FILTERING & PAGINATION
+// ============================================
+
+/**
+ * Filter students based on search and status filter
+ */
+function filterStudents() {
+    const searchTerm = mobileState.searchTerm.toLowerCase().trim();
+    const filterEstado = mobileState.filterEstado;
+
+    mobileState.filteredStudents = mobileState.allStudents.filter(student => {
+        // Search filter
+        let matchesSearch = true;
+        if (searchTerm) {
+            const nombre = (student.nombreCompleto || '').toLowerCase();
+            const encargado = (student.encargado || '').toLowerCase();
+            const institucion = (student.institucion || '').toLowerCase();
+            const seccion = (student.seccion || '').toLowerCase();
+            const telefono = (student.telefono || '').toLowerCase();
+
+            matchesSearch = nombre.includes(searchTerm) ||
+                encargado.includes(searchTerm) ||
+                institucion.includes(searchTerm) ||
+                seccion.includes(searchTerm) ||
+                telefono.includes(searchTerm);
+        }
+
+        // Status filter
+        let matchesStatus = true;
+        if (filterEstado === 'activo') {
+            matchesStatus = student.activo === true;
+        } else if (filterEstado === 'inactivo') {
+            matchesStatus = student.activo === false;
+        }
+
+        return matchesSearch && matchesStatus;
+    });
+
+    // Reset to first page when filtering
+    mobileState.currentPage = 1;
+}
+
+/**
+ * Get paginated students for current page
+ */
+function getPagedStudents() {
+    const start = (mobileState.currentPage - 1) * mobileState.pageSize;
+    const end = start + mobileState.pageSize;
+    return mobileState.filteredStudents.slice(start, end);
+}
+
+/**
+ * Get total pages
+ */
+function getTotalPages() {
+    return Math.ceil(mobileState.filteredStudents.length / mobileState.pageSize) || 1;
+}
+
+/**
+ * Go to specific page
+ */
+function goToPage(page) {
+    const totalPages = getTotalPages();
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+
+    mobileState.currentPage = page;
+    renderMobileStudentCards();
+
+    // Scroll to top of cards container
+    if (DOM.studentCardsContainer) {
+        DOM.studentCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// ============================================
+// MOBILE: CARD RENDERING
+// ============================================
+
+/**
+ * Create HTML for a single student card
+ */
+function createStudentCardHtml(student) {
+    const statusClass = student.activo ? 'active' : 'inactive';
+    const statusBadge = student.activo
+        ? '<span class="tm-badge tm-badge-success"><i class="bi bi-check-circle-fill"></i> Activo</span>'
+        : '<span class="tm-badge tm-badge-danger"><i class="bi bi-x-circle-fill"></i> Inactivo</span>';
+
+    return `
+        <div class="tm-student-card ${statusClass}" data-id="${student.id}">
+            <div class="tm-student-card-header" 
+                 data-bs-toggle="collapse" 
+                 data-bs-target="#student-details-${student.id}" 
+                 aria-expanded="false"
+                 aria-controls="student-details-${student.id}">
+                <div class="tm-student-info">
+                    <div class="tm-student-title-row">
+                        <span class="tm-student-name">${escapeHtml(student.nombreCompleto)}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="tm-student-meta">
+                        <span class="tm-student-meta-item">
+                            <i class="bi bi-building"></i>
+                            ${escapeHtml(student.institucion || 'Sin institución')}
+                        </span>
+                        <span class="tm-student-meta-item">
+                            <i class="bi bi-bookmark"></i>
+                            ${escapeHtml(student.seccion || 'Sin sección')}
+                        </span>
+                    </div>
+                </div>
+                <div class="tm-student-preview">
+                    <i class="bi bi-chevron-down tm-expand-icon"></i>
+                </div>
+            </div>
+            <div class="collapse" id="student-details-${student.id}">
+                <div class="tm-student-card-body">
+                    <div class="tm-student-details">
+                        <div class="tm-student-detail-item">
+                            <span class="tm-student-detail-label">Encargado Legal</span>
+                            <span class="tm-student-detail-value">${escapeHtml(student.encargado || '—')}</span>
+                        </div>
+                        <div class="tm-student-detail-item">
+                            <span class="tm-student-detail-label">Maestra</span>
+                            <span class="tm-student-detail-value">${escapeHtml(student.maestra || '—')}</span>
+                        </div>
+                        <div class="tm-student-detail-item">
+                            <span class="tm-student-detail-label">Institución</span>
+                            <span class="tm-student-detail-value">${escapeHtml(student.institucion || '—')}</span>
+                        </div>
+                        <div class="tm-student-detail-item">
+                            <span class="tm-student-detail-label">Teléfono</span>
+                            <span class="tm-student-detail-value">${escapeHtml(student.telefono || '—')}</span>
+                        </div>
+                    </div>
+                    <div class="tm-student-actions">
+                        <div class="tm-student-actions-left">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       role="switch"
+                                       id="mobile-estado-${student.id}"
+                                       ${student.activo ? 'checked' : ''}
+                                       onchange="cambiarEstadoEstudiante(${student.id}, this.checked)">
+                                <label class="form-check-label small" for="mobile-estado-${student.id}">
+                                    ${student.activo ? 'Activo' : 'Inactivo'}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="tm-student-actions-right">
+                            <button class="tm-btn tm-btn-sm tm-btn-outline" 
+                                    onclick="editarEstudiante(${student.id})"
+                                    title="Editar">
+                                <i class="bi bi-pencil me-1"></i>
+                                Editar
+                            </button>
+                            <button class="tm-btn tm-btn-sm tm-btn-danger" 
+                                    onclick="eliminarEstudiante(${student.id})"
+                                    title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Create empty state HTML
+ */
+function createEmptyStateHtml() {
+    const isFiltered = mobileState.searchTerm || mobileState.filterEstado;
+
+    if (isFiltered) {
+        return `
+            <div class="tm-empty-state">
+                <i class="bi bi-search"></i>
+                <p>No se encontraron estudiantes</p>
+                <small>Intente con otros términos de búsqueda</small>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="tm-empty-state">
+            <i class="bi bi-people"></i>
+            <p>No hay estudiantes registrados</p>
+            <small>Haga clic en "Nuevo Estudiante" para agregar uno</small>
+        </div>
+    `;
+}
+
+/**
+ * Create pagination HTML
+ */
+function createPaginationHtml() {
+    const totalStudents = mobileState.filteredStudents.length;
+    const totalPages = getTotalPages();
+    const currentPage = mobileState.currentPage;
+    const pageSize = mobileState.pageSize;
+
+    const startItem = totalStudents === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalStudents);
+
+    // Generate page numbers
+    let pageNumbers = '';
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers += `
+            <button type="button" 
+                    class="tm-page-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="goToPage(${i})">
+                ${i}
+            </button>
+        `;
+    }
+
+    return `
+        <div class="tm-pagination-info">
+            Mostrando <strong>${startItem}-${endItem}</strong> de <strong>${totalStudents}</strong> estudiantes
+        </div>
+        <div class="tm-pagination-controls">
+            <button type="button" 
+                    class="tm-page-btn tm-page-prev" 
+                    onclick="goToPage(${currentPage - 1})"
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                ${pageNumbers}
+            </div>
+            <button type="button" 
+                    class="tm-page-btn tm-page-next" 
+                    onclick="goToPage(${currentPage + 1})"
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    `;
+}
+
+/**
+ * Render mobile student cards
+ */
+function renderMobileStudentCards() {
+    if (!DOM.studentCardsContainer) return;
+
+    const pagedStudents = getPagedStudents();
+
+    // Render cards or empty state
+    if (pagedStudents.length === 0) {
+        DOM.studentCardsContainer.innerHTML = createEmptyStateHtml();
+    } else {
+        DOM.studentCardsContainer.innerHTML = pagedStudents
+            .map(student => createStudentCardHtml(student))
+            .join('');
+    }
+
+    // Render pagination
+    if (DOM.mobilePagination) {
+        if (mobileState.filteredStudents.length > 0) {
+            DOM.mobilePagination.innerHTML = createPaginationHtml();
+            DOM.mobilePagination.style.display = '';
+        } else {
+            DOM.mobilePagination.innerHTML = '';
+            DOM.mobilePagination.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Initialize mobile view
+ */
+function initMobileView() {
+    // Load data
+    mobileState.allStudents = loadStudentsData();
+    mobileState.filteredStudents = [...mobileState.allStudents];
+
+    // Initial render
+    renderMobileStudentCards();
+}
+
+/**
+ * Attach mobile control event handlers
+ */
+function attachMobileEventHandlers() {
+    // Search input
+    if (DOM.mobileSearch) {
+        let searchTimeout;
+        DOM.mobileSearch.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                mobileState.searchTerm = e.target.value;
+                filterStudents();
+                renderMobileStudentCards();
+            }, 300); // Debounce 300ms
+        });
+    }
+
+    // Status filter
+    if (DOM.mobileFilterEstado) {
+        DOM.mobileFilterEstado.addEventListener('change', (e) => {
+            mobileState.filterEstado = e.target.value;
+            filterStudents();
+            renderMobileStudentCards();
+        });
+    }
+
+    // Page size
+    if (DOM.mobilePageSize) {
+        DOM.mobilePageSize.addEventListener('change', (e) => {
+            mobileState.pageSize = parseInt(e.target.value, 10);
+            mobileState.currentPage = 1;
+            renderMobileStudentCards();
+        });
+    }
+}
+
+// Expose goToPage globally for onclick handlers
+window.goToPage = goToPage;
 
 // ============================================
 // FORM HANDLING
@@ -229,19 +584,14 @@ window.cargarBusetas = cargarBusetas;
  * Reset the form to create mode
  */
 function nuevoEstudiante() {
-    // Reset form
     if (DOM.form) {
         DOM.form.reset();
     }
 
-    // Update modal title and action
     $('#modalEstudianteLabel').html('<i class="bi bi-mortarboard me-2"></i>Registrar Estudiante');
     $('#estudianteForm').attr('action', '/Estudiantes/RegistrarEstudiante');
-
-    // Clear hidden ID
     $('#IdUsuario').val('');
 
-    // Reset Select2 elements
     [DOM.encargado, DOM.maestra, DOM.institucion].forEach(el => {
         if (el) {
             $(el).val('').trigger('change');
@@ -249,25 +599,19 @@ function nuevoEstudiante() {
         }
     });
 
-    // Reset busetas
     if (DOM.busetas) {
         $(DOM.busetas).val(null).trigger('change');
     }
 
-    // Reset active checkbox
     $('#ActivoCheck').prop('checked', true);
-
-    // Clear validation states
     $('#estudianteForm').find('.is-invalid').removeClass('is-invalid');
     $('#estudianteForm').find('.is-valid').removeClass('is-valid');
 }
 
-// Expose globally
 window.nuevoEstudiante = nuevoEstudiante;
 
 /**
  * Load student data for editing
- * @param {number} id - Student ID
  */
 async function editarEstudiante(id) {
     showLoading(true, 'Cargando datos del estudiante...');
@@ -288,11 +632,9 @@ async function editarEstudiante(id) {
 
         const data = result.data;
 
-        // Update modal title and action
         $('#modalEstudianteLabel').html('<i class="bi bi-pencil me-2"></i>Editar Estudiante');
         $('#estudianteForm').attr('action', '/Estudiantes/ActualizarEstudiante');
 
-        // Fill form fields
         $('#IdUsuario').val(data.id);
         $('#Nombre').val(data.nombre);
         $('#PrimerApellido').val(data.primerApellido);
@@ -301,19 +643,16 @@ async function editarEstudiante(id) {
         $('#Telefono').val(data.telefono);
         $('#ActivoCheck').prop('checked', data.activo);
 
-        // Set Select2 values
         $('#IdEncargado').val(data.idEncargado).trigger('change');
         $('#IdInstitucion').val(data.idInstitucion).trigger('change');
         $('#IdMaestra').val(data.idMaestra).trigger('change');
 
-        // Load assigned busetas
         const busetasResponse = await fetch(`/Estudiantes/ObtenerBusetasPorEstudiante?id=${id}`);
         if (busetasResponse.ok) {
             const busetasAsignadas = await busetasResponse.json();
             $('#Busetas').val(busetasAsignadas.map(String)).trigger('change');
         }
 
-        // Show modal
         const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEstudiante'));
         modal.show();
 
@@ -325,12 +664,10 @@ async function editarEstudiante(id) {
     }
 }
 
-// Expose globally
 window.editarEstudiante = editarEstudiante;
 
 /**
  * Handle form submission
- * @param {Event} e - Submit event
  */
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -339,10 +676,8 @@ async function handleFormSubmit(e) {
     const action = form.action;
     const isCreate = action.includes('RegistrarEstudiante');
 
-    // Build FormData
     const formData = new FormData(form);
 
-    // Handle busetas (multiple select)
     const busetasSeleccionadas = $('#Busetas').val() || [];
     formData.delete('Busetas');
     busetasSeleccionadas.forEach(b => formData.append('Busetas', b));
@@ -359,11 +694,9 @@ async function handleFormSubmit(e) {
         const data = await response.json().catch(() => null);
 
         if (response.ok && data?.ok) {
-            // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalEstudiante'));
             if (modal) modal.hide();
 
-            // Show success notification and reload
             showNotification(
                 'success',
                 data.title || (isCreate ? 'Estudiante creado' : 'Estudiante actualizado'),
@@ -371,7 +704,6 @@ async function handleFormSubmit(e) {
                 true
             );
 
-            // Reload after short delay
             setTimeout(() => window.location.reload(), 1500);
         } else {
             showNotification(
@@ -394,7 +726,6 @@ async function handleFormSubmit(e) {
 
 /**
  * Show delete confirmation
- * @param {number} id - Student ID to delete
  */
 function eliminarEstudiante(id) {
     if (typeof Swal === 'undefined') {
@@ -423,7 +754,6 @@ function eliminarEstudiante(id) {
 
 /**
  * Perform the actual delete operation
- * @param {number} id - Student ID
  */
 async function performDelete(id) {
     showLoading(true, 'Eliminando estudiante...');
@@ -468,7 +798,6 @@ async function performDelete(id) {
     }
 }
 
-// Expose globally
 window.eliminarEstudiante = eliminarEstudiante;
 
 // ============================================
@@ -477,8 +806,6 @@ window.eliminarEstudiante = eliminarEstudiante;
 
 /**
  * Toggle student active status
- * @param {number} id - Student ID
- * @param {boolean} isChecked - New status
  */
 async function cambiarEstadoEstudiante(id, isChecked) {
     try {
@@ -500,9 +827,47 @@ async function cambiarEstadoEstudiante(id, isChecked) {
                 data.message || `El estudiante fue ${isChecked ? 'activado' : 'desactivado'} correctamente.`,
                 true
             );
+
+            // Update mobile state if in mobile view
+            if (isMobileView()) {
+                const studentIndex = mobileState.allStudents.findIndex(s => s.id === id);
+                if (studentIndex !== -1) {
+                    mobileState.allStudents[studentIndex].activo = isChecked;
+
+                    // Update the card's appearance
+                    const card = document.querySelector(`.tm-student-card[data-id="${id}"]`);
+                    if (card) {
+                        card.classList.toggle('active', isChecked);
+                        card.classList.toggle('inactive', !isChecked);
+
+                        // Update badge
+                        const badge = card.querySelector('.tm-badge');
+                        if (badge) {
+                            if (isChecked) {
+                                badge.className = 'tm-badge tm-badge-success';
+                                badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Activo';
+                            } else {
+                                badge.className = 'tm-badge tm-badge-danger';
+                                badge.innerHTML = '<i class="bi bi-x-circle-fill"></i> Inactivo';
+                            }
+                        }
+
+                        // Update label
+                        const label = card.querySelector(`label[for="mobile-estado-${id}"]`);
+                        if (label) {
+                            label.textContent = isChecked ? 'Activo' : 'Inactivo';
+                        }
+                    }
+                }
+            }
         } else {
             // Revert the checkbox
-            document.getElementById(`estado-${id}`).checked = !isChecked;
+            const desktopCheckbox = document.getElementById(`estado-${id}`);
+            const mobileCheckbox = document.getElementById(`mobile-estado-${id}`);
+
+            if (desktopCheckbox) desktopCheckbox.checked = !isChecked;
+            if (mobileCheckbox) mobileCheckbox.checked = !isChecked;
+
             showNotification(
                 'error',
                 data?.title || 'Error',
@@ -511,46 +876,35 @@ async function cambiarEstadoEstudiante(id, isChecked) {
         }
     } catch (error) {
         console.error('Error changing status:', error);
-        // Revert the checkbox
-        document.getElementById(`estado-${id}`).checked = !isChecked;
+
+        // Revert checkboxes
+        const desktopCheckbox = document.getElementById(`estado-${id}`);
+        const mobileCheckbox = document.getElementById(`mobile-estado-${id}`);
+
+        if (desktopCheckbox) desktopCheckbox.checked = !isChecked;
+        if (mobileCheckbox) mobileCheckbox.checked = !isChecked;
+
         showNotification('error', 'Error', 'Ocurrió un error inesperado.');
     }
 }
 
-// Expose globally
 window.cambiarEstadoEstudiante = cambiarEstadoEstudiante;
 
 // ============================================
 // MODAL EVENT HANDLERS
 // ============================================
 
-/**
- * Handle modal shown event
- */
 function onModalShown() {
-    // Initialize Select2 for dropdowns
     initSelect2($(DOM.encargado));
     initSelect2($(DOM.maestra));
     initSelect2($(DOM.institucion));
-
-    // Initialize phone mask
     initTelefonoMask();
-
-    // Focus first input
     $('#Nombre').focus();
 }
 
-/**
- * Handle modal hidden event
- */
 function onModalHidden() {
-    // Reset form
     nuevoEstudiante();
-
-    // Destroy phone mask
     destroyTelefonoMask();
-
-    // Remove validation classes
     $(DOM.telefono).removeClass('is-invalid is-valid');
 }
 
@@ -558,9 +912,6 @@ function onModalHidden() {
 // VALIDATION SETUP
 // ============================================
 
-/**
- * Setup custom phone validation
- */
 function setupPhoneValidation() {
     if (!$.validator || $.validator.methods.crphone) return;
 
@@ -578,30 +929,43 @@ function setupPhoneValidation() {
 }
 
 // ============================================
+// RESIZE HANDLER
+// ============================================
+
+let resizeTimeout;
+function handleResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        // Re-render mobile view if needed
+        if (isMobileView() && mobileState.allStudents.length > 0) {
+            renderMobileStudentCards();
+        }
+    }, 250);
+}
+
+// ============================================
 // INITIAL DATA LOADING
 // ============================================
 
-/**
- * Load all initial data for the page
- * Shows loading overlay during the process
- */
 async function loadInitialData() {
-    // Show loading overlay with initial message
     showLoading(true, 'Cargando estudiantes...');
 
     try {
         // Load busetas for the form
-        await cargarBusetas(false); // Don't show separate loading for this
-
-        // Initialize Select2 for busetas after loading
+        await cargarBusetas(false);
         initSelect2Multiple($(DOM.busetas));
 
-        // Initialize DataTable
-        if (typeof initDataTable === 'function') {
+        // Initialize DataTable for desktop
+        if (!isMobileView() && typeof initDataTable === 'function') {
             dataTableInstance = initDataTable('tablaEstudiantes', [7, 8], {
                 order: [[0, 'asc']],
                 pageLength: 10
             });
+        }
+
+        // Initialize mobile view
+        if (isMobileView()) {
+            initMobileView();
         }
 
         isPageLoaded = true;
@@ -610,7 +974,6 @@ async function loadInitialData() {
         console.error('Error loading initial data:', error);
         showNotification('error', 'Error de carga', 'No se pudieron cargar los datos iniciales.');
     } finally {
-        // Hide loading overlay
         showLoading(false);
     }
 }
@@ -619,11 +982,8 @@ async function loadInitialData() {
 // INITIALIZATION
 // ============================================
 
-/**
- * Initialize the page
- */
 function initPage() {
-    // Cache DOM elements first
+    // Cache DOM elements
     DOM.modal = $('#modalEstudiante');
     DOM.form = document.getElementById('estudianteForm');
     DOM.encargado = document.getElementById('IdEncargado');
@@ -632,6 +992,13 @@ function initPage() {
     DOM.telefono = document.getElementById('Telefono');
     DOM.busetas = document.getElementById('Busetas');
     DOM.loadingOverlay = document.getElementById('loading-overlay');
+
+    // Mobile elements
+    DOM.studentCardsContainer = document.getElementById('studentCardsContainer');
+    DOM.mobileSearch = document.getElementById('mobileSearchEstudiantes');
+    DOM.mobileFilterEstado = document.getElementById('mobileFilterEstado');
+    DOM.mobilePageSize = document.getElementById('mobilePageSize');
+    DOM.mobilePagination = document.getElementById('mobilePaginationEstudiantes');
 
     // Show loading overlay immediately
     showLoading(true, 'Cargando estudiantes...');
@@ -651,16 +1018,21 @@ function initPage() {
         DOM.form.addEventListener('submit', handleFormSubmit);
     }
 
-    // Handle SweetAlert payload from server (after page load)
+    // Attach mobile event handlers
+    attachMobileEventHandlers();
+
+    // Handle window resize
+    window.addEventListener('resize', handleResize);
+
+    // Handle SweetAlert payload from server
     if (window.__swalPayload && window.__swalPayload.type) {
         const { type, title, text } = window.__swalPayload;
         if (type && title) {
-            // Delay to ensure page is ready
             setTimeout(() => showNotification(type, title, text), 500);
         }
     }
 
-    // Load initial data (busetas, DataTable, etc.)
+    // Load initial data
     loadInitialData();
 }
 

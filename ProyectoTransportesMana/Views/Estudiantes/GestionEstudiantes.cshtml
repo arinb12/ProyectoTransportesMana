@@ -23,7 +23,7 @@
 
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/principal.css" />
     <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" asp-append-version="true" />
 }
@@ -81,8 +81,8 @@
     </div>
 </div>
 
-<!-- Students Table Card -->
-<div class="tm-card">
+<!-- Desktop: Students Table Card -->
+<div class="tm-card tm-estudiantes-desktop">
     <div class="tm-card-header">
         <span><i class="bi bi-table me-2"></i>Listado de Estudiantes</span>
     </div>
@@ -107,7 +107,7 @@
                     foreach (var e in lista)
                     {
                         var split = PartirNombre(e.NombreCompletoEstudiante);
-                        <tr>
+                        <tr data-id="@e.Id">
                             <td>@split.Nombres</td>
                             <td>@split.Apellidos</td>
                             <td>@e.Encargado</td>
@@ -146,6 +146,75 @@
         </table>
     </div>
 </div>
+
+<!-- Mobile: Students Cards View -->
+<div class="tm-card tm-estudiantes-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-people me-2"></i>Listado de Estudiantes</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchEstudiantes"
+                       placeholder="Buscar estudiante...">
+            </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobileFilterEstado">
+                <option value="">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+            </select>
+            <select class="form-select" id="mobilePageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Student Cards Container -->
+    <div class="tm-student-cards" id="studentCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationEstudiantes">
+        <div class="tm-pagination-info">
+            Mostrando <strong>1-10</strong> de <strong>0</strong> estudiantes
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="estudiantesData">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(lista?.Select(e => new {
+        id = e.Id,
+                nombreCompleto = e.NombreCompletoEstudiante,
+                encargado = e.Encargado,
+                institucion = e.Institucion,
+                maestra = e.Maestra,
+                seccion = e.Seccion,
+                telefono = e.Telefono,
+                activo = e.Activo
+        }) ?? Enumerable.Empty<object>()))
+</script>
 
 <!-- Modal: Nuevo/Editar Estudiante -->
 <div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel" aria-hidden="true">
@@ -281,33 +350,6 @@
                 <button type="submit" form="estudianteForm" class="tm-btn tm-btn-primary">
                     <i class="bi bi-check-lg me-1"></i>
                     Guardar Estudiante
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Confirmar Eliminación -->
-<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalConfirmarEliminarLabel">
-                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                    Confirmar Eliminación
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-0">¿Está seguro que desea eliminar este estudiante? Esta acción no se puede deshacer.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
-                    Cancelar
-                </button>
-                <button type="button" class="tm-btn tm-btn-danger" id="btnConfirmarEliminar">
-                    <i class="bi bi-trash me-1"></i>
-                    Eliminar
                 </button>
             </div>
         </div>
