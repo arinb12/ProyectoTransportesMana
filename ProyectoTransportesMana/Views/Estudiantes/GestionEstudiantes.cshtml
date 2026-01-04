@@ -23,23 +23,71 @@
 
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
-
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" asp-append-version="true" />
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="text-dark">Gestión de Estudiantes</h1>
-    <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEstudiante">
-        <i class="bi bi-person-plus me-1"></i>Nuevo Estudiante
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 tm-text-muted">Cargando estudiantes...</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-mortarboard-fill"></i>
+        Gestión de Estudiantes
+    </h1>
+    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalEstudiante" onclick="nuevoEstudiante()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Nuevo Estudiante
     </button>
 </div>
 
-<div class="card mb-4 shadow">
-    <div class="card-header bg-info text-dark fw-bold">
-        <i class="fas fa-users me-2"></i>Listado de Estudiantes
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-estudiantes">@(lista?.Count ?? 0)</div>
+            <div class="tm-stat-label">Total Estudiantes</div>
+        </div>
     </div>
-    <div class="card-body">
-        <table id="tablaEstudiantes" class="table pastel-table table-hover table-bordered">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-estudiantes-activos">@(lista?.Count(e => e.Activo) ?? 0)</div>
+            <div class="tm-stat-label">Estudiantes Activos</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-building-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-instituciones">@(lista?.Select(e => e.Institucion).Distinct().Count() ?? 0)</div>
+            <div class="tm-stat-label">Instituciones</div>
+        </div>
+    </div>
+</div>
+
+<!-- Students Table Card -->
+<div class="tm-card">
+    <div class="tm-card-header">
+        <span><i class="bi bi-table me-2"></i>Listado de Estudiantes</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaEstudiantes" class="table table-hover w-100">
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -49,8 +97,8 @@
                     <th>Maestra</th>
                     <th>Sección</th>
                     <th>Teléfono</th>
-                    <th>Activo</th>
-                    <th>Acciones</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -60,27 +108,37 @@
                     {
                         var split = PartirNombre(e.NombreCompletoEstudiante);
                         <tr>
-                            <td data-label="Nombre">@split.Nombres</td>
-                            <td data-label="Apellidos">@split.Apellidos</td>
-                            <td data-label="Encargado Legal">@e.Encargado</td>
-                            <td data-label="Institución">@e.Institucion</td>
-                            <td data-label="Maestra">@e.Maestra</td>
-                            <td data-label="Sección">@e.Seccion</td>
-                            <td data-label="Teléfono">@e.Telefono</td>
-                            <td data-label="Activo" class="text-center">
-                                <input type="checkbox"
-                                       @(e.Activo ? "checked" : null)
-                                       onchange="cambiarEstadoEstudiante(@e.Id, this.checked)" />
+                            <td>@split.Nombres</td>
+                            <td>@split.Apellidos</td>
+                            <td>@e.Encargado</td>
+                            <td>@e.Institucion</td>
+                            <td>@e.Maestra</td>
+                            <td>@e.Seccion</td>
+                            <td>@e.Telefono</td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-flex justify-content-center">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           role="switch"
+                                           id="estado-@e.Id"
+                                           @(e.Activo ? "checked" : null)
+                                           onchange="cambiarEstadoEstudiante(@e.Id, this.checked)" />
+                                </div>
                             </td>
-                            <td data-label="Acciones">
-                                <a href="#" class="text-primary ms-2" title="Editar" onclick="editarEstudiante(@e.Id)">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" class="text-danger ms-2" title="Eliminar" onclick="eliminarEstudiante(@e.Id)">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                            <td class="text-center">
+                                <div class="tm-action-buttons">
+                                    <button class="tm-btn tm-btn-sm tm-btn-outline"
+                                            title="Editar"
+                                            onclick="editarEstudiante(@e.Id)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="tm-btn tm-btn-sm tm-btn-danger"
+                                            title="Eliminar"
+                                            onclick="eliminarEstudiante(@e.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </td>
-
                         </tr>
                     }
                 }
@@ -89,15 +147,16 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel"
-     aria-hidden="true">
+<!-- Modal: Nuevo/Editar Estudiante -->
+<div class="modal fade" id="modalEstudiante" tabindex="-1" aria-labelledby="modalEstudianteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark fw-bold" id="modalEstudianteLabel">
-                    <i class="fas fa-user-graduate me-2"></i>Registrar Estudiante
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEstudianteLabel">
+                    <i class="bi bi-mortarboard me-2"></i>
+                    Registrar Estudiante
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <form id="estudianteForm"
@@ -109,99 +168,147 @@
                     <input type="hidden" id="IdUsuario" name="IdUsuario" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                    <!-- Nombre -->
                     <div class="col-md-6">
-                        <label asp-for="Nombre" class="form-label"></label>
-                        <input asp-for="Nombre" class="form-control" />
+                        <label asp-for="Nombre" class="form-label">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Nombre" class="form-control" placeholder="Ingrese el nombre" />
                         <span asp-validation-for="Nombre" class="text-danger"></span>
                     </div>
 
+                    <!-- Primer Apellido -->
                     <div class="col-md-3">
-                        <label asp-for="PrimerApellido" class="form-label"></label>
-                        <input asp-for="PrimerApellido" class="form-control" />
+                        <label asp-for="PrimerApellido" class="form-label">
+                            Primer Apellido <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="PrimerApellido" class="form-control" placeholder="Primer apellido" />
                         <span asp-validation-for="PrimerApellido" class="text-danger"></span>
                     </div>
 
+                    <!-- Segundo Apellido -->
                     <div class="col-md-3">
-                        <label asp-for="SegundoApellido" class="form-label"></label>
-                        <input asp-for="SegundoApellido" class="form-control" />
+                        <label asp-for="SegundoApellido" class="form-label">Segundo Apellido</label>
+                        <input asp-for="SegundoApellido" class="form-control" placeholder="Segundo apellido" />
                         <span asp-validation-for="SegundoApellido" class="text-danger"></span>
                     </div>
 
+                    <!-- Encargado Legal -->
                     <div class="col-md-6">
-                        <label asp-for="IdEncargado" class="form-label"></label>
+                        <label asp-for="IdEncargado" class="form-label">
+                            Encargado Legal <span class="text-danger">*</span>
+                        </label>
                         <select asp-for="IdEncargado"
                                 class="form-select select2"
                                 asp-items="ViewBag.Encargados"
-                                data-placeholder="-- Seleccione un encargado --">
+                                data-placeholder="Seleccione un encargado">
                             <option value=""></option>
                         </select>
                         <span asp-validation-for="IdEncargado" class="text-danger"></span>
                     </div>
 
+                    <!-- Institución -->
                     <div class="col-md-6">
-                        <label asp-for="IdInstitucion" class="form-label"></label>
+                        <label asp-for="IdInstitucion" class="form-label">
+                            Institución <span class="text-danger">*</span>
+                        </label>
                         <select asp-for="IdInstitucion"
                                 class="form-select select2"
                                 asp-items="ViewBag.Instituciones"
-                                data-placeholder="-- Seleccione una institución --">
+                                data-placeholder="Seleccione una institución">
                             <option value=""></option>
                         </select>
                         <span asp-validation-for="IdInstitucion" class="text-danger"></span>
                     </div>
 
+                    <!-- Maestra -->
                     <div class="col-md-6">
-                        <label asp-for="IdMaestra" class="form-label"></label>
+                        <label asp-for="IdMaestra" class="form-label">Maestra</label>
                         <select asp-for="IdMaestra"
                                 class="form-select select2"
                                 asp-items="ViewBag.Maestras"
-                                data-placeholder="-- Seleccione una maestra --">
+                                data-placeholder="Seleccione una maestra">
                             <option value=""></option>
                         </select>
                         <span asp-validation-for="IdMaestra" class="text-danger"></span>
                     </div>
 
+                    <!-- Sección -->
                     <div class="col-md-3">
-                        <label asp-for="Seccion" class="form-label"></label>
-                        <input asp-for="Seccion" class="form-control" />
+                        <label asp-for="Seccion" class="form-label">Sección</label>
+                        <input asp-for="Seccion" class="form-control" placeholder="Ej: 1-A" />
                         <span asp-validation-for="Seccion" class="text-danger"></span>
                     </div>
 
+                    <!-- Teléfono -->
                     <div class="col-md-3">
-                        <label asp-for="Telefono" class="form-label"></label>
+                        <label asp-for="Telefono" class="form-label">Teléfono</label>
                         <input asp-for="Telefono"
                                class="form-control"
                                id="Telefono"
                                inputmode="tel"
                                autocomplete="tel"
-                               placeholder="####-#### o +506 ####-####" />
+                               placeholder="####-####" />
                         <span asp-validation-for="Telefono" class="text-danger"></span>
                     </div>
 
-                    <div class="col-md-12">
-                        <label for="Busetas" class="form-label">Busetas asignadas</label>
+                    <!-- Busetas -->
+                    <div class="col-md-9">
+                        <label for="Busetas" class="form-label">Busetas Asignadas</label>
                         <select id="Busetas"
                                 name="Busetas"
                                 class="form-select select2-multiple"
                                 multiple="multiple"
-                                data-placeholder="-- Seleccione una o varias busetas --">
+                                data-placeholder="Seleccione una o varias busetas">
                         </select>
-                        <span class="text-muted small">Puede seleccionar más de una buseta.</span>
+                        <div class="form-text">Puede seleccionar más de una buseta.</div>
                     </div>
 
-
+                    <!-- Activo -->
                     <div class="col-md-3 d-flex align-items-center">
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" asp-for="Activo" />
-                            <label class="form-check-label" asp-for="Activo"></label>
+                        <div class="form-check form-switch mt-4">
+                            <input class="form-check-input" type="checkbox" asp-for="Activo" id="ActivoCheck" />
+                            <label class="form-check-label" for="ActivoCheck">Activo</label>
                         </div>
                         <span asp-validation-for="Activo" class="text-danger"></span>
                     </div>
-
-                    <div class="col-12 text-end">
-                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <a asp-action="GestionEstudiantes" asp-controller="Estudiantes" class="btn btn-secondary">Cancelar</a>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="estudianteForm" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar Estudiante
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Eliminación -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalConfirmarEliminarLabel">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">¿Está seguro que desea eliminar este estudiante? Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="tm-btn tm-btn-danger" id="btnConfirmarEliminar">
+                    <i class="bi bi-trash me-1"></i>
+                    Eliminar
+                </button>
             </div>
         </div>
     </div>
@@ -211,21 +318,13 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-       window.__swalPayload = {
+        // SweetAlert payload from server
+        window.__swalPayload = {
             type: '@Html.Raw(TempData["SwalType"] ?? ViewData["SwalType"] ?? "")',
             title: '@Html.Raw(TempData["SwalTitle"] ?? ViewData["SwalTitle"] ?? "")',
             text: '@Html.Raw(TempData["SwalText"] ?? ViewData["SwalText"] ?? "")'
-       };
-
+        };
     </script>
 
     <script src="~/js/estudiantes/gestion-estudiantes.js" asp-append-version="true"></script>
-
-    <script>
-        $(document).ready(function () {
-            if (window.innerWidth <= 768) {
-                $('#tablaEstudiantes').DataTable().columns.adjust().responsive.recalc();
-            }
-        });
-    </script>
 }

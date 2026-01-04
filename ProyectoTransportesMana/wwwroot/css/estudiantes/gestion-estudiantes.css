@@ -1,92 +1,404 @@
-.card-header.bg-info {
-  background-color: var(--pastel-blue) !important;
-  font-weight: 600;
-  border-top-left-radius: 0.75rem;
-  border-top-right-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.card-header.bg-info i,
-.card-header.bg-info span {
-  color: #000 !important;
-}
-
-/* Modal header pastel */
-#modalEstudiante .modal-header { background-color: var(--pastel-blue) !important; }
-
-/* Tabla estilos pastel */
-table.pastel-table th {
-  background-color: var(--pastel-gray);
-  font-weight: 600;
-  color: #333;
-}
-table.pastel-table tbody tr:hover {
-  background-color: var(--pastel-green);
-}
-
-.pastel-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 0.75rem;
-  transition: transform 0.2s ease;
-}
-
-.pastel-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
+/* Single Select */
 .select2-container--default .select2-selection--single {
-    background-color: #fff;
-    border: 1px solid #ced4da;
-    height: calc(2.375rem + 2px); 
+    background-color: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    height: calc(2.375rem + 2px);
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
-    border-radius: 0.375rem;
+    border-radius: var(--tm-radius);
     display: flex;
     align-items: center;
+    transition: border-color var(--tm-transition), box-shadow var(--tm-transition);
 }
 
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        color: #6c757d;
-        line-height: 1.5;
+    .select2-container--default .select2-selection--single:hover {
+        border-color: var(--tm-secondary);
     }
 
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 100%;
-        right: 0.75rem;
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--tm-secondary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--tm-text);
+    line-height: 1.5;
+    padding-left: 0;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--tm-text-muted);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+    right: 0.75rem;
+}
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: var(--tm-text-muted) transparent transparent transparent;
     }
 
-/* Estilos para el select múltiple de busetas */
+/* Multiple Select */
 .select2-container--default .select2-selection--multiple {
-    background-color: #fff;
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem;
+    background-color: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius);
     cursor: text;
     min-height: calc(2.375rem + 2px);
-    padding: 0.375rem;
+    padding: 0.25rem 0.375rem;
+    transition: border-color var(--tm-transition), box-shadow var(--tm-transition);
 }
 
-    .select2-container--default .select2-selection--multiple .select2-selection__choice {
-        background-color: var(--pastel-blue);
-        border: none;
-        color: #000;
-        border-radius: 0.375rem;
-        padding: 0.25rem 0.5rem;
-        margin-top: 0.25rem;
-        font-size: 0.9rem;
+    .select2-container--default .select2-selection--multiple:hover {
+        border-color: var(--tm-secondary);
     }
 
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-        color: #000;
-        margin-right: 0.35rem;
-        font-weight: bold;
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--tm-secondary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--tm-secondary);
+    border: none;
+    color: white;
+    border-radius: var(--tm-radius-sm);
+    padding: 0.25rem 0.5rem;
+    margin: 0.125rem;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255, 255, 255, 0.8);
+    margin-right: 0.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1;
+    order: 1;
+    cursor: pointer;
+    transition: color var(--tm-transition);
+}
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: white;
     }
 
-    .select2-container--default .select2-selection--multiple .select2-selection__rendered {
-        display: flex;
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem;
+    padding: 0;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--tm-text);
+}
+
+/* Dropdown */
+.select2-container--default .select2-dropdown {
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius);
+    box-shadow: var(--tm-shadow-md);
+    background-color: var(--tm-surface);
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius-sm);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+    .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+        border-color: var(--tm-secondary);
+        outline: none;
+        box-shadow: 0 0 0 0.15rem rgba(13, 148, 136, 0.15);
+    }
+
+.select2-container--default .select2-results__option {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--tm-text);
+    transition: background-color var(--tm-transition);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--tm-secondary);
+    color: white;
+}
+
+.select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: var(--tm-bg);
+    color: var(--tm-text);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected="true"] {
+    background-color: var(--tm-secondary-dark);
+    color: white;
+}
+
+/* Dropdown inside modal - ensure proper z-index */
+.modal .select2-container--open {
+    z-index: 1060;
+}
+
+/* ============================================
+   MODAL CUSTOMIZATION
+   ============================================ */
+
+#modalEstudiante .modal-header {
+    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light) 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: calc(var(--tm-radius-lg) - 1px) calc(var(--tm-radius-lg) - 1px) 0 0;
+}
+
+    #modalEstudiante .modal-header .modal-title {
+        font-weight: 600;
+    }
+
+    #modalEstudiante .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+        #modalEstudiante .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+#modalEstudiante .modal-content {
+    border: none;
+    border-radius: var(--tm-radius-lg);
+    box-shadow: var(--tm-shadow-xl);
+}
+
+#modalEstudiante .modal-footer {
+    background-color: var(--tm-bg);
+    border-top: 1px solid var(--tm-border);
+    border-radius: 0 0 calc(var(--tm-radius-lg) - 1px) calc(var(--tm-radius-lg) - 1px);
+}
+
+#modalConfirmarEliminar .modal-header {
+    background-color: var(--tm-surface);
+    border-bottom: 1px solid var(--tm-border);
+}
+
+#modalConfirmarEliminar .modal-content {
+    border: none;
+    border-radius: var(--tm-radius-lg);
+    box-shadow: var(--tm-shadow-xl);
+}
+
+/* ============================================
+   TABLE ENHANCEMENTS
+   ============================================ */
+
+#tablaEstudiantes thead th {
+    background-color: var(--tm-bg);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--tm-text-muted);
+    border-bottom: 2px solid var(--tm-border);
+    white-space: nowrap;
+    padding: 0.75rem;
+}
+
+#tablaEstudiantes tbody td {
+    vertical-align: middle;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--tm-text);
+    border-bottom: 1px solid var(--tm-border-light);
+}
+
+#tablaEstudiantes tbody tr:hover {
+    background-color: var(--tm-bg);
+}
+
+#tablaEstudiantes tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Switch Styling */
+#tablaEstudiantes .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+    #tablaEstudiantes .form-check-input:checked {
+        background-color: var(--tm-success);
+        border-color: var(--tm-success);
+    }
+
+    #tablaEstudiantes .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.25);
+    }
+
+/* ============================================
+   FORM ENHANCEMENTS
+   ============================================ */
+
+#estudianteForm .form-label {
+    font-weight: 500;
+    color: var(--tm-text);
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+}
+
+#estudianteForm .form-control,
+#estudianteForm .form-select {
+    border-color: var(--tm-border);
+    font-size: 0.9375rem;
+}
+
+    #estudianteForm .form-control:focus,
+    #estudianteForm .form-select:focus {
+        border-color: var(--tm-secondary);
+        box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+    }
+
+    #estudianteForm .form-control::placeholder {
+        color: var(--tm-text-light);
+    }
+
+#estudianteForm .form-text {
+    font-size: 0.75rem;
+    color: var(--tm-text-muted);
+}
+
+#estudianteForm .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+}
+
+    #estudianteForm .form-check-input:checked {
+        background-color: var(--tm-secondary);
+        border-color: var(--tm-secondary);
+    }
+
+#estudianteForm .form-check-label {
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+/* Validation States */
+#estudianteForm .form-control.is-invalid,
+#estudianteForm .form-select.is-invalid {
+    border-color: var(--tm-danger);
+}
+
+    #estudianteForm .form-control.is-invalid:focus,
+    #estudianteForm .form-select.is-invalid:focus {
+        box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.15);
+    }
+
+#estudianteForm .form-control.is-valid,
+#estudianteForm .form-select.is-valid {
+    border-color: var(--tm-success);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 767.98px) {
+    /* Modal takes full width on mobile */
+    #modalEstudiante .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    #modalEstudiante .modal-body {
+        padding: 1rem;
+    }
+
+    /* Form fields stack better */
+    #estudianteForm .col-md-3,
+    #estudianteForm .col-md-6,
+    #estudianteForm .col-md-9 {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Table responsive - horizontal scroll */
+    .tm-card-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #tablaEstudiantes {
+        min-width: 800px;
+    }
+
+    /* Action buttons smaller on mobile */
+    .tm-action-buttons .tm-btn {
+        padding: 0.25rem 0.375rem;
+    }
+
+        .tm-action-buttons .tm-btn i {
+            font-size: 0.875rem;
+        }
+}
+
+@media (max-width: 575.98px) {
+    #modalEstudiante .modal-header {
+        padding: 0.875rem 1rem;
+    }
+
+    #modalEstudiante .modal-title {
+        font-size: 1rem;
+    }
+
+    #modalEstudiante .modal-footer {
+        padding: 0.75rem 1rem;
         flex-wrap: wrap;
-        gap: 0.25rem;
+        gap: 0.5rem;
     }
+
+        #modalEstudiante .modal-footer .tm-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+    /* Stats grid single column on very small screens */
+    .tm-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .tm-page-header button,
+    .tm-action-buttons,
+    .form-check-input,
+    .modal {
+        display: none !important;
+    }
+
+    .tm-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    #tablaEstudiantes {
+        font-size: 10pt;
+    }
+
+        #tablaEstudiantes th {
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+}
