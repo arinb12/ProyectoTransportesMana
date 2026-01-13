@@ -4,336 +4,210 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
-    <style>
-        .pastel-table thead th {
-            background: #e8f4ff;
-        }
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/maestras/gestion-maestras.css" asp-append-version="true" />
 
-        .badge-activo {
-            background-color: #28a745;
-        }
-
-        .badge-inactivo {
-            background-color: #dc3545;
-        }
-
-        #modalMaestra .modal-header {
-            background: #e8f4ff !important;
-        }
-    </style>
 }
 
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="text-dark">Gestión de Maestras</h1>
-        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalMaestra" onclick="nuevaMaestra()">
-            <i class="fas fa-plus me-1"></i> Agregar
-        </button>
-    </div>
-
-    <div class="card mb-4 shadow">
-        <div class="card-header bg-info d-flex align-items-center">
-            <i class="fas fa-table me-2 text-dark"></i>
-            <span class="text-dark fw-bold">Listado Maestras</span>
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
         </div>
-        <div class="card-body">
-            <table id="tablaMaestras" class="table table-hover table-bordered pastel-table align-middle">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Institución</th>
-                        <th>Sección</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-center" style="width: 110px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyMaestras"></tbody>
-            </table>
+        <p class="mt-3 tm-text-muted">Cargando maestras...</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-person-badge-fill"></i>
+        Gestión de Maestras
+    </h1>
+    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalMaestra" onclick="nuevaMaestra()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Nueva Maestra
+    </button>
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-maestras">0</div>
+            <div class="tm-stat-label">Total Maestras</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-maestras-activas">0</div>
+            <div class="tm-stat-label">Maestras Activas</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-building-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-instituciones">0</div>
+            <div class="tm-stat-label">Instituciones</div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalMaestra" tabindex="-1" aria-hidden="true">
+<!-- Desktop: Maestras Table Card -->
+<div class="tm-card tm-maestras-desktop">
+    <div class="tm-card-header">
+        <span><i class="bi bi-table me-2"></i>Listado de Maestras</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaMaestras" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Institución</th>
+                    <th>Sección</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyMaestras">
+                <!-- Data loaded via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mobile: Maestras Cards View -->
+<div class="tm-card tm-maestras-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-person-badge me-2"></i>Listado de Maestras</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchMaestras"
+                       placeholder="Buscar maestra...">
+            </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobileFilterEstado">
+                <option value="">Todos</option>
+                <option value="activo">Activas</option>
+                <option value="inactivo">Inactivas</option>
+            </select>
+            <select class="form-select" id="mobilePageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Maestra Cards Container -->
+    <div class="tm-maestra-cards" id="maestraCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationMaestras">
+        <div class="tm-pagination-info">
+            Mostrando <strong>1-10</strong> de <strong>0</strong> maestras
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nueva/Editar Maestra -->
+<div class="modal fade" id="modalMaestra" tabindex="-1" aria-labelledby="modalMaestraLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-dark fw-bold" id="modalMaestraLabel">
-                    <i class="fas fa-user-graduate me-2"></i>Registrar Maestra
+                <h5 class="modal-title" id="modalMaestraLabel">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Registrar Maestra
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <form id="maestraForm" class="row g-3" novalidate>
                     <input type="hidden" id="IdMaestra" value="0" />
 
+                    <!-- Nombre -->
                     <div class="col-md-12">
-                        <label class="form-label">Nombre completo</label>
-                        <input type="text" id="Nombre" class="form-control" required />
+                        <label for="Nombre" class="form-label">
+                            Nombre Completo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="Nombre" class="form-control"
+                               placeholder="Ingrese el nombre completo" required />
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="form-label">Institución</label>
+                    <!-- Institución -->
+                    <div class="col-md-6">
+                        <label for="IdInstitucion" class="form-label">
+                            Institución <span class="text-danger">*</span>
+                        </label>
                         <select id="IdInstitucion" class="form-select" required>
                             <option value="">Seleccione una institución</option>
                         </select>
                     </div>
 
+                    <!-- Sección -->
                     <div class="col-md-6">
-                        <label class="form-label">Sección</label>
-                        <input type="text" id="Seccion" class="form-control" required />
+                        <label for="Seccion" class="form-label">
+                            Sección <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="Seccion" class="form-control"
+                               placeholder="Ej: 1-A, Kinder B" required />
                     </div>
 
-                    <div class="col-md-6 d-flex align-items-center">
-                        <label class="form-check-label me-2">Activo</label>
-                        <input type="checkbox" id="Activo" class="form-check-input" checked />
-                    </div>
-
-                    <div class="col-12 text-end">
-                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <!-- Activo -->
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="Activo" checked />
+                            <label class="form-check-label" for="Activo">Activa</label>
+                        </div>
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="maestraForm" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar Maestra
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        function escapeHtml(s) {
-            if (s === null || s === undefined) return '';
-            return String(s)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#039;');
-        }
-
-        function ensureDt() {
-            return window.jQuery && $.fn && $.fn.DataTable;
-        }
-
-        function initMaestrasDataTable() {
-            if (!ensureDt()) return;
-
-            if ($.fn.DataTable.isDataTable('#tablaMaestras')) {
-                $('#tablaMaestras').DataTable().destroy();
-            }
-
-            $('#tablaMaestras').DataTable({
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50, 100],
-                ordering: true,
-                searching: true,
-                autoWidth: false,
-                language: {
-                    lengthMenu: "Mostrar _MENU_ registros",
-                    zeroRecords: "No hay datos para mostrar",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                    infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                    infoFiltered: "(filtrado de _MAX_ registros)",
-                    search: "Buscar:",
-                    paginate: {
-                        first: "Primero",
-                        last: "Último",
-                        next: "Siguiente",
-                        previous: "Anterior"
-                    }
-                }
-            });
-        }
-
-        async function cargarInstituciones() {
-            const r = await fetch('/GestionMaestras/InstitucionesLookup');
-            if (!r.ok) throw new Error('No se pudieron cargar instituciones');
-            const data = await r.json();
-
-            const sel = document.getElementById('IdInstitucion');
-            sel.innerHTML = '<option value="">Seleccione una institución</option>';
-
-            data.forEach(x => {
-                const o = document.createElement('option');
-                o.value = x.idInstitucion;
-                o.textContent = x.nombre;
-                sel.appendChild(o);
-            });
-        }
-
-        async function listarMaestras() {
-            const r = await fetch('/GestionMaestras/Listar');
-            if (!r.ok) throw new Error('No se pudieron cargar maestras');
-            const data = await r.json();
-
-            if (ensureDt() && $.fn.DataTable.isDataTable('#tablaMaestras')) {
-                $('#tablaMaestras').DataTable().destroy();
-            }
-
-            const tbody = document.getElementById('tbodyMaestras');
-            tbody.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No hay maestras registradas</td></tr>';
-                initMaestrasDataTable();
-                return;
-            }
-
-            data.forEach(m => {
-                const tr = document.createElement('tr');
-
-                const estado = m.activo === true
-                    ? '<span class="badge badge-activo">Activo</span>'
-                    : '<span class="badge badge-inactivo">Inactivo</span>';
-
-                tr.innerHTML =
-                    '<td>' + escapeHtml(m.nombre) + '</td>' +
-                    '<td>' + escapeHtml(m.institucion) + '</td>' +
-                    '<td>' + escapeHtml(m.seccion) + '</td>' +
-                    '<td class="text-center">' + estado + '</td>' +
-                    '<td class="text-center">' +
-                        '<button type="button" class="btn btn-sm btn-outline-primary me-1" title="Editar" onclick="editarMaestra(' + m.idMaestra + ')">' +
-                            '<i class="fas fa-edit"></i>' +
-                        '</button>' +
-                        '<button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="eliminarMaestra(' + m.idMaestra + ')">' +
-                            '<i class="fas fa-trash"></i>' +
-                        '</button>' +
-                    '</td>';
-
-                tbody.appendChild(tr);
-            });
-
-            initMaestrasDataTable();
-        }
-
-        function nuevaMaestra() {
-            document.getElementById('IdMaestra').value = 0;
-            document.getElementById('Nombre').value = '';
-            document.getElementById('Seccion').value = '';
-            document.getElementById('Activo').checked = true;
-            document.getElementById('IdInstitucion').value = '';
-            document.getElementById('modalMaestraLabel').innerHTML = '<i class="fas fa-user-graduate me-2"></i>Registrar Maestra';
-        }
-
-        async function editarMaestra(id) {
-            const r = await fetch('/GestionMaestras/Obtener?id=' + id);
-            if (!r.ok) throw new Error('No se pudo cargar la maestra');
-            const m = await r.json();
-
-            document.getElementById('IdMaestra').value = m.idMaestra;
-            document.getElementById('Nombre').value = m.nombre || '';
-            document.getElementById('Seccion').value = m.seccion || '';
-            document.getElementById('Activo').checked = m.activo === true;
-            document.getElementById('IdInstitucion').value = String(m.idInstitucion || '');
-            document.getElementById('modalMaestraLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Editar Maestra';
-
-            new bootstrap.Modal(document.getElementById('modalMaestra')).show();
-        }
-
-        async function eliminarMaestra(id) {
-            const ok = await Swal.fire({
-                icon: 'warning',
-                title: 'Confirmar eliminación',
-                text: '¿Deseas eliminar esta maestra?',
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar'
-            });
-
-            if (!ok.isConfirmed) return;
-
-            const r = await fetch('/GestionMaestras/Eliminar?id=' + id, { method: 'DELETE' });
-            if (!r.ok) {
-                const t = await r.text();
-                await Swal.fire({ icon: 'error', title: 'Error', text: t || 'No se pudo eliminar' });
-                return;
-            }
-
-            await Swal.fire({ icon: 'success', title: 'Eliminado', text: 'La maestra fue eliminada correctamente.' });
-            await listarMaestras();
-        }
-
-        document.getElementById('maestraForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const id = parseInt(document.getElementById('IdMaestra').value || '0', 10);
-            const nombre = document.getElementById('Nombre').value || '';
-            const seccion = document.getElementById('Seccion').value || '';
-            const activo = document.getElementById('Activo').checked;
-            const idInstitucionRaw = document.getElementById('IdInstitucion').value;
-
-            if (!nombre.trim() || !seccion.trim() || !idInstitucionRaw) {
-                await Swal.fire({ icon: 'warning', title: 'Validación', text: 'Complete todos los campos.' });
-                return;
-            }
-
-            const esNuevo = id === 0;
-
-            const confirm = await Swal.fire({
-                icon: 'question',
-                title: esNuevo ? 'Confirmar registro' : 'Confirmar actualización',
-                text: esNuevo ? '¿Deseas agregar esta maestra?' : '¿Deseas guardar los cambios?',
-                showCancelButton: true,
-                confirmButtonText: esNuevo ? 'Agregar' : 'Guardar',
-                cancelButtonText: 'Cancelar'
-            });
-
-            if (!confirm.isConfirmed) return;
-
-            if (esNuevo) {
-                const r = await fetch('/GestionMaestras/Crear', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        idInstitucion: parseInt(idInstitucionRaw, 10),
-                        seccion: seccion
-                    })
-                });
-
-                if (!r.ok) {
-                    const t = await r.text();
-                    await Swal.fire({ icon: 'error', title: 'Error', text: t || 'No se pudo crear' });
-                    return;
-                }
-
-                await Swal.fire({ icon: 'success', title: 'Agregado', text: 'La maestra fue registrada correctamente.' });
-            } else {
-                const r = await fetch('/GestionMaestras/Actualizar?id=' + id, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        idMaestra: id,
-                        nombre: nombre,
-                        idInstitucion: parseInt(idInstitucionRaw, 10),
-                        seccion: seccion,
-                        activo: activo
-                    })
-                });
-
-                if (!r.ok) {
-                    const t = await r.text();
-                    await Swal.fire({ icon: 'error', title: 'Error', text: t || 'No se pudo actualizar' });
-                    return;
-                }
-
-                await Swal.fire({ icon: 'success', title: 'Actualizado', text: 'Los cambios se guardaron correctamente.' });
-            }
-
-            const modalEl = document.getElementById('modalMaestra');
-            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modal.hide();
-
-            await listarMaestras();
-        });
-
-        document.addEventListener('DOMContentLoaded', async function () {
-            try {
-                await cargarInstituciones();
-                await listarMaestras();
-            } catch (e) {
-                await Swal.fire({ icon: 'error', title: 'Error', text: e.message || 'Error al cargar datos' });
-            }
-        });
-    </script>
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/maestras/gestion-maestras.js" asp-append-version="true"></script>
 }
