@@ -6,380 +6,330 @@
     Layout = "~/Views/Shared/_LayoutInterno.cshtml";
 
     var encargados = ViewBag.Encargados as List<EncargadoLegalListItemResponse> ?? new();
+    var totalEncargados = encargados.Count;
+    var encargadosActivos = encargados.Count(e => e.Activo);
+    var encargadosInactivos = totalEncargados - encargadosActivos;
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
-    <style>
-        .pastel-table thead th {
-            background: #e8f4ff;
-        }
-
-        .badge-activo {
-            background-color: #28a745;
-        }
-
-        .badge-inactivo {
-            background-color: #dc3545;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/encargados-legales/gestion-encargados.css" asp-append-version="true" />
 }
 
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="text-dark">Gestión de Padres</h1>
-        <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalEncargado" onclick="nuevoEncargado()">
-            <i class="fas fa-plus me-1"></i> Agregar
-        </button>
-    </div>
-
-    <div class="card mb-4 shadow">
-        <div class="card-header bg-info d-flex align-items-center">
-            <i class="fas fa-users me-2 text-dark"></i>
-            <span class="text-dark fw-bold">Listado de Padres</span>
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay" style="display: none;">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
         </div>
-        <div class="card-body">
-            <table id="tablaEncargados" class="table table-hover table-bordered pastel-table align-middle">
-                <thead>
-                    <tr>
-                        <th>Nombre Completo</th>
-                        <th>Estudiante</th>
-                        <th>Estado Contrato</th>
-                        <th>Fecha Inicio</th>
-                        <th>Dirección</th>
-                        <th>Teléfono</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-center">Credenciales</th>
-                        <th class="text-center" style="width:110px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var e in encargados)
-                    {
-                        <tr>
-                            <td>@e.NombreCompleto</td>
-                            <td>@(string.IsNullOrWhiteSpace(e.Estudiantes) ? "-" : e.Estudiantes)</td>
-                            <td>@e.EstadoContrato</td>
-                            <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
-                            <td>@e.Direccion</td>
-                            <td>@e.Telefono</td>
-                            <td class="text-center">
-                                @if (e.Activo)
-                                {
-                                    <span class="badge badge-activo">Activo</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-inactivo">Inactivo</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-secondary" onclick="enviarContrasena(@e.IdUsuario)">
-                                    Enviar contraseña
-                                </button>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1" title="Editar" onclick="editarEncargado(@e.IdUsuario)">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="eliminarEncargado(@e.IdUsuario)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <p class="mt-3 tm-text-muted">Cargando padres...</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-people-fill"></i>
+        Gestión de Padres
+    </h1>
+    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalEncargado" onclick="nuevoEncargado()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Nuevo Padre
+    </button>
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-encargados">@totalEncargados</div>
+            <div class="tm-stat-label">Total Padres</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-encargados-activos">@encargadosActivos</div>
+            <div class="tm-stat-label">Padres Activos</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-person-x-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-encargados-inactivos">@encargadosInactivos</div>
+            <div class="tm-stat-label">Padres Inactivos</div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalEncargado" tabindex="-1">
+<!-- Desktop: Encargados Table Card -->
+<div class="tm-card tm-encargados-desktop">
+    <div class="tm-card-header">
+        <span><i class="bi bi-table me-2"></i>Listado de Padres</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaEncargados" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Estudiante</th>
+                    <th>Estado Contrato</th>
+                    <th>Fecha Inicio</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Credenciales</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyEncargados">
+                @foreach (var e in encargados)
+                {
+                    <tr data-id="@e.IdUsuario">
+                        <td>@e.NombreCompleto</td>
+                        <td>@(string.IsNullOrWhiteSpace(e.Estudiantes) ? "-" : e.Estudiantes)</td>
+                        <td>@e.EstadoContrato</td>
+                        <td>@(e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-")</td>
+                        <td>@e.Direccion</td>
+                        <td>@e.Telefono</td>
+                        <td class="text-center">
+                            @if (e.Activo)
+                            {
+                                <span class="tm-badge tm-badge-success">
+                                    <i class="bi bi-check-circle-fill"></i> Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="tm-badge tm-badge-danger">
+                                    <i class="bi bi-x-circle-fill"></i> Inactivo
+                                </span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <button class="tm-btn tm-btn-outline tm-btn-sm"
+                                    onclick="enviarContrasena(@e.IdUsuario)"
+                                    title="Enviar contraseña temporal">
+                                <i class="bi bi-envelope-fill"></i>
+                            </button>
+                        </td>
+                        <td class="text-center">
+                            <div class="tm-action-buttons">
+                                <button class="tm-btn tm-btn-outline tm-btn-sm"
+                                        title="Editar"
+                                        onclick="editarEncargado(@e.IdUsuario)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="tm-btn tm-btn-danger tm-btn-sm"
+                                        title="Eliminar"
+                                        onclick="eliminarEncargado(@e.IdUsuario)">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mobile: Encargados Cards View -->
+<div class="tm-card tm-encargados-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-people me-2"></i>Listado de Padres</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchEncargados"
+                       placeholder="Buscar padre...">
+            </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobileFilterEstado">
+                <option value="">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+            </select>
+            <select class="form-select" id="mobilePageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Encargado Cards Container -->
+    <div class="tm-encargado-cards" id="encargadoCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationEncargados">
+        <div class="tm-pagination-info">
+            Mostrando <strong>1-10</strong> de <strong>0</strong> padres
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="encargadosData">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(encargados.Select(e => new {
+        idUsuario = e.IdUsuario,
+                nombreCompleto = e.NombreCompleto,
+                estudiantes = e.Estudiantes ?? "-",
+                estadoContrato = e.EstadoContrato,
+                fechaInicio = e.FechaInicio?.ToString("dd/MM/yyyy") ?? "-",
+                direccion = e.Direccion,
+                telefono = e.Telefono,
+                activo = e.Activo
+        })))
+</script>
+
+<!-- Modal: Nuevo/Editar Encargado -->
+<div class="modal fade" id="modalEncargado" tabindex="-1" aria-labelledby="modalEncargadoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark fw-bold" id="modalEncargadoLabel">
-                    <i class="fas fa-user-graduate me-2"></i> Registrar Padre
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEncargadoLabel">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Registrar Padre
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form id="encargadoForm" class="row g-3">
+                <form id="encargadoForm" class="row g-3" novalidate>
                     @Html.AntiForgeryToken()
 
-                    <input type="hidden" id="IdUsuario" />
-                    <input type="hidden" id="AceptoTerminos" />
-                    <input type="hidden" id="Activo" />
+                    <input type="hidden" id="IdUsuario" value="0" />
+                    <input type="hidden" id="AceptoTerminos" value="false" />
+                    <input type="hidden" id="Activo" value="true" />
 
+                    <!-- Nombre -->
                     <div class="col-md-4">
-                        <label class="form-label">Nombre</label>
-                        <input id="Nombre" class="form-control" />
+                        <label for="Nombre" class="form-label">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="Nombre" class="form-control"
+                               placeholder="Ingrese el nombre" required />
                     </div>
 
+                    <!-- Primer Apellido -->
                     <div class="col-md-4">
-                        <label class="form-label">Primer Apellido</label>
-                        <input id="PrimerApellido" class="form-control" />
+                        <label for="PrimerApellido" class="form-label">
+                            Primer Apellido <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="PrimerApellido" class="form-control"
+                               placeholder="Ingrese primer apellido" required />
                     </div>
 
+                    <!-- Segundo Apellido -->
                     <div class="col-md-4">
-                        <label class="form-label">Segundo Apellido</label>
-                        <input id="SegundoApellido" class="form-control" />
+                        <label for="SegundoApellido" class="form-label">
+                            Segundo Apellido
+                        </label>
+                        <input type="text" id="SegundoApellido" class="form-control"
+                               placeholder="Ingrese segundo apellido" />
                     </div>
 
+                    <!-- Correo -->
                     <div class="col-md-6">
-                        <label class="form-label">Correo</label>
-                        <input id="Correo" class="form-control" />
+                        <label for="Correo" class="form-label">
+                            Correo Electrónico <span class="text-danger">*</span>
+                        </label>
+                        <input type="email" id="Correo" class="form-control"
+                               placeholder="ejemplo@correo.com" required />
                     </div>
 
+                    <!-- Teléfono -->
                     <div class="col-md-6">
-                        <label class="form-label">Teléfono</label>
-                        <input id="Telefono" class="form-control" />
+                        <label for="Telefono" class="form-label">
+                            Teléfono <span class="text-danger">*</span>
+                        </label>
+                        <input type="tel" id="Telefono" class="form-control"
+                               placeholder="Ej: 8888-8888" required />
                     </div>
 
+                    <!-- Fecha de Inicio -->
                     <div class="col-md-6">
-                        <label class="form-label">Fecha de inicio</label>
-                        <input id="FirmaContrato" type="date" class="form-control" />
+                        <label for="FirmaContrato" class="form-label">
+                            Fecha de Inicio
+                        </label>
+                        <input type="date" id="FirmaContrato" class="form-control" />
                     </div>
 
+                    <!-- Dirección -->
                     <div class="col-md-6">
-                        <label class="form-label">Dirección</label>
-                        <input id="DireccionResidencia" class="form-control" />
+                        <label for="DireccionResidencia" class="form-label">
+                            Dirección
+                        </label>
+                        <input type="text" id="DireccionResidencia" class="form-control"
+                               placeholder="Ingrese la dirección" />
                     </div>
 
-                    <div class="col-12 text-end">
-                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <!-- Estado Activo (solo visible en edición) -->
+                    <div class="col-md-12" id="activoContainer" style="display: none;">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="ActivoSwitch" checked />
+                            <label class="form-check-label" for="ActivoSwitch">Activo</label>
+                        </div>
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="encargadoForm" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
+    <script src="~/js/encargados-legales/gestion-encargados.js" asp-append-version="true"></script>
     <script>
-        $(document).ready(function () {
-            $('#tablaEncargados').DataTable({
-                pageLength: 10,
-                order: [],
-                language: {
-                    lengthMenu: "Mostrar _MENU_ registros",
-                    search: "Buscar:",
-                    zeroRecords: "No hay datos",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_",
-                    infoEmpty: "Mostrando 0 a 0 de 0",
-                    infoFiltered: "(filtrado de _MAX_ registros)",
-                    paginate: { next: "Siguiente", previous: "Anterior" }
-                }
-            });
-
-                    $('#encargadoForm').on('submit', function (e) {
-            e.preventDefault();
-
-            const id = parseInt($('#IdUsuario').val() || '0');
-            const esEdicion = id > 0;
-
-            const titulo = esEdicion ? 'Confirmar cambios' : 'Confirmar registro';
-            const texto = esEdicion
-                ? '¿Desea guardar los cambios del padre?'
-                : '¿Desea registrar este nuevo padre?';
-
-            Swal.fire({
-                icon: 'question',
-                title: titulo,
-                text: texto,
-                showCancelButton: true,
-                confirmButtonText: 'Sí, guardar',
-                cancelButtonText: 'Cancelar'
-            }).then(result => {
-                if (!result.isConfirmed) return;
-
-                const url = esEdicion
-                    ? '@Url.Action("ActualizarEncargado", "EncargadosLegales")'
-                    : '@Url.Action("RegistrarEncargado", "EncargadosLegales")';
-
-                const firma = $('#FirmaContrato').val();
-
-                const payload = {
-                    IdUsuario: id,
-                    Nombre: $('#Nombre').val(),
-                    PrimerApellido: $('#PrimerApellido').val(),
-                    SegundoApellido: $('#SegundoApellido').val(),
-                    Correo: $('#Correo').val(),
-                    Telefono: $('#Telefono').val(),
-                    DireccionResidencia: $('#DireccionResidencia').val(),
-                    Activo: ($('#Activo').val() || 'false') === 'true',
-                    AceptoTerminos: ($('#AceptoTerminos').val() || 'false') === 'true',
-                    FirmaContrato: (firma && firma.trim() !== '') ? firma : null
-                };
-
-                const token = $('input[name="__RequestVerificationToken"]').val();
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: payload,
-                    headers: { 'RequestVerificationToken': token }
-                }).done(function (r) {
-                    if (r && r.ok === false) {
-                        Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
-                        return;
-                    }
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: esEdicion ? 'Actualizado' : 'Registrado',
-                        text: esEdicion
-                            ? 'Los cambios se guardaron correctamente.'
-                            : 'El padre fue registrado correctamente.'
-                    }).then(() => {
-                        $('#modalEncargado').modal('hide');
-                        location.reload();
-                    });
-
-                }).fail(function (xhr) {
-                    let msg = 'Error de datos. Revisa campos requeridos.';
-                    if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
-
-                    Swal.fire('Error', msg, 'error');
-                });
-            });
-        });
-
-
-                const token = $('input[name="__RequestVerificationToken"]').val();
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: payload,
-                    headers: { 'RequestVerificationToken': token }
-                }).done(function (r) {
-                    if (r && r.ok === false) {
-                        Swal.fire('Error', r.message || 'No se pudo guardar.', 'error');
-                        return;
-                    }
-                    $('#modalEncargado').modal('hide');
-                    location.reload();
-                }).fail(function (xhr) {
-                    let msg = 'Error de datos. Revisa campos requeridos y formato.';
-                    if (xhr.responseJSON) {
-                        if (xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                        if (xhr.responseJSON.errors) {
-                            const e = xhr.responseJSON.errors;
-                            const detalle = Object.keys(e).map(k => `${k}: ${e[k].join(', ')}`).join('<br/>');
-                            msg = `${msg}<br/><br/>${detalle}`;
-                        }
-                    }
-                    Swal.fire('Error', msg, 'error');
-                });
-            });
-       
-
-        function nuevoEncargado() {
-            $('#encargadoForm')[0].reset();
-            $('#IdUsuario').val(0);
-            $('#AceptoTerminos').val('false');
-            $('#Activo').val('true');
-            $('#FirmaContrato').val('');
-            $('#modalEncargadoLabel').text('Registrar Padre');
-        }
-
-        function editarEncargado(id) {
-            $.get('@Url.Action("ObtenerParaEditar", "EncargadosLegales")', { id: id })
-                .done(function (r) {
-                    if (!r || r.ok !== true) {
-                        Swal.fire('Error', (r && r.message) ? r.message : 'No se pudo cargar el encargado.', 'error');
-                        return;
-                    }
-
-                    const e = r.data;
-                    $('#IdUsuario').val(e.idUsuario);
-                    $('#Nombre').val(e.nombre);
-                    $('#PrimerApellido').val(e.primerApellido);
-                    $('#SegundoApellido').val(e.segundoApellido);
-                    $('#Correo').val(e.correo);
-                    $('#Telefono').val(e.telefono);
-                    $('#DireccionResidencia').val(e.direccionResidencia);
-
-                    $('#AceptoTerminos').val((e.aceptoTerminos === true).toString());
-                    $('#Activo').val((e.activo === true).toString());
-
-                    if (e.firmaContrato) {
-                        let iso = '';
-                        if (typeof e.firmaContrato === 'string') {
-                            if (e.firmaContrato.includes('T')) {
-                                iso = e.firmaContrato.split('T')[0];
-                            } else if (e.firmaContrato.includes('/')) {
-                                const p = e.firmaContrato.split('/');
-                                if (p.length === 3) iso = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
-                            } else {
-                                iso = e.firmaContrato;
-                            }
-                        }
-                        $('#FirmaContrato').val(iso);
-                    } else {
-                        $('#FirmaContrato').val('');
-                    }
-
-                    $('#modalEncargadoLabel').text('Editar Padre');
-                    $('#modalEncargado').modal('show');
-                })
-                .fail(function () {
-                    Swal.fire('Error', 'No se pudo cargar la información para editar.', 'error');
-                });
-        }
-
-        function eliminarEncargado(id) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Eliminar',
-                text: '¿Deseas eliminar este padre?',
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then(r => {
-                if (!r.isConfirmed) return;
-
-                $.post('@Url.Action("EliminarEncargado", "EncargadosLegales")', { id: id })
-                    .done(function (resp) {
-                        if (resp && resp.ok === false) {
-                            Swal.fire('Error', resp.message || 'No se pudo eliminar.', 'error');
-                            return;
-                        }
-                        location.reload();
-                    })
-                    .fail(function () {
-                        Swal.fire('Error', 'No se pudo eliminar el encargado.', 'error');
-                    });
-            });
-        }
-
-                function enviarContrasena(id) {
-            Swal.fire({
-                icon: 'question',
-                title: 'Enviar contraseña temporal',
-                text: '¿Desea resetear la contraseña y enviar una contraseña temporal por correo?',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, enviar',
-                cancelButtonText: 'Cancelar'
-            }).then(r => {
-                if (!r.isConfirmed) return;
-
-                $.post('@Url.Action("ResetCredencialesEncargado", "Cuenta")', { idUsuario: id })
-                    .done(function (resp) {
-                        if (resp && resp.ok === false) {
-                            Swal.fire('Error', resp.message || 'No se pudo enviar.', 'error');
-                            return;
-                        }
-                        Swal.fire('Listo', (resp && resp.message) ? resp.message : 'Correo enviado.', 'success');
-                    })
-                    .fail(function (xhr) {
-                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'No se pudo enviar el correo.';
-                        Swal.fire('Error', msg, 'error');
-                    });
-            });
-        }
-
+        // URL endpoints for JavaScript
+        window.EncargadosConfig = {
+            urls: {
+                obtenerParaEditar: '@Url.Action("ObtenerParaEditar", "EncargadosLegales")',
+                registrar: '@Url.Action("RegistrarEncargado", "EncargadosLegales")',
+                actualizar: '@Url.Action("ActualizarEncargado", "EncargadosLegales")',
+                eliminar: '@Url.Action("EliminarEncargado", "EncargadosLegales")',
+                resetCredenciales: '@Url.Action("ResetCredencialesEncargado", "Cuenta")'
+            }
+        };
     </script>
 }
