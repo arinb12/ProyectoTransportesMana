@@ -13,7 +13,7 @@
     let dataTableInstance = null;
     let isPageLoaded = false;
 
-    // Mobile pagination state
+    // Mobile pagination state using common structure
     const mobileState = {
         allMaestras: [],
         filteredMaestras: [],
@@ -36,67 +36,31 @@
         mobilePagination: null
     };
 
+    // Status labels for maestras (feminine form)
+    const STATUS_LABELS = { active: 'Activa', inactive: 'Inactiva' };
+
     // ============================================
-    // UTILITY FUNCTIONS
+    // LOCAL UTILITY WRAPPERS
     // ============================================
 
     function showLoading(show = true, message = null) {
-        if (DOM.loadingOverlay) {
-            DOM.loadingOverlay.style.display = show ? 'flex' : 'none';
-            if (message) {
-                const messageEl = DOM.loadingOverlay.querySelector('p');
-                if (messageEl) {
-                    messageEl.textContent = message;
-                }
-            }
-        }
+        GestionCommon.showLoading(DOM.loadingOverlay, show, message);
     }
 
     function showNotification(type, title, text, toast = false) {
-        if (typeof SwalNotify === 'function' && !toast) {
-            SwalNotify(type, title, text);
-            return;
-        }
-
-        if (typeof Swal !== 'undefined') {
-            if (toast) {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: type,
-                    title: title,
-                    text: text,
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            } else {
-                Swal.fire({ icon: type, title: title, text: text });
-            }
-        } else {
-            alert(`${title}\n${text}`);
-        }
+        GestionCommon.showNotification(type, title, text, toast);
     }
 
     function isMobileView() {
-        return window.innerWidth < 992;
+        return GestionCommon.isMobileView();
     }
 
     function escapeHtml(str) {
-        if (str == null) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        return GestionCommon.escapeHtml(str);
     }
 
     function escapeAttr(str) {
-        if (str == null) return '';
-        return String(str)
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        return GestionCommon.escapeAttr(str);
     }
 
     // ============================================
@@ -105,7 +69,6 @@
 
     async function cargarInstituciones() {
         try {
-            // Using the MVC endpoint for instituciones lookup
             const response = await fetch('/GestionMaestras/InstitucionesLookup');
             if (!response.ok) throw new Error('No se pudieron cargar instituciones');
             const data = await response.json();
@@ -132,7 +95,6 @@
         showLoading(true, 'Cargando maestras...');
 
         try {
-            // Using original API endpoint
             const response = await fetch(API);
             if (!response.ok) throw new Error('No se pudieron cargar maestras');
             const data = await response.json();
@@ -173,6 +135,10 @@
         if (activasEl) activasEl.textContent = activas;
         if (institucionesEl) institucionesEl.textContent = instituciones;
     }
+
+    // ============================================
+    // DESKTOP TABLE RENDERING
+    // ============================================
 
     function renderDesktopTable(data) {
         // Destroy existing DataTable
@@ -240,12 +206,10 @@
     }
 
     function initDataTableInstance() {
-        if (typeof initDataTable === 'function') {
-            dataTableInstance = initDataTable('tablaMaestras', [3, 4], {
-                order: [[0, 'asc']],
-                pageLength: 10
-            });
-        }
+        dataTableInstance = GestionCommon.initDataTableInstance('tablaMaestras', [3, 4], {
+            order: [[0, 'asc']],
+            pageLength: 10
+        });
     }
 
     // ============================================
@@ -312,9 +276,7 @@
 
     function createMaestraCardHtml(maestra) {
         const statusClass = maestra.activo ? 'active' : 'inactive';
-        const statusBadge = maestra.activo
-            ? '<span class="tm-badge tm-badge-success"><i class="bi bi-check-circle-fill"></i> Activa</span>'
-            : '<span class="tm-badge tm-badge-danger"><i class="bi bi-x-circle-fill"></i> Inactiva</span>';
+        const statusBadge = GestionCommon.createStatusBadgeHtml(maestra.activo, STATUS_LABELS);
 
         return `
             <div class="tm-maestra-card ${statusClass}" data-id="${maestra.idMaestra}">
@@ -398,25 +360,20 @@
     }
 
     function createEmptyStateHtml() {
-        const isFiltered = mobileState.searchTerm || mobileState.filterEstado;
+        // Create a compatible state object for GestionCommon
+        const state = {
+            searchTerm: mobileState.searchTerm,
+            filterEstado: mobileState.filterEstado
+        };
 
-        if (isFiltered) {
-            return `
-                <div class="tm-empty-state">
-                    <i class="bi bi-search"></i>
-                    <p>No se encontraron maestras</p>
-                    <small>Intente con otros términos de búsqueda</small>
-                </div>
-            `;
-        }
-
-        return `
-            <div class="tm-empty-state">
-                <i class="bi bi-person-badge"></i>
-                <p>No hay maestras registradas</p>
-                <small>Haga clic en "Nueva Maestra" para agregar una</small>
-            </div>
-        `;
+        return GestionCommon.createEmptyStateHtml(state, {
+            iconFiltered: 'bi-search',
+            iconEmpty: 'bi-person-badge',
+            messageFiltered: 'No se encontraron maestras',
+            messageEmpty: 'No hay maestras registradas',
+            submessageFiltered: 'Intente con otros términos de búsqueda',
+            submessageEmpty: 'Haga clic en "Nueva Maestra" para agregar una'
+        });
     }
 
     function createPaginationHtml() {
@@ -621,18 +578,11 @@
     // ============================================
 
     function eliminarMaestra(id, nombre) {
-        Swal.fire({
+        GestionCommon.showDeleteConfirmation({
             title: '¿Estás seguro?',
             html: `Se desactivará la maestra: <strong>${escapeHtml(nombre)}</strong>`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#64748b',
             confirmButtonText: '<i class="bi bi-trash me-1"></i>Sí, desactivar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
+            onConfirm: function () {
                 showLoading(true, 'Desactivando maestra...');
 
                 // Using original API endpoint: DELETE /api/v1/gestion-maestras/{id}
@@ -697,23 +647,11 @@
                 // Update local state
                 maestra.activo = isChecked;
 
-                // Update UI for mobile view
+                // Update UI for mobile view using GestionCommon
                 if (isMobileView()) {
                     const card = document.querySelector(`.tm-maestra-card[data-id="${id}"]`);
                     if (card) {
-                        card.classList.toggle('active', isChecked);
-                        card.classList.toggle('inactive', !isChecked);
-
-                        const badge = card.querySelector('.tm-badge');
-                        if (badge) {
-                            if (isChecked) {
-                                badge.className = 'tm-badge tm-badge-success';
-                                badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Activa';
-                            } else {
-                                badge.className = 'tm-badge tm-badge-danger';
-                                badge.innerHTML = '<i class="bi bi-x-circle-fill"></i> Inactiva';
-                            }
-                        }
+                        GestionCommon.updateCardStatusBadge(card, isChecked, STATUS_LABELS);
 
                         const label = card.querySelector(`label[for="mobile-estado-${id}"]`);
                         if (label) {
@@ -790,19 +728,15 @@
     // RESIZE HANDLER
     // ============================================
 
-    let resizeTimeout;
-    function handleResize() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (isPageLoaded) {
-                if (isMobileView()) {
-                    renderMobileMaestraCards();
-                } else {
-                    renderDesktopTable(mobileState.allMaestras);
-                }
+    const handleResize = GestionCommon.createResizeHandler(() => {
+        if (isPageLoaded) {
+            if (isMobileView()) {
+                renderMobileMaestraCards();
+            } else {
+                renderDesktopTable(mobileState.allMaestras);
             }
-        }, 250);
-    }
+        }
+    }, 250);
 
     // ============================================
     // INITIALIZATION
