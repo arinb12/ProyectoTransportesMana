@@ -76,32 +76,44 @@
     });
 
     function init() {
-        // Cache DOM elements
+        // Cache DOM elements FIRST - especially loading overlay
+        DOM.loadingOverlay = document.getElementById(CONFIG.loadingOverlayId);
         DOM.modal = document.getElementById(CONFIG.modalId);
         DOM.form = document.getElementById(CONFIG.formId);
-        DOM.loadingOverlay = document.getElementById(CONFIG.loadingOverlayId);
         DOM.encargadoCardsContainer = document.getElementById(CONFIG.cardsContainerId);
         DOM.mobileSearch = document.getElementById('mobileSearchEncargados');
         DOM.mobileFilterEstado = document.getElementById('mobileFilterEstado');
         DOM.mobilePageSize = document.getElementById('mobilePageSize');
         DOM.mobilePagination = document.getElementById(CONFIG.paginationId);
 
-        loadEncargadosData();
-        initDataTable();
-        initMobileEventHandlers();
-        initFormHandlers();
-        initModalHandlers();
-        initResizeHandler();
+        // Show loading overlay immediately
+        showLoading(true, 'Cargando padres...');
 
-        // Initial render based on view
-        if (isMobileView()) {
-            renderMobileEncargadoCards();
+        try {
+            // Load data from JSON
+            loadEncargadosData();
+
+            // Initialize components
+            initDataTable();
+            initMobileEventHandlers();
+            initFormHandlers();
+            initModalHandlers();
+            initResizeHandler();
+
+            // Initial render based on view
+            if (isMobileView()) {
+                renderMobileEncargadoCards();
+            }
+
+            isPageLoaded = true;
+
+        } catch (error) {
+            console.error('Error initializing page:', error);
+            showNotification('error', 'Error', 'No se pudieron cargar los datos iniciales');
+        } finally {
+            // Hide loading overlay after initialization
+            showLoading(false);
         }
-
-        isPageLoaded = true;
-
-        // Hide loading overlay
-        showLoading(false);
     }
 
     // ============================================
