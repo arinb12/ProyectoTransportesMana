@@ -353,7 +353,7 @@
 
     .tm-desktop-page-size label {
         font-size: 0.875rem;
-        color: var(--tm-text-muted);
+        color: white;
         white-space: nowrap;
     }
 
