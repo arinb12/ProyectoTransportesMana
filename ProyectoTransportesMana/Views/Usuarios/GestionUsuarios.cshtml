@@ -7,139 +7,252 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
-    <style>
-        .pastel-table thead th {
-            background: #e8f4ff;
-        }
-
-        .badge-activo {
-            background-color: #28a745;
-        }
-
-        .badge-inactivo {
-            background-color: #dc3545;
-        }
-
-        .modal-content {
-            border: 1px solid #cfe8ff;
-        }
-
-        .modal-body {
-            background-color: #ffffff;
-        }
-
-        .modal-footer {
-            background-color: #f8fbff;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/usuarios/gestion-usuarios.css" asp-append-version="true" />
 }
 
-<div class="container-fluid p-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="text-dark">Gestión de Usuarios</h1>
-    </div>
-
-    <div class="mb-3">
-        <button class="btn btn-sm btn-primary me-1 filtro-rol" data-rol="">Todos</button>
-        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Admin">Admin</button>
-        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Encargado">Encargado</button>
-        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Maestra">Maestra</button>
-        <button class="btn btn-sm btn-outline-secondary me-1 filtro-rol" data-rol="Estudiante">Estudiante</button>
-        <button class="btn btn-sm btn-outline-secondary filtro-rol" data-rol="Asistente">Asistente</button>
-    </div>
-
-    <div class="card mb-4 shadow">
-        <div class="card-header bg-info d-flex align-items-center">
-            <i class="fas fa-users me-2 text-dark"></i>
-            <span class="text-dark fw-bold">Listado de Usuarios</span>
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay" style="display: none;">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
         </div>
+        <p class="mt-3 tm-text-muted">Cargando usuarios...</p>
+    </div>
+</div>
 
-        <div class="card-body">
-            <table id="tablaUsuarios" class="table table-hover table-bordered pastel-table align-middle">
-                <thead>
-                    <tr>
-                        <th>Nombre Completo</th>
-                        <th>Rol</th>
-                        <th>Correo</th>
-                        <th>Fecha Registro</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-center" style="width:110px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var u in Model.Usuarios)
-                    {
-                        <tr>
-                            <td>@($"{u.Nombre} {u.PrimerApellido} {u.SegundoApellido}".Replace("  ", " ").Trim())</td>
-                            <td>@u.RolNombre</td>
-                            <td>@(string.IsNullOrWhiteSpace(u.Correo) ? "-" : u.Correo)</td>
-                            <td>@u.FechaRegistro.ToString("dd/MM/yyyy")</td>
-                            <td class="text-center">
-                                @if (u.Activo)
-                                {
-                                    <span class="badge badge-activo">Activo</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-inactivo">Inactivo</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editarUsuario(@u.IdUsuario)">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarUsuario(@u.IdUsuario)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-people-fill"></i>
+        Gestión de Usuarios
+    </h1>
+    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="nuevoUsuario()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Nuevo Usuario
+    </button>
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-usuarios">@Model.Usuarios.Count()</div>
+            <div class="tm-stat-label">Total Usuarios</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-usuarios-activos">@Model.Usuarios.Count(u => u.Activo)</div>
+            <div class="tm-stat-label">Usuarios Activos</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-shield-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-roles">@Model.Roles.Count()</div>
+            <div class="tm-stat-label">Roles</div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalUsuario" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow">
-            <div class="modal-header bg-info d-flex align-items-center">
-                <i class="fas fa-users me-2 text-dark"></i>
-                <h5 class="modal-title text-dark fw-bold mb-0" id="modalUsuarioLabel">Editar Usuario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Role Filter Buttons -->
+<div class="tm-filter-buttons mb-3">
+    <button class="tm-btn tm-btn-sm tm-btn-primary filtro-rol active" data-rol="">
+        <i class="bi bi-grid-fill me-1"></i>Todos
+    </button>
+    @foreach (var rol in Model.Roles)
+    {
+        <button class="tm-btn tm-btn-sm tm-btn-outline filtro-rol" data-rol="@rol.Text">
+            @rol.Text
+        </button>
+    }
+</div>
+
+<!-- Desktop: Usuarios Table Card -->
+<div class="tm-card tm-usuarios-desktop">
+    <div class="tm-card-header">
+        <span><i class="bi bi-table me-2"></i>Listado de Usuarios</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaUsuarios" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Rol</th>
+                    <th>Correo</th>
+                    <th>Fecha Registro</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyUsuarios">
+                @foreach (var u in Model.Usuarios)
+                {
+                    <tr data-id="@u.IdUsuario">
+                        <td>@($"{u.Nombre} {u.PrimerApellido} {u.SegundoApellido}".Replace("  ", " ").Trim())</td>
+                        <td>@u.RolNombre</td>
+                        <td>@(string.IsNullOrWhiteSpace(u.Correo) ? "—" : u.Correo)</td>
+                        <td>@u.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       id="estado-@u.IdUsuario"
+                                       @(u.Activo ? "checked" : "")
+                                       onchange="cambiarEstadoUsuario(@u.IdUsuario, this.checked)" />
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="tm-action-buttons">
+                                <button class="tm-btn tm-btn-sm tm-btn-outline"
+                                        title="Editar"
+                                        onclick="editarUsuario(@u.IdUsuario)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="tm-btn tm-btn-sm tm-btn-danger"
+                                        title="Eliminar"
+                                        onclick="eliminarUsuario(@u.IdUsuario, '@Html.Raw($"{u.Nombre} {u.PrimerApellido}".Replace("'", "\\'"))')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mobile: Usuarios Cards View -->
+<div class="tm-card tm-usuarios-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-people me-2"></i>Listado de Usuarios</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchUsuarios"
+                       placeholder="Buscar usuario...">
             </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobileFilterEstado">
+                <option value="">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+            </select>
+            <select class="form-select" id="mobileFilterRol">
+                <option value="">Rol</option>
+                @foreach (var rol in Model.Roles)
+                {
+                    <option value="@rol.Text">@rol.Text</option>
+                }
+            </select>
+            <select class="form-select" id="mobilePageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
 
+    <!-- Usuario Cards Container -->
+    <div class="tm-usuario-cards" id="usuarioCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationUsuarios">
+        <div class="tm-pagination-info">
+            Mostrando <strong>1-10</strong> de <strong>0</strong> usuarios
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nuevo/Editar Usuario -->
+<div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalUsuarioLabel">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Registrar Usuario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
             <div class="modal-body">
-                <form id="usuarioForm" class="row g-3">
+                <form id="usuarioForm" class="row g-3" novalidate>
                     @Html.AntiForgeryToken()
+                    <input type="hidden" id="IdUsuario" value="0" />
 
-                    <input type="hidden" id="IdUsuario" />
-
+                    <!-- Nombre -->
                     <div class="col-md-4">
-                        <label class="form-label">Nombre</label>
-                        <input id="Nombre" class="form-control" />
+                        <label for="Nombre" class="form-label">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="Nombre" class="form-control"
+                               placeholder="Ingrese el nombre" required />
                     </div>
 
+                    <!-- Primer Apellido -->
                     <div class="col-md-4">
-                        <label class="form-label">Primer Apellido</label>
-                        <input id="PrimerApellido" class="form-control" />
+                        <label for="PrimerApellido" class="form-label">
+                            Primer Apellido <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="PrimerApellido" class="form-control"
+                               placeholder="Primer apellido" required />
                     </div>
 
+                    <!-- Segundo Apellido -->
                     <div class="col-md-4">
-                        <label class="form-label">Segundo Apellido</label>
-                        <input id="SegundoApellido" class="form-control" />
+                        <label for="SegundoApellido" class="form-label">
+                            Segundo Apellido
+                        </label>
+                        <input type="text" id="SegundoApellido" class="form-control"
+                               placeholder="Segundo apellido" />
                     </div>
 
+                    <!-- Correo -->
                     <div class="col-md-6">
-                        <label class="form-label">Correo</label>
-                        <input id="Correo" class="form-control" />
+                        <label for="Correo" class="form-label">
+                            Correo Electrónico
+                        </label>
+                        <input type="email" id="Correo" class="form-control"
+                               placeholder="ejemplo@correo.com" />
                     </div>
 
+                    <!-- Rol -->
                     <div class="col-md-3">
-                        <label class="form-label">Rol</label>
-                        <select id="RolId" class="form-select">
+                        <label for="RolId" class="form-label">
+                            Rol <span class="text-danger">*</span>
+                        </label>
+                        <select id="RolId" class="form-select" required>
                             @foreach (var r in Model.Roles)
                             {
                                 <option value="@r.Value">@r.Text</option>
@@ -147,159 +260,86 @@
                         </select>
                     </div>
 
+                    <!-- Estado -->
                     <div class="col-md-3">
-                        <label class="form-label">Estado</label>
+                        <label for="Activo" class="form-label">Estado</label>
                         <select id="Activo" class="form-select">
                             <option value="true">Activo</option>
                             <option value="false">Inactivo</option>
                         </select>
                     </div>
 
+                    <!-- Contraseña -->
                     <div class="col-md-6">
-                        <label class="form-label">Contraseña</label>
-                        <input id="Contrasena" type="password" class="form-control" />
-                        <small class="text-muted">En edición, dejar vacío para no cambiar</small>
+                        <label for="Contrasena" class="form-label">
+                            Contraseña <span class="text-danger" id="contrasenaRequired">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="password" id="Contrasena" class="form-control"
+                                   placeholder="Ingrese contraseña" />
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted" id="contrasenaHint" style="display: none;">
+                            Dejar vacío para mantener la contraseña actual
+                        </small>
                     </div>
 
-                    <div class="col-12 text-end">
-                        <button type="submit" class="btn pastel-btn me-2">Guardar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <!-- Confirmar Contraseña -->
+                    <div class="col-md-6">
+                        <label for="ConfirmarContrasena" class="form-label">
+                            Confirmar Contraseña <span class="text-danger" id="confirmarRequired">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="password" id="ConfirmarContrasena" class="form-control"
+                                   placeholder="Confirme contraseña" />
+                            <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
-
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="usuarioForm" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar Usuario
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Pass data to JavaScript -->
+<script>
+    window.UsuariosData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Usuarios.Select(u => new {
+        idUsuario = u.IdUsuario,
+        nombre = u.Nombre,
+        primerApellido = u.PrimerApellido,
+        segundoApellido = u.SegundoApellido,
+        nombreCompleto = $"{u.Nombre} {u.PrimerApellido} {u.SegundoApellido}".Replace("  ", " ").Trim(),
+        correo = u.Correo,
+        rolId = u.RolId,
+        rolNombre = u.RolNombre,
+        activo = u.Activo,
+        fechaRegistro = u.FechaRegistro.ToString("dd/MM/yyyy")
+    })));
+
+    window.UsuariosUrls = {
+        obtenerParaEditar: '@Url.Action("ObtenerParaEditar", "Usuarios")',
+        actualizarUsuario: '@Url.Action("ActualizarUsuario", "Usuarios")',
+        eliminarUsuario: '@Url.Action("EliminarUsuario", "Usuarios")',
+        crearUsuario: '@Url.Action("CrearUsuario", "Usuarios")'
+    };
+</script>
+
 @section Scripts {
-    <script>
-        let tablaUsuarios;
-
-        $(document).ready(function () {
-            tablaUsuarios = $('#tablaUsuarios').DataTable({
-                pageLength: 10,
-                order: [],
-                language: {
-                    lengthMenu: "Mostrar _MENU_ registros",
-                    search: "Buscar:",
-                    zeroRecords: "No hay datos",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_",
-                    infoEmpty: "Mostrando 0 a 0 de 0",
-                    infoFiltered: "(filtrado de _MAX_ registros)",
-                    paginate: { next: "Siguiente", previous: "Anterior" }
-                }
-            });
-
-            $('#usuarioForm').on('submit', async function (e) {
-                e.preventDefault();
-
-                const id = parseInt($('#IdUsuario').val() || '0');
-
-                const r = await Swal.fire({
-                    icon: 'question',
-                    title: 'Confirmar cambios',
-                    text: '¿Desea guardar los cambios del usuario?',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, guardar',
-                    cancelButtonText: 'Cancelar'
-                });
-
-                if (!r.isConfirmed) return;
-
-                const pass = ($('#Contrasena').val() || '').trim();
-
-                const correo = ($('#Correo').val() || '').trim();
-
-                const payload = {
-                    IdUsuario: id,
-                    Nombre: ($('#Nombre').val() || '').trim(),
-                    PrimerApellido: ($('#PrimerApellido').val() || '').trim(),
-                    SegundoApellido: ($('#SegundoApellido').val() || '').trim(),
-                    Correo: correo === '' ? null : correo,
-                    RolId: parseInt($('#RolId').val() || '1'),
-                    Activo: ($('#Activo').val() === 'true'),
-                    Contrasena: pass === '' ? null : pass
-                };
-
-                const token = $('input[name="__RequestVerificationToken"]').val();
-
-                const resp = await fetch('@Url.Action("ActualizarUsuario", "Usuarios")', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': token
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const json = await resp.json().catch(() => null);
-
-                if (!resp.ok || !json || json.ok === false) {
-                    Swal.fire('Error', json?.message || 'No se pudo actualizar el usuario.', 'error');
-                    return;
-                }
-
-                Swal.fire('Listo', json.message, 'success')
-                    .then(() => location.reload());
-            });
-        });
-
-        $(document).on('click', '.filtro-rol', function () {
-            const rol = $(this).data('rol');
-
-            $('.filtro-rol').removeClass('btn-primary').addClass('btn-outline-secondary');
-            $(this).removeClass('btn-outline-secondary').addClass('btn-primary');
-
-            if (!rol) tablaUsuarios.column(1).search('').draw();
-            else tablaUsuarios.column(1).search('^' + rol + '$', true, false).draw();
-        });
-
-        async function editarUsuario(id) {
-            const resp = await fetch(`@Url.Action("ObtenerParaEditar", "Usuarios")?id=${id}`);
-            const json = await resp.json();
-
-            if (!json.ok) {
-                Swal.fire('Error', json.message || 'No se pudo cargar el usuario.', 'error');
-                return;
-            }
-
-            const u = json.data;
-
-            $('#IdUsuario').val(u.idUsuario);
-            $('#Nombre').val(u.nombre);
-            $('#PrimerApellido').val(u.primerApellido);
-            $('#SegundoApellido').val(u.segundoApellido);
-            $('#Correo').val(u.correo);
-            $('#RolId').val(u.rolId.toString());
-            $('#Activo').val(u.activo ? 'true' : 'false');
-            $('#Contrasena').val('');
-
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalUsuario')).show();
-        }
-
-        async function eliminarUsuario(id) {
-            const r = await Swal.fire({
-                icon: 'warning',
-                title: 'Eliminar',
-                text: '¿Deseas eliminar este usuario?',
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar'
-            });
-
-            if (!r.isConfirmed) return;
-
-            const resp = await fetch(`@Url.Action("EliminarUsuario", "Usuarios")?id=${id}`, { method: 'POST' });
-            const json = await resp.json();
-
-            if (!json.ok) {
-                Swal.fire('Error', json.message, 'error');
-                return;
-            }
-
-            Swal.fire('Listo', json.message, 'success')
-                .then(() => location.reload());
-        }
-    </script>
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
+    <script src="~/js/usuarios/gestion-usuarios.js" asp-append-version="true"></script>
 }
