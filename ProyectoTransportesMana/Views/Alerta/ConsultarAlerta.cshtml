@@ -4,308 +4,276 @@
     int? rolActual = Context.Session.GetInt32("IdRol");
 }
 
-
 @section Styles {
-    <link rel="stylesheet" href="~/css/instituciones/instituciones.css" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/alertas/alertas.css" asp-append-version="true" />
 }
 
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="text-dark">Alertas Informativas</h1>
-        @* Solo mostrar el botón si el rol es Admin (1) o Asistente (5) *@
-        @if (rolActual == 1 || rolActual == 5)
-        {
-            <button class="btn pastel-btn" data-bs-toggle="modal" data-bs-target="#modalAlerta">
-                <i class="bi bi-bell-fill me-1"></i> Generar Alerta
-            </button>
-        }
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-info text-dark fw-bold">
-            <i class="bi bi-megaphone me-2"></i>Listado de Alertas
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
         </div>
-        <div class="card-body">
-            <table id="tablaAlertas" class="table table-hover table-bordered pastel-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Mensaje</th>
-                        <th>Fecha de Publicación</th>
-                        <th>Visibilidad</th>
-                        <th>Leído</th>
-                        <th>Tipo</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <p class="mt-3 tm-text-muted">Cargando alertas...</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-bell-fill"></i>
+        Alertas Informativas
+    </h1>
+    @if (rolActual == 1 || rolActual == 5)
+    {
+        <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalAlerta">
+            <i class="bi bi-plus-lg me-1"></i>
+            Nueva Alerta
+        </button>
+    }
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-megaphone-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-alertas">0</div>
+            <div class="tm-stat-label">Total Alertas</div>
         </div>
     </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-envelope-open-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-alertas-leidas">0</div>
+            <div class="tm-stat-label">Alertas Leídas</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-envelope-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-alertas-pendientes">0</div>
+            <div class="tm-stat-label">Alertas Pendientes</div>
+        </div>
+    </div>
+</div>
 
+<!-- Desktop: Alerts Table Card -->
+<div class="tm-card">
+    <div class="tm-card-header">
+        <span><i class="bi bi-list-ul me-2"></i>Listado de Alertas</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaAlertas" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Mensaje</th>
+                    <th>Fecha Publicación</th>
+                    <th>Destinatario</th>
+                    <th>Estado</th>
+                    <th>Tipo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
-    <div class="modal fade" id="modalAlerta" tabindex="-1" aria-labelledby="modalAlertaLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-info">
-                    <h5 class="modal-title text-dark" id="modalAlertaLabel">
-                        <i class="bi bi-bell me-2"></i>Registrar
-                        Nueva Alerta
-                    </h5> <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                  aria-label="Cerrar"></button>
+        <!-- Mobile View: Alert Cards -->
+        <div class="tm-alerts-mobile">
+            <!-- Mobile Controls -->
+            <div class="tm-mobile-controls">
+                <div class="tm-mobile-search">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="mobileSearchAlertas"
+                               placeholder="Buscar alertas...">
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form id="formAlerta">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="tipoAlerta" class="form-label">Tipo de Alerta</label>
-                                <select id="tipoAlerta" class="form-select" required>
-                                    <option selected disabled>Seleccione un tipo</option>
-                                    <option>Retraso</option>
-                                    <option>Cambio Ruta</option>
-                                    <option>Evento Especial</option>
-                                    <option>Otro</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="fechaPublicacion" class="form-label">
-                                    Fecha de
-                                    Publicación
-                                </label> <input type="date" id="fechaPublicacion" class="form-control"
-                                                required />
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="tituloAlerta" class="form-label">
-                                Título <span class="text-danger">*</span>
-                            </label> <input type="text" id="tituloAlerta"
-                                            class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="contenidoAlerta" class="form-label">Mensaje / Contenido</label>
-                            <textarea class="form-control" id="contenidoAlerta" rows="5"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="publico" class="form-label">Público Destinatario</label> <select id="publico" class="form-select">
-                                <option value="todos">Todos (Masiva)</option>
-                                <option value="buseta">Por Buseta</option>
-                                <option value="encargado">Por Encargado Legal</option>
-                            </select>
-                        </div>
-                        <div class="mb-3 d-none" id="grupoBuseta">
-                            <label for="buseta" class="form-label">
-                                Selecciona una
-                                Buseta
-                            </label> <select id="buseta" class="form-select">
-                                <option disabled selected value="">Selecciona una buseta</option>
-                            </select>
-                        </div>
-                        <div class="mb-3 d-none" id="grupoEncargado">
-                            <label for="encargado"
-                                   class="form-label">Selecciona un Encargado Legal</label> <select id="encargado"
-                                                                                                    class="form-select">
-                                <option disabled selected value="">Selecciona un encargado</option>
-                            </select>
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="btn pastel-btn">Guardar Alerta</button>
-                        </div>
-                    </form>
+                <div class="tm-mobile-filter">
+                    <select class="form-select" id="mobileFilterEstado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="leido">Leídas</option>
+                    </select>
+                    <select class="form-select" id="mobilePageSize">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Alert Cards Container -->
+            <div class="tm-alert-cards" id="alertCardsContainer">
+                <!-- Cards will be rendered here by JavaScript -->
+            </div>
+
+            <!-- Mobile Pagination -->
+            <div class="tm-mobile-pagination" id="mobilePaginationAlertas">
+                <div class="tm-pagination-info">
+                    Mostrando <strong>1-10</strong> de <strong>0</strong> alertas
+                </div>
+                <div class="tm-pagination-controls">
+                    <button class="tm-page-btn tm-page-prev" disabled>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <div class="tm-page-numbers">
+                        <!-- Page numbers rendered by JS -->
+                    </div>
+                    <button class="tm-page-btn tm-page-next" disabled>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal: Nueva Alerta -->
+<div class="modal fade" id="modalAlerta" tabindex="-1" aria-labelledby="modalAlertaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAlertaLabel">
+                    <i class="bi bi-bell me-2"></i>
+                    Registrar Nueva Alerta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAlerta">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Tipo de Alerta <span class="text-danger">*</span>
+                            </label>
+                            <div class="tm-btn-group-select" id="tipoAlertaGroup">
+                                <input type="radio" name="tipoAlertaRadio" id="tipoRetraso" value="Retraso">
+                                <label for="tipoRetraso" class="tm-btn-option">Retraso</label>
+                                
+                                <input type="radio" name="tipoAlertaRadio" id="tipoCambio" value="Cambio Ruta">
+                                <label for="tipoCambio" class="tm-btn-option">Cambio Ruta</label>
+                                
+                                <input type="radio" name="tipoAlertaRadio" id="tipoEvento" value="Evento Especial">
+                                <label for="tipoEvento" class="tm-btn-option">Evento</label>
+                                
+                                <input type="radio" name="tipoAlertaRadio" id="tipoOtro" value="Otro">
+                                <label for="tipoOtro" class="tm-btn-option">Otro</label>
+                            </div>
+                            <!-- Keep hidden select for form compatibility -->
+                            <select id="tipoAlerta" class="d-none" required>
+                                <option value="">Seleccione</option>
+                                <option value="Retraso">Retraso</option>
+                                <option value="Cambio Ruta">Cambio Ruta</option>
+                                <option value="Evento Especial">Evento Especial</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fechaPublicacion" class="form-label">
+                                Fecha de Publicación <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" id="fechaPublicacion" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tituloAlerta" class="form-label">
+                            Título <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="tituloAlerta" class="form-control"
+                               placeholder="Ingrese el título de la alerta" required maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="contenidoAlerta" class="form-label">Mensaje / Contenido</label>
+                        <textarea class="form-control" id="contenidoAlerta" rows="4"
+                                  placeholder="Descripción detallada de la alerta..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="publico" class="form-label">Público Destinatario</label>
+                        <select id="publico" class="form-select">
+                            <option value="todos">Todos (Masiva)</option>
+                            <option value="buseta">Por Buseta</option>
+                            <option value="encargado">Por Encargado Legal</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="grupoBuseta">
+                        <label for="buseta" class="form-label">
+                            Selecciona una Buseta <span class="text-danger">*</span>
+                        </label>
+                        <select id="buseta" class="form-select">
+                            <option disabled selected value="">Selecciona una buseta</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="grupoEncargado">
+                        <label for="encargado" class="form-label">
+                            Selecciona un Encargado Legal <span class="text-danger">*</span>
+                        </label>
+                        <select id="encargado" class="form-select">
+                            <option disabled selected value="">Selecciona un encargado</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="formAlerta" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar Alerta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Eliminación -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalConfirmarEliminarLabel">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">¿Está seguro que desea eliminar esta alerta? Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="tm-btn tm-btn-danger" id="btnConfirmarEliminar">
+                    <i class="bi bi-trash me-1"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    @inject IConfiguration Configuration
     <script>
-        function escapeHtml(text) {
-            if (text === null || text === undefined) return '';
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        window.CURRENT_USER_ID = @(ViewData["CurrentUserId"]);
-        console.log('CURRENT_USER_ID=', window.CURRENT_USER_ID);
-
-        const encargadosMap = new Map();
-        const busetasMap = new Map();
-
-        function togglePublicoGroups() {
-            const publico = document.getElementById('publico')?.value;
-            document.getElementById('grupoBuseta').classList.toggle('d-none', publico !== 'buseta');
-            document.getElementById('grupoEncargado').classList.toggle('d-none', publico !== 'encargado');
-        }
-
-        async function marcarAlertasComoLeidas() {
-            if (!window.CURRENT_USER_ID || window.CURRENT_USER_ID === 0) return;
-            await fetch(`${window.API_BASE}/api/alerta/user/${window.CURRENT_USER_ID}/marcar-leidas`, { method: 'POST' });
-        }
-
-        async function cargarLookups() {
-            const busRes = await fetch(`${window.API_BASE}/api/alerta/busetas`);
-            const encRes = await fetch(`${window.API_BASE}/api/alerta/encargados`);
-
-            if (busRes.ok) {
-                const data = await busRes.json();
-                const sel = document.getElementById('buseta');
-                data.forEach(b => {
-                    const opt = document.createElement('option');
-                    opt.value = b.Id;
-                    opt.textContent = b.Texto;
-                    sel.appendChild(opt);
-                    busetasMap.set(String(b.Id), b.Texto);
-                });
-            }
-
-            if (encRes.ok) {
-                const data = await encRes.json();
-                const sel = document.getElementById('encargado');
-                data.forEach(e => {
-                    const opt = document.createElement('option');
-                    opt.value = e.IdUsuario;
-                    opt.textContent = e.NombreCompleto;
-                    sel.appendChild(opt);
-                    encargadosMap.set(opt.value, opt.textContent);
-                });
-            }
-        }
-
-        document.getElementById('formAlerta').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const publicoValue = publico.value;
-
-            if (publicoValue === "buseta" && !buseta.value) { alert("Debe seleccionar una buseta."); return; }
-            if (publicoValue === "encargado" && !encargado.value) { alert("Debe seleccionar un encargado."); return; }
-
-            let publicoFinal = publicoValue;
-            if (publicoValue === "buseta") publicoFinal = `buseta:${buseta.value}`;
-            if (publicoValue === "encargado") publicoFinal = `usuario:${encargado.value}`;
-
-            const payload = {
-                EnviadoPor: Number(window.CURRENT_USER_ID),
-                Titulo: tituloAlerta.value,
-                TipoAlerta: tipoAlerta.value,
-                Mensaje: contenidoAlerta.value,
-                PublicoDestino: publicoFinal,
-                FechaPublicacion: fechaPublicacion.value
-            };
-
-            const resp = await fetch(`${window.API_BASE}/api/alerta`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (resp.ok) {
-                bootstrap.Modal.getInstance(document.getElementById('modalAlerta')).hide();
-                await cargarAlertas();
-                await actualizarContadorAlertas();
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await cargarLookups();
-            await cargarAlertas();
-            await marcarAlertasComoLeidas();
-            togglePublicoGroups();
-        });
-
-           async function cargarAlertas() {
-    const rolActual = Number(window.ROL_ACTUAL);
-    const userId = Number(window.CURRENT_USER_ID);
-
-    let url = `${window.API_BASE}/api/alerta/listar`; // URL general para obtener alertas
-    const resp = await fetch(url);
-    if (!resp.ok) {
-        console.error('Error cargando alertas', resp.status);
-        return;
-    }
-
-    const allAlertas = await resp.json();
-    const tbody = document.querySelector('#tablaAlertas tbody');
-    tbody.innerHTML = '';
-
-    // Filtrar alertas según rol
-    let alertasFiltradas = [];
-
-    if (rolActual === 1 || rolActual === 5) {
-        // Admin o Asistente: todas las alertas
-        alertasFiltradas = allAlertas;
-    } else if (rolActual === 2) {
-        // Encargado Legal: solo las alertas masivas o dirigidas a este usuario
-        alertasFiltradas = allAlertas.filter(a => {
-            const destino = a.publico_destino ?? a.PublicoDestino ?? '';
-            return destino === 'todos' || destino === `usuario:${userId}`;
-        });
-    } else {
-        // Otros roles: solo alertas masivas
-        alertasFiltradas = allAlertas.filter(a => {
-            const destino = a.publico_destino ?? a.PublicoDestino ?? '';
-            return destino === 'todos';
-        });
-    }
-
-    alertasFiltradas.forEach(r => {
-        let publicoTexto = r.publico_destino ?? r.PublicoDestino ?? '';
-
-        for (let [key, value] of busetasMap.entries()) {
-            if (publicoTexto === `buseta:${key}`) {
-                publicoTexto = "Buseta: " + value;
-                break;
-            }
-        }
-
-        if (String(publicoTexto).startsWith("usuario:")) {
-            const id = String(publicoTexto).split(":")[1];
-            publicoTexto = "Encargado: " + (encargadosMap.get(id) || "Desconocido");
-        }
-
-        if (publicoTexto === "todos") publicoTexto = "Todos";
-
-        const leidoRaw = r.Leido ?? r.leido;
-        const leidoFlag =
-            leidoRaw === true ||
-            leidoRaw === 1 ||
-            leidoRaw === '1' ||
-            (typeof leidoRaw === 'string' && leidoRaw.toLowerCase() === 'sí') ||
-            (typeof leidoRaw === 'string' && leidoRaw.toLowerCase() === 'si');
-
-        const fecha = r.fecha_publicacion || r.Fecha_Publicacion || r.FechaPublicacion;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${r.id_alerta ?? r.Id_Alerta ?? r.IdAlerta ?? ''}</td>
-            <td>${r.titulo ?? r.Titulo ?? ''}</td>
-            <td>${r.mensaje ?? r.Mensaje ?? ''}</td>
-            <td>${fecha ? new Date(fecha).toLocaleString() : ''}</td>
-            <td>${publicoTexto}</td>
-            <td class="${leidoFlag ? 'text-success fw-bold' : 'text-danger'}">${leidoFlag ? 'Sí' : 'No'}</td>
-            <td>${r.tipo_alerta ?? r.TipoAlerta ?? ''}</td>
-            <td><a href="#" onclick="borrarAlerta(${r.id_alerta ?? r.IdAlerta ?? 0})"><i class="fas fa-trash"></i></a></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-        async function borrarAlerta(id) {
-            await fetch(`${window.API_BASE}/api/alerta/${id}`, { method: 'DELETE' });
-            cargarAlertas();
-        }
-
-        document.getElementById('publico').addEventListener('change', togglePublicoGroups);
-
-        document.getElementById('modalAlerta').addEventListener('shown.bs.modal', function () {
-            document.getElementById('publico').value = 'todos';
-            document.getElementById('buseta').value = '';
-            document.getElementById('encargado').value = '';
-            togglePublicoGroups();
-        });
+        // API Configuration - Set before loading alertas.js
+        window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';
+        window.CURRENT_USER_ID = @(ViewData["CurrentUserId"] ?? 0);
+        window.ROL_ACTUAL = @(rolActual ?? 0);
     </script>
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/pages/alertas.js" asp-append-version="true"></script>
 }

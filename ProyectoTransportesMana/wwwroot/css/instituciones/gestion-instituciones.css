@@ -1,0 +1,788 @@
+/* ============================================
+   DESKTOP/MOBILE VIEW TOGGLE
+   ============================================ */
+.tm-instituciones-desktop {
+    display: block;
+}
+
+.tm-instituciones-mobile {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .tm-instituciones-desktop {
+        display: none;
+    }
+
+    .tm-instituciones-mobile {
+        display: block;
+    }
+}
+
+/* ============================================
+   STATS GRID - Single Card Layout
+   ============================================ */
+.tm-stats-grid {
+    max-width: 300px;
+}
+
+/* ============================================
+   CARD HEADER WITH ACTIONS
+   ============================================ */
+.tm-card-header-with-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tm-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Desktop Search */
+.tm-desktop-search {
+    min-width: 200px;
+    max-width: 280px;
+}
+
+    .tm-desktop-search .input-group-text {
+        background: var(--tm-surface);
+        border-color: var(--tm-border);
+        color: var(--tm-text-muted);
+    }
+
+    .tm-desktop-search .form-control {
+        border-color: var(--tm-border);
+        font-size: 0.875rem;
+    }
+
+        .tm-desktop-search .form-control:focus {
+            border-color: var(--tm-secondary);
+            box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+        }
+
+/* View Toggle Buttons */
+.tm-view-toggle {
+    display: flex;
+    background: var(--tm-bg);
+    border-radius: var(--tm-radius);
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.tm-view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--tm-text-muted);
+    border-radius: calc(var(--tm-radius) - 2px);
+    cursor: pointer;
+    transition: all var(--tm-transition);
+}
+
+    .tm-view-btn:hover {
+        background: var(--tm-surface);
+        color: var(--tm-text);
+    }
+
+    .tm-view-btn.active {
+        background: var(--tm-primary);
+        color: white;
+        box-shadow: var(--tm-shadow-sm);
+    }
+
+    .tm-view-btn i {
+        font-size: 1rem;
+    }
+
+/* ============================================
+   DESKTOP CARDS VIEW
+   ============================================ */
+.tm-desktop-cards-view {
+    padding: 0.5rem;
+}
+
+.tm-desktop-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+/* Desktop Institution Card */
+.tm-desktop-institucion-card {
+    background: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    transition: all var(--tm-transition);
+    animation: fadeInUp 0.3s ease-out backwards;
+}
+
+    .tm-desktop-institucion-card:hover {
+        border-color: var(--tm-secondary);
+        box-shadow: var(--tm-shadow-md);
+        transform: translateY(-2px);
+    }
+
+    /* Staggered animation for desktop cards */
+    .tm-desktop-institucion-card:nth-child(1) {
+        animation-delay: 0.02s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(2) {
+        animation-delay: 0.04s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(3) {
+        animation-delay: 0.06s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(4) {
+        animation-delay: 0.08s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(5) {
+        animation-delay: 0.10s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(6) {
+        animation-delay: 0.12s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(7) {
+        animation-delay: 0.14s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(8) {
+        animation-delay: 0.16s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(9) {
+        animation-delay: 0.18s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(10) {
+        animation-delay: 0.20s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(11) {
+        animation-delay: 0.22s;
+    }
+
+    .tm-desktop-institucion-card:nth-child(12) {
+        animation-delay: 0.24s;
+    }
+
+/* Card Icon */
+.tm-desktop-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--tm-primary), var(--tm-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+}
+
+/* Card Content */
+.tm-desktop-card-content {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+.tm-desktop-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tm-text);
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Card Actions */
+.tm-desktop-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--tm-border-light);
+}
+
+    .tm-desktop-card-actions .tm-btn {
+        flex: 1;
+        max-width: 120px;
+        justify-content: center;
+        gap: 0.375rem;
+    }
+
+        .tm-desktop-card-actions .tm-btn span {
+            font-size: 0.8125rem;
+        }
+
+/* Desktop Empty State */
+.tm-desktop-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--tm-text-muted);
+}
+
+    .tm-desktop-empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .tm-desktop-empty-state p {
+        font-size: 1.125rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        color: var(--tm-text);
+    }
+
+    .tm-desktop-empty-state small {
+        color: var(--tm-text-muted);
+    }
+
+/* ============================================
+   DESKTOP PAGINATION
+   ============================================ */
+.tm-desktop-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+    border-top: 1px solid var(--tm-border-light);
+    margin-top: 0.5rem;
+}
+
+.tm-desktop-pagination-info {
+    font-size: 0.875rem;
+    color: var(--tm-text-muted);
+}
+
+    .tm-desktop-pagination-info strong {
+        color: var(--tm-text);
+        font-weight: 600;
+    }
+
+.tm-desktop-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tm-desktop-page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tm-desktop-page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.625rem;
+    border: 1px solid var(--tm-border);
+    background: var(--tm-surface);
+    color: var(--tm-text);
+    border-radius: var(--tm-radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--tm-transition);
+}
+
+    .tm-desktop-page-btn:hover:not(:disabled):not(.active) {
+        background: var(--tm-bg);
+        border-color: var(--tm-secondary);
+        color: var(--tm-secondary);
+    }
+
+    .tm-desktop-page-btn.active {
+        background: var(--tm-primary);
+        border-color: var(--tm-primary);
+        color: white;
+        font-weight: 600;
+    }
+
+    .tm-desktop-page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: var(--tm-bg);
+    }
+
+    .tm-desktop-page-btn i {
+        font-size: 0.875rem;
+    }
+
+/* Page Size Select for Desktop */
+.tm-desktop-page-size {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+    .tm-desktop-page-size label {
+        font-size: 0.875rem;
+        color: white;
+        white-space: nowrap;
+    }
+
+    .tm-desktop-page-size select {
+        width: auto;
+        padding: 0.375rem 2rem 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        border-color: var(--tm-border);
+        border-radius: var(--tm-radius);
+    }
+
+        .tm-desktop-page-size select:focus {
+            border-color: var(--tm-secondary);
+            box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+        }
+
+/* ============================================
+   DESKTOP TABLE VIEW
+   ============================================ */
+.tm-desktop-table-view {
+    padding: 0.5rem;
+}
+
+/* ============================================
+   INSTITUCION CARDS (Mobile View)
+   ============================================ */
+.tm-institucion-cards {
+    padding: 0.5rem;
+}
+
+.tm-institucion-card {
+    background: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius);
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    transition: all var(--tm-transition);
+    animation: fadeInUp 0.3s ease-out;
+}
+
+    .tm-institucion-card:hover {
+        box-shadow: var(--tm-shadow-sm);
+    }
+
+/* Card Header */
+.tm-institucion-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    gap: 0.75rem;
+}
+
+/* Institucion Info */
+.tm-institucion-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tm-institucion-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--tm-radius);
+    background: linear-gradient(135deg, var(--tm-primary), var(--tm-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+.tm-institucion-name {
+    font-weight: 600;
+    color: var(--tm-text);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+/* Card Actions */
+.tm-institucion-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* Staggered animation for cards */
+.tm-institucion-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.tm-institucion-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.tm-institucion-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.tm-institucion-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.tm-institucion-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+/* ============================================
+   TABLE ENHANCEMENTS
+   ============================================ */
+#tablaInstituciones {
+    font-size: 0.875rem;
+}
+
+    #tablaInstituciones thead th {
+        background: var(--tm-bg);
+        font-weight: 600;
+        color: var(--tm-text);
+        border-bottom: 2px solid var(--tm-border);
+        padding: 0.75rem;
+        white-space: nowrap;
+    }
+
+    #tablaInstituciones tbody td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--tm-border-light);
+    }
+
+    #tablaInstituciones tbody tr:hover {
+        background: var(--tm-bg);
+    }
+
+/* ============================================
+   MODAL ENHANCEMENTS
+   ============================================ */
+#modalInstitucion .modal-header {
+    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light, #2d4a6f) 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: calc(var(--tm-radius-lg) - 1px) calc(var(--tm-radius-lg) - 1px) 0 0;
+}
+
+    #modalInstitucion .modal-header .modal-title {
+        font-weight: 600;
+    }
+
+    #modalInstitucion .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+        #modalInstitucion .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+#modalInstitucion .modal-content {
+    border: none;
+    border-radius: var(--tm-radius-lg);
+    box-shadow: var(--tm-shadow-xl);
+}
+
+#modalInstitucion .modal-footer {
+    background-color: var(--tm-bg);
+    border-top: 1px solid var(--tm-border);
+    border-radius: 0 0 calc(var(--tm-radius-lg) - 1px) calc(var(--tm-radius-lg) - 1px);
+}
+
+/* Form styling */
+#institucionForm .form-label {
+    font-weight: 500;
+    color: var(--tm-text);
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+}
+
+#institucionForm .form-control {
+    border-color: var(--tm-border);
+    font-size: 0.9375rem;
+}
+
+    #institucionForm .form-control:focus {
+        border-color: var(--tm-secondary);
+        box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+    }
+
+    #institucionForm .form-control::placeholder {
+        color: var(--tm-text-light);
+    }
+
+/* ============================================
+   BUTTON SIZE VARIANTS
+   ============================================ */
+.tm-btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+    .tm-btn-sm i {
+        font-size: 0.75rem;
+    }
+
+/* ============================================
+   RESPONSIVE: TABLET (992px - 1199px)
+   ============================================ */
+@media (max-width: 1199.98px) {
+    .tm-desktop-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    .tm-card-header-with-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tm-header-actions {
+        justify-content: space-between;
+    }
+
+    .tm-desktop-search {
+        flex: 1;
+        max-width: none;
+    }
+
+    .tm-desktop-pagination {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .tm-desktop-pagination-info {
+        text-align: center;
+    }
+
+    .tm-desktop-pagination-controls {
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   RESPONSIVE: MOBILE
+   ============================================ */
+@media (max-width: 767.98px) {
+    /* Stats */
+    .tm-stats-grid {
+        max-width: none;
+    }
+
+    /* Modal adjustments */
+    #modalInstitucion .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    #modalInstitucion .modal-header {
+        padding: 0.875rem 1rem;
+    }
+
+    #modalInstitucion .modal-title {
+        font-size: 1rem;
+    }
+
+    #modalInstitucion .modal-body {
+        padding: 1rem;
+    }
+
+    #modalInstitucion .modal-footer {
+        padding: 0.875rem 1rem;
+        flex-direction: column-reverse;
+    }
+
+        #modalInstitucion .modal-footer .tm-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    /* Institucion cards */
+    .tm-institucion-card-header {
+        padding: 0.875rem;
+    }
+
+    .tm-institucion-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .tm-institucion-name {
+        font-size: 0.875rem;
+    }
+
+    .tm-institucion-actions .tm-btn {
+        padding: 0.375rem 0.5rem;
+    }
+}
+
+/* ============================================
+   RESPONSIVE: SMALL MOBILE (430px and below)
+   ============================================ */
+@media (max-width: 430px) {
+    .tm-institucion-cards {
+        padding: 0.375rem;
+    }
+
+    .tm-institucion-card {
+        margin-bottom: 0.375rem;
+    }
+
+    .tm-institucion-card-header {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .tm-institucion-info {
+        gap: 0.5rem;
+    }
+
+    .tm-institucion-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+
+    .tm-institucion-name {
+        font-size: 0.8125rem;
+    }
+
+    .tm-institucion-actions {
+        gap: 0.375rem;
+    }
+
+        .tm-institucion-actions .tm-btn {
+            padding: 0.3125rem 0.4375rem;
+            font-size: 0.6875rem;
+        }
+}
+
+/* ============================================
+   RESPONSIVE: VERY SMALL (374px and below)
+   ============================================ */
+@media (max-width: 374.98px) {
+    .tm-institucion-card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .tm-institucion-actions {
+        justify-content: flex-end;
+    }
+
+        .tm-institucion-actions .tm-btn {
+            flex: 1;
+            justify-content: center;
+        }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+    .tm-page-header button,
+    .tm-action-buttons,
+    .tm-institucion-actions,
+    .tm-desktop-card-actions,
+    .tm-header-actions,
+    .modal,
+    .tm-mobile-controls,
+    .tm-mobile-pagination,
+    .tm-desktop-pagination,
+    .tm-instituciones-mobile,
+    .tm-view-toggle {
+        display: none !important;
+    }
+
+    .tm-instituciones-desktop {
+        display: block !important;
+    }
+
+    .tm-desktop-cards-view {
+        display: block !important;
+    }
+
+    .tm-desktop-table-view {
+        display: none !important;
+    }
+
+    .tm-desktop-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tm-desktop-institucion-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+
+    .tm-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    #tablaInstituciones {
+        font-size: 10pt;
+    }
+
+        #tablaInstituciones th {
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+}

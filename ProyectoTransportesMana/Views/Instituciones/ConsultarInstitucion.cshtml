@@ -3,210 +3,284 @@
 @{
     ViewData["Title"] = "Instituciones";
     Layout = "_LayoutInterno";
+
+    var totalInstituciones = Model?.Count ?? 0;
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
-    <style>
-        .pastel-table thead th {
-            background: #e8f4ff;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/instituciones/gestion-instituciones.css" asp-append-version="true" />
 }
 
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="text-dark">Gestión de Instituciones</h1>
-        <button class="btn pastel-btn" onclick="abrirModalNuevo()">
-            <i class="fas fa-plus me-1"></i> Agregar
-        </button>
-    </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-header bg-info d-flex align-items-center">
-            <i class="fas fa-school me-2 text-dark"></i>
-            <span class="text-dark fw-bold">Listado de Instituciones</span>
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
         </div>
+        <p class="mt-3 tm-text-muted">Cargando instituciones...</p>
+    </div>
+</div>
 
-        <div class="card-body">
-            <table id="tablaInstituciones" class="table table-hover table-bordered pastel-table align-middle">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th class="text-center" style="width:110px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var i in Model)
-                    {
-                        <tr>
-                            <td>@i.Nombre</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1"
-                                        title="Editar"
-                                        onclick="abrirModalEditar(@i.IdInstitucion, '@i.Nombre')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-building-fill"></i>
+        Gestión de Instituciones
+    </h1>
+    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalInstitucion" onclick="nuevaInstitucion()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Nueva Institución
+    </button>
+</div>
 
-                                <button class="btn btn-sm btn-outline-danger"
-                                        title="Eliminar"
-                                        onclick="eliminarInstitucion(@i.IdInstitucion)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            @if (!Model.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-school text-muted" style="font-size: 3rem;"></i>
-                    <h4 class="text-muted mt-3">No hay instituciones registradas</h4>
-                </div>
-            }
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-building-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-instituciones">@totalInstituciones</div>
+            <div class="tm-stat-label">Total Instituciones</div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalInstitucion" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title fw-bold text-dark">
-                    <i class="fas fa-building me-2"></i>
-                    <span id="tituloModal">Nueva Institución</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Desktop View -->
+<div class="tm-card tm-instituciones-desktop">
+    <div class="tm-card-header tm-card-header-with-actions">
+        <span><i class="bi bi-building me-2"></i>Listado de Instituciones</span>
+        <div class="tm-header-actions">
+            <!-- Search Box -->
+            <div class="tm-desktop-search">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="desktopSearchInstituciones"
+                           placeholder="Buscar institución...">
+                </div>
             </div>
+            <!-- Page Size (only for cards view) -->
+            <div class="tm-desktop-page-size" id="desktopPageSizeContainer">
+                <label for="desktopPageSize">Mostrar:</label>
+                <select class="form-select form-select-sm" id="desktopPageSize">
+                    <option value="6">6</option>
+                    <option value="12" selected>12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+            <!-- View Toggle -->
+            <div class="tm-view-toggle" role="group" aria-label="Cambiar vista">
+                <button type="button" class="tm-view-btn active" id="btnViewCards" title="Vista de tarjetas">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                </button>
+                <button type="button" class="tm-view-btn" id="btnViewTable" title="Vista de tabla">
+                    <i class="bi bi-table"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="tm-card-body">
+        <!-- Desktop Cards View (Default) -->
+        <div class="tm-desktop-cards-view" id="desktopCardsView">
+            <div class="tm-desktop-cards-grid" id="desktopCardsGrid">
+                @if (Model != null)
+                {
+                    @foreach (var i in Model)
+                    {
+                        <div class="tm-desktop-institucion-card" data-id="@i.IdInstitucion" data-nombre="@i.Nombre">
+                            <div class="tm-desktop-card-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="tm-desktop-card-content">
+                                <h3 class="tm-desktop-card-title">@i.Nombre</h3>
+                            </div>
+                            <div class="tm-desktop-card-actions">
+                                <button class="tm-btn tm-btn-outline tm-btn-sm"
+                                        title="Editar"
+                                        onclick="editarInstitucion(@i.IdInstitucion, '@Html.Raw(i.Nombre?.Replace("'", "\\'"))')">
+                                    <i class="bi bi-pencil-fill"></i>
+                                    <span>Editar</span>
+                                </button>
+                                <button class="tm-btn tm-btn-danger tm-btn-sm"
+                                        title="Eliminar"
+                                        onclick="eliminarInstitucion(@i.IdInstitucion, '@Html.Raw(i.Nombre?.Replace("'", "\\'"))')">
+                                    <i class="bi bi-trash-fill"></i>
+                                    <span>Eliminar</span>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <!-- Empty State for Cards -->
+            <div class="tm-desktop-empty-state" id="desktopEmptyState" style="display: none;">
+                <i class="bi bi-building"></i>
+                <p>No se encontraron instituciones</p>
+                <small>Intente con otros términos de búsqueda</small>
+            </div>
+            <!-- Desktop Cards Pagination -->
+            <div class="tm-desktop-pagination" id="desktopCardsPagination">
+                <!-- Pagination rendered by JS -->
+            </div>
+        </div>
 
-            <form id="formInstitucion">
-                @Html.AntiForgeryToken()
+        <!-- Desktop Table View (Hidden by default) -->
+        <div class="tm-desktop-table-view" id="desktopTableView" style="display: none;">
+            <table id="tablaInstituciones" class="table table-hover w-100">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyInstituciones">
+                    @if (Model != null)
+                    {
+                        @foreach (var i in Model)
+                        {
+                            <tr data-id="@i.IdInstitucion">
+                                <td>@i.Nombre</td>
+                                <td class="text-center">
+                                    <div class="tm-action-buttons">
+                                        <button class="tm-btn tm-btn-outline tm-btn-sm"
+                                                title="Editar"
+                                                onclick="editarInstitucion(@i.IdInstitucion, '@Html.Raw(i.Nombre?.Replace("'", "\\'"))')">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button class="tm-btn tm-btn-danger tm-btn-sm"
+                                                title="Eliminar"
+                                                onclick="eliminarInstitucion(@i.IdInstitucion, '@Html.Raw(i.Nombre?.Replace("'", "\\'"))')">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-                <div class="modal-body">
-                    <input type="hidden" id="IdInstitucion" />
+<!-- Mobile: Instituciones Cards View -->
+<div class="tm-card tm-instituciones-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-building me-2"></i>Listado de Instituciones</span>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre</label>
-                        <input id="Nombre" class="form-control" />
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchInstituciones"
+                       placeholder="Buscar institución...">
+            </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobilePageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Institucion Cards Container -->
+    <div class="tm-institucion-cards" id="institucionCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationInstituciones">
+        <div class="tm-pagination-info">
+            Mostrando <strong>1-10</strong> de <strong>0</strong> instituciones
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="institucionesData">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.Select(i => new {
+        idInstitucion = i.IdInstitucion,
+                nombre = i.Nombre
+        }) ?? Enumerable.Empty<object>()))
+</script>
+
+<!-- Modal: Nueva/Editar Institución -->
+<div class="modal fade" id="modalInstitucion" tabindex="-1" aria-labelledby="modalInstitucionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalInstitucionLabel">
+                    <i class="bi bi-building-add me-2"></i>
+                    Nueva Institución
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="institucionForm" class="row g-3" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" id="IdInstitucion" value="0" />
+
+                    <!-- Nombre -->
+                    <div class="col-12">
+                        <label for="Nombre" class="form-label">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="Nombre" class="form-control"
+                               placeholder="Ingrese el nombre de la institución" required />
                     </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn pastel-btn">Guardar</button>
-                </div>
-            </form>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="institucionForm" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
+    <script src="~/js/instituciones/gestion-instituciones.js" asp-append-version="true"></script>
     <script>
-        let antiToken = "";
-
-        async function cargarToken() {
-            const resp = await fetch("/Instituciones/Token");
-            const data = await resp.json();
-            antiToken = data.token;
-        }
-
-        function abrirModalNuevo() {
-            document.getElementById("tituloModal").innerText = "Nueva Institución";
-            document.getElementById("IdInstitucion").value = "";
-            document.getElementById("Nombre").value = "";
-            new bootstrap.Modal(document.getElementById("modalInstitucion")).show();
-        }
-
-        function abrirModalEditar(id, nombre) {
-            document.getElementById("tituloModal").innerText = "Editar Institución";
-            document.getElementById("IdInstitucion").value = id;
-            document.getElementById("Nombre").value = nombre;
-            new bootstrap.Modal(document.getElementById("modalInstitucion")).show();
-        }
-
-        document.getElementById("formInstitucion").addEventListener("submit", async e => {
-            e.preventDefault();
-
-            const payload = {
-                IdInstitucion: document.getElementById("IdInstitucion").value,
-                Nombre: document.getElementById("Nombre").value
-            };
-
-            const isEdit = payload.IdInstitucion && payload.IdInstitucion > 0;
-            const url = isEdit
-                ? "/Instituciones/ActualizarInstitucion"
-                : "/Instituciones/CrearInstitucion";
-
-            const resp = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "RequestVerificationToken": antiToken
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (resp.ok) {
-                Swal.fire({
-                    icon: "success",
-                    title: "Guardado",
-                    text: "La institución se guardó correctamente.",
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                setTimeout(() => location.reload(), 1600);
-            } else {
-                Swal.fire("Error", "No se pudo guardar la institución", "error");
+        // URL endpoints for JavaScript
+        window.InstitucionesConfig = {
+            urls: {
+                token: '@Url.Action("Token", "Instituciones")',
+                crear: '@Url.Action("CrearInstitucion", "Instituciones")',
+                actualizar: '@Url.Action("ActualizarInstitucion", "Instituciones")',
+                eliminar: '@Url.Action("EliminarInstitucion", "Instituciones")'
             }
-        });
-
-        function eliminarInstitucion(id) {
-            Swal.fire({
-                icon: "warning",
-                title: "¿Eliminar institución?",
-                text: "Esta acción no se puede deshacer.",
-                showCancelButton: true,
-                confirmButtonText: "Eliminar",
-                cancelButtonText: "Cancelar"
-            }).then(r => {
-                if (!r.isConfirmed) return;
-
-                $.ajax({
-                    url: "/Instituciones/EliminarInstitucion?id=" + id,
-                    type: "DELETE",
-                    success: function (resp) {
-                        if (resp.success) {
-                            Swal.fire("Eliminada", resp.message, "success");
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            Swal.fire("Error", resp.message, "error");
-                        }
-                    }
-                });
-            });
-        }
-
-        $(document).ready(async function () {
-            await cargarToken();
-
-            $('#tablaInstituciones').DataTable({
-                pageLength: 10,
-                order: [],
-                language: {
-                    lengthMenu: "Mostrar _MENU_ registros",
-                    search: "Buscar:",
-                    zeroRecords: "No hay datos",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_",
-                    infoEmpty: "Mostrando 0 a 0 de 0",
-                    infoFiltered: "(filtrado de _MAX_ registros)",
-                    paginate: {
-                        next: "Siguiente",
-                        previous: "Anterior"
-                    }
-                }
-            });
-        });
+        };
     </script>
 }

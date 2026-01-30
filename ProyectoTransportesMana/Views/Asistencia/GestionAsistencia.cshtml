@@ -2,7 +2,7 @@
 @using ProyectoTransportesMana.Contracts.Busetas
 
 @{
-    ViewData["Title"] = "Gestión de Asistencia – Transportes Maná";
+    ViewData["Title"] = "Gestión de Asistencia";
     Layout = "~/Views/Shared/_LayoutInterno.cshtml";
 
     var instituciones = ViewBag.Instituciones as List<InstitucionModel> ?? new();
@@ -10,115 +10,313 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/asistencia/gestion-asistencia.css" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/asistencia/gestion-asistencia.css" asp-append-version="true" />
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="text-dark">Gestión de Asistencia Diaria</h1>
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay" style="display: none;">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 tm-text-muted">Cargando asistencia...</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-clipboard-check-fill"></i>
+        Gestión de Asistencia
+    </h1>
+    <div class="tm-header-actions">
+        <span class="tm-badge tm-badge-primary">
+            <i class="bi bi-calendar3 me-1"></i>
+            <span id="fecha-actual"></span>
+        </span>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-building-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-instituciones">@instituciones.Count</div>
+            <div class="tm-stat-label">Instituciones</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-bus-front-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-busetas">@busetas.Count</div>
+            <div class="tm-stat-label">Busetas Disponibles</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-recogidos-hoy">0</div>
+            <div class="tm-stat-label">Recogidos Hoy</div>
+        </div>
+    </div>
 </div>
 
 @if (!instituciones.Any())
 {
-    <div class="alert alert-warning">
-        No hay instituciones registradas. Registre al menos una institución para gestionar la asistencia.
+    <!-- Empty State -->
+    <div class="tm-card">
+        <div class="tm-card-body">
+            <div class="tm-empty-state">
+                <i class="bi bi-building-slash"></i>
+                <p>No hay instituciones registradas</p>
+                <small>Registre al menos una institución para gestionar la asistencia</small>
+                <a href="/GestionInstituciones" class="tm-btn tm-btn-primary mt-3">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Registrar Institución
+                </a>
+            </div>
+        </div>
     </div>
 }
 else
 {
-    foreach (var inst in instituciones)
-    {
-        var escuelaId = inst.IdInstitucion;
-        var nombreEscuela = inst.Nombre;
+    <!-- Institutions Accordion -->
+    <div class="tm-accordion" id="accordionInstituciones">
+        @foreach (var inst in instituciones)
+        {
+            var escuelaId = inst.IdInstitucion;
+            var nombreEscuela = inst.Nombre;
+            var collapseId = $"collapse-{escuelaId}";
+            var headerId = $"heading-{escuelaId}";
 
-        <div class="asistencia-bloque mb-5" data-escuela-id="@escuelaId">
-            <h4 class="asistencia-escuela-nombre mb-3">
-                @nombreEscuela
-            </h4>
-
-            <div class="asistencia-header-filters d-flex flex-wrap gap-3 align-items-end mb-3">
-                <!-- Siempre se tomará la asistencia del día actual -->
-                <div>
-                    <label for="buseta-@escuelaId" class="asistencia-label">Buseta</label>
-                    <select id="buseta-@escuelaId" class="asistencia-select">
-                        <option value="">— Seleccione —</option>
-                        @foreach (var b in busetas)
-                        {
-                            <option value="@b.Id">
-                                @b.Placa - @b.NombreConductor
-                            </option>
-                        }
-                    </select>
-                </div>
-
-                <div>
-                    <label for="tipoViaje-@escuelaId" class="asistencia-label">Tipo de viaje</label>
-                    <select id="tipoViaje-@escuelaId" class="asistencia-select">
-                        <option value="">— Seleccione —</option>
-                        <option value="ida-manana">Ida Mañana</option>
-                        <option value="ida-tarde">Ida Tarde</option>
-                        <option value="vuelta-manana">Vuelta Mañana</option>
-                        <option value="vuelta-tarde">Vuelta Tarde</option>
-                    </select>
-                </div>
-
-
-                <div>
-                    <button class="asistencia-boton-filtros"
-                            onclick="aplicarFiltros(@escuelaId)">
-                        Aplicar Filtros
+            <div class="tm-asistencia-card mb-3" data-escuela-id="@escuelaId">
+                <!-- Card Header (Accordion Toggle) -->
+                <div class="tm-accordion-header" id="@headerId">
+                    <button class="tm-accordion-btn collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#@collapseId"
+                            aria-expanded="false"
+                            aria-controls="@collapseId">
+                        <div class="tm-institution-info">
+                            <i class="bi bi-building me-2"></i>
+                            <span class="tm-institution-name">@nombreEscuela</span>
+                            <span class="tm-dirty-indicator" id="dirty-indicator-@escuelaId" style="display: none;">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                Sin guardar
+                            </span>
+                        </div>
+                        <i class="bi bi-chevron-down tm-accordion-icon"></i>
                     </button>
                 </div>
-            </div>
 
-            <div class="asistencia-alerta-filtros" id="alerta-filtros-@escuelaId">
-                <p class="text-muted">
-                    ⚠️ Para ver la lista de estudiantes, seleccione una buseta y aplique los filtros.
-                </p>
-            </div>
+                <!-- Card Body (Collapsible Content) -->
+                <div id="@collapseId"
+                     class="collapse"
+                     aria-labelledby="@headerId"
+                     data-bs-parent="#accordionInstituciones">
+                    <div class="tm-card-body">
+                        <!-- Filters Section -->
+                        <div class="tm-filters-section">
+                            <div class="tm-filters-grid">
+                                <!-- Buseta Select -->
+                                <div class="tm-filter-group">
+                                    <label for="buseta-@escuelaId" class="tm-filter-label">
+                                        <i class="bi bi-bus-front me-1"></i>
+                                        Buseta
+                                    </label>
+                                    <select id="buseta-@escuelaId" class="form-select tm-filter-select">
+                                        <option value="">Seleccione una buseta</option>
+                                        @foreach (var b in busetas)
+                                        {
+                                            <option value="@b.Id">
+                                                @b.Placa - @b.NombreConductor
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
 
-            <!-- Tabla: oculta por defecto. Luego se llenará vía AJAX/DataTables -->
-            <div class="asistencia-table-container d-none" id="tabla-container-@escuelaId">
-                <table id="tablaAsistencia-@escuelaId" class="asistencia-table tabla-asistencia-dinamica">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Apellidos</th>
-                            <th>Sección</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @* se llenará luego vía AJAX/DataTables *@
-                    </tbody>
-                </table>
+                                <!-- Tipo de Viaje Select -->
+                                <div class="tm-filter-group">
+                                    <label for="tipoViaje-@escuelaId" class="tm-filter-label">
+                                        <i class="bi bi-signpost-2 me-1"></i>
+                                        Tipo de Viaje
+                                    </label>
+                                    <select id="tipoViaje-@escuelaId" class="form-select tm-filter-select">
+                                        <option value="">Seleccione tipo de viaje</option>
+                                        <option value="ida-manana">🌅 Ida Mañana</option>
+                                        <option value="ida-tarde">🌇 Ida Tarde</option>
+                                        <option value="vuelta-manana">🔙 Vuelta Mañana</option>
+                                        <option value="vuelta-tarde">🔙 Vuelta Tarde</option>
+                                    </select>
+                                </div>
 
-                <div class="mt-3 d-flex justify-content-end gap-3 flex-wrap">
-                    <button class="asistencia-boton-filtros"
-                            onclick="guardarAsistencia(@escuelaId)">
-                        Guardar Asistencia
-                    </button>
+                                <!-- Apply Filters Button -->
+                                <div class="tm-filter-group tm-filter-actions">
+                                    <button type="button"
+                                            class="tm-btn tm-btn-secondary w-100"
+                                            onclick="aplicarFiltros(@escuelaId)">
+                                        <i class="bi bi-funnel-fill me-1"></i>
+                                        Aplicar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alert: No filters applied -->
+                        <div class="tm-alert tm-alert-info" id="alerta-filtros-@escuelaId">
+                            <div class="tm-alert-icon">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+                            <div class="tm-alert-content">
+                                <strong>Seleccione los filtros</strong>
+                                <p>Para ver la lista de estudiantes, seleccione una buseta y tipo de viaje, luego aplique los filtros.</p>
+                            </div>
+                        </div>
+
+                        <!-- Desktop: Table View -->
+                        <div class="tm-table-container d-none tm-asistencia-desktop" id="tabla-container-@escuelaId">
+                            <!-- Quick Stats for this institution -->
+                            <div class="tm-quick-stats mb-3" id="quick-stats-@escuelaId">
+                                <div class="tm-quick-stat">
+                                    <span class="tm-quick-stat-value" id="stat-total-@escuelaId">0</span>
+                                    <span class="tm-quick-stat-label">Total</span>
+                                </div>
+                                <div class="tm-quick-stat tm-quick-stat-success">
+                                    <span class="tm-quick-stat-value" id="stat-recogidos-@escuelaId">0</span>
+                                    <span class="tm-quick-stat-label">Recogidos</span>
+                                </div>
+                                <div class="tm-quick-stat tm-quick-stat-warning">
+                                    <span class="tm-quick-stat-value" id="stat-pendientes-@escuelaId">0</span>
+                                    <span class="tm-quick-stat-label">Pendientes</span>
+                                </div>
+                                <div class="tm-quick-stat tm-quick-stat-danger">
+                                    <span class="tm-quick-stat-value" id="stat-noviaja-@escuelaId">0</span>
+                                    <span class="tm-quick-stat-label">No Viajan</span>
+                                </div>
+                            </div>
+
+                            <table id="tablaAsistencia-@escuelaId" class="table table-hover w-100 tm-asistencia-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Apellidos</th>
+                                        <th>Sección</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data loaded via JavaScript -->
+                                </tbody>
+                            </table>
+
+                            <!-- Action Buttons -->
+                            <div class="tm-table-actions">
+                                <button type="button"
+                                        class="tm-btn tm-btn-outline"
+                                        onclick="marcarTodos(@escuelaId, 'recogido')">
+                                    <i class="bi bi-check-all me-1"></i>
+                                    Marcar Todos Recogidos
+                                </button>
+                                <button type="button"
+                                        class="tm-btn tm-btn-primary"
+                                        onclick="guardarAsistencia(@escuelaId)">
+                                    <i class="bi bi-save me-1"></i>
+                                    Guardar Asistencia
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mobile: Cards View -->
+                        <div class="tm-asistencia-mobile d-none" id="mobile-container-@escuelaId">
+                            <!-- Mobile Quick Stats -->
+                            <div class="tm-quick-stats-mobile mb-3" id="quick-stats-mobile-@escuelaId">
+                                <div class="tm-quick-stat-mobile">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span id="stat-total-mobile-@escuelaId">0</span>
+                                </div>
+                                <div class="tm-quick-stat-mobile tm-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span id="stat-recogidos-mobile-@escuelaId">0</span>
+                                </div>
+                                <div class="tm-quick-stat-mobile tm-warning">
+                                    <i class="bi bi-clock-fill"></i>
+                                    <span id="stat-pendientes-mobile-@escuelaId">0</span>
+                                </div>
+                                <div class="tm-quick-stat-mobile tm-danger">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    <span id="stat-noviaja-mobile-@escuelaId">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Mobile Search -->
+                            <div class="tm-mobile-controls">
+                                <div class="tm-mobile-search">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text"
+                                               class="form-control tm-mobile-search-input"
+                                               id="mobileSearch-@escuelaId"
+                                               placeholder="Buscar estudiante...">
+                                    </div>
+                                </div>
+                                <div class="tm-mobile-filter">
+                                    <select class="form-select tm-mobile-filter-estado" id="mobileFilterEstado-@escuelaId">
+                                        <option value="">Todos</option>
+                                        <option value="pendiente">Pendientes</option>
+                                        <option value="recogido">Recogidos</option>
+                                        <option value="noViaja">No Viajan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Student Cards Container -->
+                            <div class="tm-estudiante-cards" id="estudianteCards-@escuelaId">
+                                <!-- Cards rendered by JavaScript -->
+                            </div>
+
+                            <!-- Mobile Pagination -->
+                            <div class="tm-mobile-pagination" id="mobilePagination-@escuelaId" style="display: none;">
+                                <!-- Pagination rendered by JavaScript -->
+                            </div>
+
+                            <!-- Mobile Action Buttons -->
+                            <div class="tm-mobile-actions">
+                                <button type="button"
+                                        class="tm-btn tm-btn-outline tm-btn-block"
+                                        onclick="marcarTodos(@escuelaId, 'recogido')">
+                                    <i class="bi bi-check-all me-1"></i>
+                                    Marcar Todos Recogidos
+                                </button>
+                                <button type="button"
+                                        class="tm-btn tm-btn-primary tm-btn-block"
+                                        onclick="guardarAsistencia(@escuelaId)">
+                                    <i class="bi bi-save me-1"></i>
+                                    Guardar Asistencia
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 }
 
 @section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.body.addEventListener("change", (event) => {
-                const select = event.target;
-                if (!select.classList.contains("asistencia-estado-select")) return;
-
-                const tr = select.closest("tr");
-                if (!tr) return;
-
-                tr.classList.remove("asistencia-row-updated");
-                void tr.offsetWidth;
-                tr.classList.add("asistencia-row-updated");
-            });
-        });
-    </script>
-
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
     <script src="~/js/asistencia/gestion-asistencia.js" asp-append-version="true"></script>
 }

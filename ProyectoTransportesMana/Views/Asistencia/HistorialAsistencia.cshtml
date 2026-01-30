@@ -2,7 +2,7 @@
 @using ProyectoTransportesMana.Contracts.Busetas
 
 @{
-    ViewData["Title"] = "Histórico de Asistencia – Transportes Maná";
+    ViewData["Title"] = "Histórico de Asistencia";
     Layout = "~/Views/Shared/_LayoutInterno.cshtml";
 
     var instituciones = ViewBag.Instituciones as List<InstitucionModel> ?? new();
@@ -10,110 +10,242 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/asistencia/historial-asistencia.css" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/asistencia/historial-asistencia.css" asp-append-version="true" />
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="text-dark fw-bold">Histórico de Asistencia</h1>
-</div>
-
-<div class="historial-filtros pastel-card p-3 mb-4">
-    <div class="row g-3">
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Fecha</label>
-            <input type="date" id="filtroFecha" class="form-control pastel-input" />
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay" style="display: none;">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
         </div>
-
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Escuela</label>
-            <select id="filtroEscuela" class="form-select pastel-input">
-                <option value="">— Todas —</option>
-                @foreach (var i in instituciones)
-                {
-                    <option value="@i.IdInstitucion">@i.Nombre</option>
-                }
-            </select>
-
-
-        </div>
-
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Buseta</label>
-            <select id="filtroBuseta" class="form-select pastel-input">
-                <option value="">— Todas —</option>
-                @foreach (var b in busetas)
-                {
-                    <option value="@b.Id">@b.Placa - @b.NombreConductor</option>
-                }
-            </select>
-
-        </div>
-
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Tipo de viaje</label>
-            <select id="filtroTipo" class="form-select pastel-input">
-                <option value="">— Todos —</option>
-                <option value="ida-manana">Ida Mañana</option>
-                <option value="ida-tarde">Ida Tarde</option>
-                <option value="vuelta-manana">Vuelta Mañana</option>
-                <option value="vuelta-tarde">Vuelta Tarde</option>
-            </select>
-        </div>
-
-        <div class="col-12 d-flex gap-3 mt-2">
-            <button id="btnAplicar" class="btn pastel-btn px-4">Aplicar Filtros</button>
-            <button id="btnExportar" class="btn bg-pastel-azul px-4">Exportar CSV</button>
-        </div>
+        <p class="mt-3 tm-text-muted">Cargando historial...</p>
     </div>
 </div>
 
-<!-- Tarjetas Resumen -->
-<div class="row resumen-estilos mb-4">
-    <div class="col-md-3">
-        <div class="resumen-card pastel-card p-3 text-center">
-            <h2 id="cardTotal" class="fw-bold">0</h2>
-            <p>Total Estudiantes</p>
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-clock-history"></i>
+        Histórico de Asistencia
+    </h1>
+    <button class="tm-btn tm-btn-secondary" id="btnExportar">
+        <i class="bi bi-download me-1"></i>
+        Exportar CSV
+    </button>
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="cardTotal">0</div>
+            <div class="tm-stat-label">Total Estudiantes</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="resumen-card pastel-card p-3 text-center">
-            <h2 id="cardRecogidos" class="fw-bold text-success">0</h2>
-            <p>Recogidos</p>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="cardRecogidos">0</div>
+            <div class="tm-stat-label">Recogidos</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="resumen-card pastel-card p-3 text-center">
-            <h2 id="cardNoViaja" class="fw-bold text-warning">0</h2>
-            <p>No viajan</p>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="cardNoViaja">0</div>
+            <div class="tm-stat-label">No Viajan</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="resumen-card pastel-card p-3 text-center">
-            <h2 id="cardPendientes" class="fw-bold text-muted">0</h2>
-            <p>Pendientes</p>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon info">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="cardPendientes">0</div>
+            <div class="tm-stat-label">Pendientes</div>
         </div>
     </div>
 </div>
 
-<!-- Tabla -->
-<div class="pastel-card p-3">
-    <table id="tablaHistorial" class="table pastel-table table-hover w-100">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Escuela</th>
-                <th>Buseta</th>
-                <th>Tipo de viaje</th>
-                <th>Nombre</th>
-                <th>Apellidos</th>
-                <th>Sección</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+<!-- Filters Card -->
+<div class="tm-card tm-filters-card">
+    <div class="tm-card-header">
+        <span><i class="bi bi-funnel me-2"></i>Filtros de Búsqueda</span>
+        <button class="tm-btn tm-btn-sm tm-btn-light" type="button"
+                data-bs-toggle="collapse" data-bs-target="#filtersCollapse"
+                aria-expanded="true" aria-controls="filtersCollapse">
+            <i class="bi bi-chevron-up tm-collapse-icon"></i>
+        </button>
+    </div>
+    <div class="collapse show" id="filtersCollapse">
+        <div class="tm-card-body">
+            <div class="tm-filters-grid">
+                <!-- Fecha -->
+                <div class="tm-filter-group">
+                    <label for="filtroFecha" class="tm-filter-label">
+                        <i class="bi bi-calendar3"></i>
+                        Fecha
+                    </label>
+                    <input type="date" id="filtroFecha" class="form-control" />
+                </div>
+
+                <!-- Escuela -->
+                <div class="tm-filter-group">
+                    <label for="filtroEscuela" class="tm-filter-label">
+                        <i class="bi bi-building"></i>
+                        Escuela
+                    </label>
+                    <select id="filtroEscuela" class="form-select">
+                        <option value="">Todas las escuelas</option>
+                        @foreach (var i in instituciones)
+                        {
+                            <option value="@i.IdInstitucion">@i.Nombre</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Buseta -->
+                <div class="tm-filter-group">
+                    <label for="filtroBuseta" class="tm-filter-label">
+                        <i class="bi bi-bus-front"></i>
+                        Buseta
+                    </label>
+                    <select id="filtroBuseta" class="form-select">
+                        <option value="">Todas las busetas</option>
+                        @foreach (var b in busetas)
+                        {
+                            <option value="@b.Id">@b.Placa - @b.NombreConductor</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Tipo de Viaje -->
+                <div class="tm-filter-group">
+                    <label for="filtroTipo" class="tm-filter-label">
+                        <i class="bi bi-signpost-split"></i>
+                        Tipo de Viaje
+                    </label>
+                    <select id="filtroTipo" class="form-select">
+                        <option value="">Todos los tipos</option>
+                        <option value="ida-manana">Ida Mañana</option>
+                        <option value="ida-tarde">Ida Tarde</option>
+                        <option value="vuelta-manana">Vuelta Mañana</option>
+                        <option value="vuelta-tarde">Vuelta Tarde</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="tm-filter-actions">
+                <button id="btnLimpiar" class="tm-btn tm-btn-outline">
+                    <i class="bi bi-x-lg me-1"></i>
+                    Limpiar
+                </button>
+                <button id="btnAplicar" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-search me-1"></i>
+                    Aplicar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Desktop: Historial Table Card -->
+<div class="tm-card tm-historial-desktop">
+    <div class="tm-card-header">
+        <span><i class="bi bi-table me-2"></i>Registro de Asistencia</span>
+        <span class="tm-header-badge" id="desktopResultCount">0 registros</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaHistorial" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Escuela</th>
+                    <th>Buseta</th>
+                    <th>Tipo de Viaje</th>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Sección</th>
+                    <th class="text-center">Estado</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyHistorial">
+                <!-- Data loaded via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mobile: Historial Cards View -->
+<div class="tm-card tm-historial-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-clock-history me-2"></i>Registro de Asistencia</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchHistorial"
+                       placeholder="Buscar estudiante...">
+            </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobileFilterEstado">
+                <option value="">Todos</option>
+                <option value="recogido">Recogidos</option>
+                <option value="noviaja">No Viajan</option>
+                <option value="pendiente">Pendientes</option>
+            </select>
+            <select class="form-select" id="mobilePageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Historial Cards Container -->
+    <div class="tm-historial-cards" id="historialCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationHistorial">
+        <div class="tm-pagination-info">
+            Mostrando <strong>0-0</strong> de <strong>0</strong> registros
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
     <script src="~/js/asistencia/historial-asistencia.js" asp-append-version="true"></script>
 }
