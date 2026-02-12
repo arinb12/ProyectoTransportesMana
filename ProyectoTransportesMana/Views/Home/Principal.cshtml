@@ -11,60 +11,67 @@
 <!-- Loading Overlay -->
 <div class="tm-loading-overlay" id="loading-overlay">
     <div class="tm-loading-content">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Cargando...</span>
         </div>
         <p class="mt-3 tm-text-muted">Cargando datos...</p>
     </div>
 </div>
 
-<!-- Page Header -->
-<div class="tm-page-header">
-    <h1 class="tm-page-title">
-        <i class="bi bi-calendar-week"></i>
-        Horarios de Salida 2026
-    </h1>
-    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalEscuela">
-        <i class="bi bi-plus-lg me-1"></i>
-        Nueva Escuela
-    </button>
-</div>
+<!-- ========== CONTENEDOR PRINCIPAL - FLUIDO 100% ========== -->
+<main style="width: 100%; max-width: 100%; min-width: 0; overflow-x: hidden;">
+    <div class="container-fluid"
+         style="width: 100%; max-width: 100%; min-width: 0; padding-left: 15px; padding-right: 15px;">
 
-<!-- Stats Cards -->
-<div class="tm-stats-grid">
-    <div class="tm-stat-card">
-        <div class="tm-stat-icon primary">
-            <i class="bi bi-building"></i>
+        <!-- Page Header -->
+        <div class="tm-page-header">
+            <h1 class="tm-page-title">
+                <i class="bi bi-calendar-week"></i>
+                Horarios de Salida 2026
+            </h1>
+            <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalEscuela">
+                <i class="bi bi-plus-lg me-1"></i>
+                Nueva Escuela
+            </button>
         </div>
-        <div class="tm-stat-content">
-            <div class="tm-stat-value" id="stats-total-escuelas">0</div>
-            <div class="tm-stat-label">Escuelas Registradas</div>
-        </div>
-    </div>
-    <div class="tm-stat-card">
-        <div class="tm-stat-icon secondary">
-            <i class="bi bi-people-fill"></i>
-        </div>
-        <div class="tm-stat-content">
-            <div class="tm-stat-value" id="stats-total-estudiantes">0</div>
-            <div class="tm-stat-label">Estudiantes con Horario</div>
-        </div>
-    </div>
-    <div class="tm-stat-card">
-        <div class="tm-stat-icon accent">
-            <i class="bi bi-clock-history"></i>
-        </div>
-        <div class="tm-stat-content">
-            <div class="tm-stat-value">2026</div>
-            <div class="tm-stat-label">Año Escolar Activo</div>
-        </div>
-    </div>
-</div>
 
-<!-- Schools Container -->
-<div id="contenedor-escuelas">
-    <!-- School cards will be dynamically inserted here -->
-</div>
+        <!-- Stats Cards - Grid responsivo natural -->
+        <div class="tm-stats-grid">
+            <div class="tm-stat-card">
+                <div class="tm-stat-icon primary">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="tm-stat-content">
+                    <div class="tm-stat-value" id="stats-total-escuelas">0</div>
+                    <div class="tm-stat-label">Escuelas Registradas</div>
+                </div>
+            </div>
+            <div class="tm-stat-card">
+                <div class="tm-stat-icon secondary">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="tm-stat-content">
+                    <div class="tm-stat-value" id="stats-total-estudiantes">0</div>
+                    <div class="tm-stat-label">Estudiantes con Horario</div>
+                </div>
+            </div>
+            <div class="tm-stat-card">
+                <div class="tm-stat-icon accent">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="tm-stat-content">
+                    <div class="tm-stat-value">2026</div>
+                    <div class="tm-stat-label">Año Escolar Activo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schools Container - SIN ANCHO MÍNIMO -->
+        <div id="contenedor-escuelas" style="width: 100%; max-width: 100%; min-width: 0;">
+            <!-- Las tarjetas se inyectan aquí -->
+        </div>
+    </div>
+</main>
 
 <!-- Modal: Nueva Escuela -->
 <div class="modal fade" id="modalEscuela" tabindex="-1" aria-labelledby="modalEscuelaLabel" aria-hidden="true">
@@ -80,12 +87,8 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="nombreEscuela" class="form-label">Nombre de la Escuela</label>
-                    <input type="text"
-                           class="form-control"
-                           id="nombreEscuela"
-                           placeholder="Ej: Escuela Primaria Central"
-                           maxlength="100"
-                           autocomplete="off">
+                    <input type="text"                   class="form-control"     id="nombreEscuela"
+                           placeholder="Ej: Escuela Primaria Central"              maxlength="100"                     autocomplete="off">
                     <div class="form-text">Ingrese el nombre completo de la institución educativa</div>
                 </div>
             </div>
@@ -105,8 +108,7 @@
 @section Scripts {
     @inject IConfiguration Configuration
     <script>
-        // API Configuration - Set before loading principal.js
-        window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';
+            window.API_BASE = '@(Configuration["Api:BaseUrl"]?.TrimEnd('/') ?? "https://localhost:7238")';
     </script>
     <script src="~/js/pages/principal.js" asp-append-version="true" charset="utf-8"></script>
 }

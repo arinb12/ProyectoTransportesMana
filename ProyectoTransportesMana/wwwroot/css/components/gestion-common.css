@@ -47,7 +47,7 @@
 
     .tm-stat-card:hover {
         box-shadow: var(--tm-shadow-md);
-        transform: translateY(-2px);
+        transform: none;
     }
 
 .tm-stat-icon {

@@ -70,12 +70,13 @@ namespace ProyectoTransportesMana.Controllers
                     }
                 }
 
-                ViewBag.Mensaje = "Usuario o contraseña incorrecta.";
+                ViewBag.Mensaje = "Usuario o contraseï¿½a incorrecta.";
                 return View();
             }
         }
 
         [Seguridad]
+        [AutorizarRoles(1)]
         public IActionResult Principal()
         {
             return View();
@@ -142,7 +143,7 @@ namespace ProyectoTransportesMana.Controllers
 
             if (!resp.IsSuccessStatusCode)
             {
-                var msg = "La API devolvió error al solicitar el token.";
+                var msg = "La API devolviï¿½ error al solicitar el token.";
                 try
                 {
                     var pd = await resp.Content.ReadFromJsonAsync<ProblemDetails>();
@@ -162,16 +163,16 @@ namespace ProyectoTransportesMana.Controllers
             {
                 TempData["SwalType"] = "success";
                 TempData["SwalTitle"] = "Listo";
-                TempData["SwalText"] = "Si el correo existe en el sistema, se enviaron instrucciones de recuperación.";
+                TempData["SwalText"] = "Si el correo existe en el sistema, se enviaron instrucciones de recuperaciï¿½n.";
                 return RedirectToAction("Index");
             }
 
             var link = Url.Action("ActualizarPassword", "Home", new { token }, Request.Scheme);
 
-            var asunto = "Restablecer contraseña - Transportes Maná";
+            var asunto = "Restablecer contraseï¿½a - Transportes Manï¿½";
             var cuerpo = $@"
 <p>Hola,</p>
-<p>Recibimos una solicitud para restablecer tu contraseña.</p>
+<p>Recibimos una solicitud para restablecer tu contraseï¿½a.</p>
 <p>Para continuar, abre este enlace:</p>
 <p><a href=""{link}"">{link}</a></p>
 <p>Este enlace expira en 30 minutos.</p>";
@@ -182,13 +183,13 @@ namespace ProyectoTransportesMana.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Mensaje = "Falló el envío de correo. " + ex.Message;
+                ViewBag.Mensaje = "Fallï¿½ el envï¿½o de correo. " + ex.Message;
                 return View();
             }
 
             TempData["SwalType"] = "success";
             TempData["SwalTitle"] = "Listo";
-            TempData["SwalText"] = "Si el correo existe en el sistema, se enviaron instrucciones de recuperación.";
+            TempData["SwalText"] = "Si el correo existe en el sistema, se enviaron instrucciones de recuperaciï¿½n.";
             return RedirectToAction("Index");
         }
 
@@ -243,7 +244,7 @@ namespace ProyectoTransportesMana.Controllers
 
             if (new_password != confirm_password)
             {
-                ViewBag.Mensaje = "Las contraseñas no coinciden.";
+                ViewBag.Mensaje = "Las contraseï¿½as no coinciden.";
                 ViewBag.Token = token;
                 return View("ResetPassword");
             }
@@ -257,7 +258,7 @@ namespace ProyectoTransportesMana.Controllers
 
             if (!resp.IsSuccessStatusCode)
             {
-                var msg = "No se pudo actualizar la contraseña.";
+                var msg = "No se pudo actualizar la contraseï¿½a.";
                 try
                 {
                     var pd = await resp.Content.ReadFromJsonAsync<ProblemDetails>();
@@ -273,7 +274,7 @@ namespace ProyectoTransportesMana.Controllers
 
             TempData["SwalType"] = "success";
             TempData["SwalTitle"] = "Listo";
-            TempData["SwalText"] = "Contraseña actualizada. Ya puede iniciar sesión.";
+            TempData["SwalText"] = "Contraseï¿½a actualizada. Ya puede iniciar sesiï¿½n.";
             return RedirectToAction("Index");
         }
 

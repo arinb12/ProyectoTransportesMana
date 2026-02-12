@@ -1,0 +1,297 @@
+/* ============================================
+   PORTAL PADRES - ESTILOS ESPECÍFICOS
+   Basado en el sistema de diseño de Transportes Maná
+   ============================================ */
+
+/* === VARIABLES DE COLOR (sobreescriben si es necesario) === */
+:root {
+    --tm-table-header-bg: #f8fafc;      /* Gris muy suave */
+    --tm-table-border: #e9ecef;
+    --tm-table-hover: #f1f5f9;
+    --tm-stat-card-sm-padding: 0.75rem;
+}
+
+/* ============================================
+   TARJETA DE ESTADÍSTICA PEQUEÑA (para personal)
+   ============================================ */
+.tm-stat-card-sm {
+    padding: var(--tm-stat-card-sm-padding) !important;
+    min-height: auto !important;
+}
+
+.tm-stat-card-sm .tm-stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+}
+
+.tm-stat-card-sm .tm-stat-content {
+    gap: 0.125rem;
+}
+
+.tm-stat-card-sm .tm-stat-label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.025em;
+}
+
+.tm-stat-card-sm .tm-stat-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.tm-stat-detail {
+    font-size: 0.75rem;
+    color: var(--tm-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.125rem;
+}
+
+/* ============================================
+   TARJETA DE VIAJE (placeholder)
+   ============================================ */
+.tm-card--placeholder .tm-card-body {
+    background: linear-gradient(to bottom, var(--tm-bg), #ffffff);
+}
+
+.tm-placeholder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: var(--tm-bg);
+    border-radius: 50%;
+    color: var(--tm-text-muted);
+    font-size: 2rem;
+}
+
+/* ============================================
+   TARJETA DE HIJO (HORARIO)
+   ============================================ */
+.tm-child-schedule-card {
+    background-color: var(--tm-surface);
+    border: 1px solid var(--tm-border-light);
+    border-radius: var(--tm-radius);
+    padding: 1.25rem;
+    transition: all var(--tm-transition);
+}
+
+.tm-child-schedule-card:hover {
+    border-color: var(--tm-secondary);
+    box-shadow: var(--tm-shadow-sm);
+}
+
+.tm-child-schedule-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--tm-border-light);
+}
+
+.tm-child-name {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--tm-text);
+}
+
+.tm-child-name small {
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+/* ============================================
+   TABLAS DE HORARIOS - COLORES SUAVES
+   ============================================ */
+.tm-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tm-table-horario {
+    border: 1px solid var(--tm-table-border);
+    border-radius: var(--tm-radius-sm);
+    overflow: hidden;
+}
+
+.tm-table-horario thead tr {
+    background-color: var(--tm-table-header-bg);
+    border-bottom: 2px solid var(--tm-border);
+}
+
+.tm-table-horario th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--tm-text-muted);
+    padding: 0.75rem 0.75rem;
+    border-bottom: none;
+    background-color: transparent;
+}
+
+.tm-table-horario td {
+    padding: 0.75rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--tm-text);
+    border-bottom: 1px solid var(--tm-table-border);
+    background-color: white;
+}
+
+.tm-table-horario tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tm-table-horario tbody tr:hover td {
+    background-color: var(--tm-table-hover);
+}
+
+/* ============================================
+   BADGES LIGEROS
+   ============================================ */
+.tm-badge-light {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    background-color: var(--tm-bg);
+    border: 1px solid var(--tm-border);
+    border-radius: 2rem;
+    font-size: 0.8125rem;
+    color: var(--tm-text);
+    transition: all var(--tm-transition);
+}
+
+.tm-badge-light:hover {
+    background-color: var(--tm-border-light);
+    border-color: var(--tm-text-muted);
+}
+
+/* ============================================
+   MODAL: ALINEADO CON EL SISTEMA
+   ============================================ */
+#cambioHorarioModal .modal-header {
+    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light) 100%);
+    color: white;
+    border-bottom: none;
+}
+
+#cambioHorarioModal .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+#cambioHorarioModal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+#cambioHorarioModal .modal-content {
+    border: none;
+    border-radius: var(--tm-radius-lg);
+    box-shadow: var(--tm-shadow-xl);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 767.98px) {
+    .tm-child-schedule-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .tm-child-schedule-header .tm-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .tm-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tm-stat-card-sm .tm-stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .tm-stat-card-sm .tm-stat-value {
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tm-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tm-stat-card-sm {
+        flex-direction: row;
+        text-align: left;
+    }
+}
+body .tm-card-header {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+.tm-modal-header {
+    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light) 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.tm-modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.tm-modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.tm-child-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--tm-bg);
+    border-radius: var(--tm-radius-sm);
+    border: 1px solid var(--tm-border-light);
+}
+
+.tm-child-detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.tm-child-detail-label {
+    font-size: 0.6875rem;
+    color: var(--tm-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.tm-child-detail-value {
+    font-size: 0.875rem;
+    color: var(--tm-text);
+    font-weight: 500;
+}
+
+@media (max-width: 767.98px) {
+    .tm-child-details-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+}
