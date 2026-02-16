@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -7,6 +8,7 @@ using System.Data;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlertaController : ControllerBase
@@ -17,8 +19,6 @@ namespace ProyectoTransportesManaAPI.Controllers
             _configuration = configuration;
         }
 
-        // POST api/alerta
-        // Crear alerta (usa sp_alertas_insertar)
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CrearAlertaDto dto)
         {
@@ -59,11 +59,12 @@ namespace ProyectoTransportesManaAPI.Controllers
         public async Task<IActionResult> GetBusetas()
         {
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var sql = @"SELECT id_buseta AS Id, placa AS Placa, CONCAT('Placa - ', placa) AS Texto 
-                        FROM dbo.busetas
-                        WHERE activa = 1
-                        ORDER BY placa;";
-            var lista = await con.QueryAsync(sql);
+
+            var lista = await con.QueryAsync<BusetaActivaDto>(
+                "dbo.sp_busetas_activas_listar",
+                commandType: CommandType.StoredProcedure
+            );
+
             return Ok(lista);
         }
 

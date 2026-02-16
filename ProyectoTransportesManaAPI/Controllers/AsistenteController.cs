@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ProyectoTransportesManaAPI.Models;
@@ -6,6 +7,7 @@ using System.Data;
 
 namespace ProyectoTransportesManaAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AsistenteController : ControllerBase
@@ -20,14 +22,13 @@ namespace ProyectoTransportesManaAPI.Controllers
         [HttpGet("Busetas")]
         public async Task<IActionResult> GetBusetas()
         {
-            const string sql = @"
-                SELECT b.id_buseta AS Id,
-                       CONCAT('Buseta - ', b.placa) AS Texto
-                FROM dbo.busetas b
-                ORDER BY b.placa;";
-
             using var con = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
-            var lista = await con.QueryAsync<BusetaDto>(sql);
+
+            var lista = await con.QueryAsync<BusetaDto>(
+                "dbo.sp_asistentes_busetas_listar",
+                commandType: CommandType.StoredProcedure
+            );
+
             return Ok(lista);
         }
 
