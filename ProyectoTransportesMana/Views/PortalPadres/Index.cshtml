@@ -6,208 +6,287 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/estudiantes/gestion-estudiantes.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/padres/portal-padres.css" asp-append-version="true" />
 }
 
-<div class="container-fluid p-4">
-    <div id="layoutSidenav_content">
-        <main>
-            <div class="container-fluid px-4">
-                <h1 class="mt-4 text-center">Bienvenido al Portal de Padres de Familia</h1>
-                <ol class="breadcrumb mb-4 justify-content-center">
-                    <li class="breadcrumb-item active">Resumen de datos</li>
-                </ol>
-
-                <!-- Detalles de viaje (inactivo) -->
-                <div class="row justify-content-center">
-                    <div>
-                        <div class="card mb-4 border-secondary">
-                            <div class="card-header bg-secondary text-white text-center">
-                                <i class="fas fa-bus me-1"></i> Detalles de viaje
-                            </div>
-                            <div class="card-body text-center text-muted">
-                                <p class="mb-1">No hay un viaje activo en este momento.</p>
-                                <p class="mb-0">
-                                    Cuando exista un viaje en curso, aquí se mostrarán los detalles del recorrido
-                                    y el estado del traslado de su hijo.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Información de conductor y ayudante -->
-                <div class="row justify-content-center mt-3">
-                    <div>
-                        <div class="card mb-4 shadow">
-                            <div class="card-header bg-info d-flex align-items-center">
-                                <i class="fas fa-id-badge me-2 text-dark"></i>
-                                Información del personal asignado
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-bordered mb-0">
-                                    <tbody>
-                                        <tr>
-                                            <th style="width: 30%">Conductor</th>
-                                            <td>
-                                                @if (Model?.Conductor != null)
-                                                {
-                                                    @Model.Conductor.NombreCompleto <br />
-                                                    <small class="text-muted">
-                                                        Teléfono: @Model.Conductor.Telefono
-                                                    </small>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Sin conductor asignado</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Ayudante</th>
-                                            <td>
-                                                @if (Model?.Ayudante != null)
-                                                {
-                                                    @Model.Ayudante.NombreCompleto <br />
-                                                    <small class="text-muted">
-                                                        Teléfono: @Model.Ayudante.Telefono
-                                                    </small>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Sin ayudante asignado</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Estudiantes transportados</th>
-                                            <td>
-                                                @if (Model?.Hijos != null && Model.Hijos.Any())
-                                                {
-                                                    @string.Join(", ", Model.Hijos.Select(h => h.NombreEstudiante))
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Aún no hay estudiantes asociados</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horario mensual de los hijos -->
-                <div class="row justify-content-center mt-3">
-                    <div>
-                        <div class="card mb-4 shadow">
-                            <div class="card-header bg-info d-flex align-items-center">
-                                <i class="fas fa-calendar-alt me-2 text-dark"></i>
-                                Horario mensual y cambios
-                            </div>
-                            <div class="card-body">
-
-                                @if (Model?.Hijos != null && Model.Hijos.Any())
-                                {
-                                    foreach (var hijo in Model.Hijos)
-                                    {
-                                        <div class="mb-4">
-                                           <h5 class="mb-2">
-                                                @hijo.NombreEstudiante
-                                                <small class="text-muted">(@hijo.Institucion)</small>
-                                            </h5>
-
-                                            @if (hijo.HorarioAnual != null && hijo.HorarioAnual.Any())
-                                            {
-                                                <table class="table table-sm table-bordered mb-3">
-                                                    <thead>
-                                                        <tr>
-                                                            <th style="width: 20%">Día</th>
-                                                            <th style="width: 40%">Hora entrada</th>
-                                                            <th style="width: 40%">Hora salida</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var dia in hijo.HorarioAnual)
-                                                        {
-                                                            string nombreDia = dia.DiaSemana switch
-                                                            {
-                                                                1 => "Lunes",
-                                                                2 => "Martes",
-                                                                3 => "Miércoles",
-                                                                4 => "Jueves",
-                                                                5 => "Viernes",
-                                                                6 => "Sábado",
-                                                                7 => "Domingo",
-                                                                _ => "Día"
-                                                            };
-
-                                                            <tr>
-                                                                <td>@nombreDia</td>
-                                                                <td>@(dia.HoraEntrada?.ToString(@"hh\:mm") ?? "-")</td>
-                                                                <td>@(dia.HoraSalida?.ToString(@"hh\:mm") ?? "-")</td>
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
-                                            }
-                                            else
-                                            {
-                                                <p class="text-muted">No hay horario anual registrado para este estudiante.</p>
-                                            }
-
-
-                                            <button class="btn btn-sm btn-primary"
-                                                    onclick="abrirModalCambioHorario(@hijo.IdEstudiante, '@hijo.NombreEstudiante')">
-                                                Registrar cambio de horario
-                                            </button>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <p class="text-muted mb-0">
-                                        Aún no hay hijos registrados para este usuario.
-                                    </p>
-                                }
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-
-        <footer class="py-4 bg-light mt-auto">
-            <div class="container-fluid px-4">
-                <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">Copyright &copy; Transportes Maná</div>
-                    <div>
-                        <a href="#">Política de privacidad</a>
-                        &middot;
-                        <a href="#">Términos y condiciones</a>
-                    </div>
-                </div>
-            </div>
-        </footer>
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay" style="display: none;">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 tm-text-muted">Procesando solicitud...</p>
     </div>
 </div>
 
-<!-- Modal para registrar cambios de horario -->
-<div class="modal fade" id="cambioHorarioModal" tabindex="-1" aria-labelledby="cambioHorarioLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="formCambioHorario">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cambioHorarioLabel">Registrar cambio de horario</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
+<!-- ========== ENCABEZADO ========== -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-people-fill"></i>
+        Portal de Padres de Familia
+    </h1>
+    <p class="tm-page-subtitle">Resumen de viajes, personal asignado y horarios</p>
+</div>
 
-                    <input type="hidden" id="IdEstudianteCambio" />
+<!-- ========== TARJETAS DE ESTADÍSTICAS ========== -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-person-hearts"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value">@(Model?.Hijos?.Count ?? 0)</div>
+            <div class="tm-stat-label">Hijos registrados</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-bus-front-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value">
+                @(Model?.Conductor != null ? "Asignado" : "—")
+            </div>
+            <div class="tm-stat-label">Conductor</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value">
+                @(Model?.Ayudante != null ? "Asignado" : "—")
+            </div>
+            <div class="tm-stat-label">Ayudante</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon info">
+            <i class="bi bi-geo-alt-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value">Inactivo</div>
+            <div class="tm-stat-label">Viaje actual</div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== VIAJE + PERSONAL ASIGNADO (SIDE BY SIDE) ========== -->
+<div class="row g-4">
+    <!-- Columna izquierda: Detalles de viaje -->
+    <div class="col-lg-6">
+        <div class="tm-card tm-card--placeholder h-100">
+            <div class="tm-card-header">
+                <i class="bi bi-bus-front me-2"></i>
+                <span>Detalles de viaje</span>
+            </div>
+            <div class="tm-card-body d-flex flex-column align-items-center justify-content-center text-center py-5">
+                <div class="tm-placeholder-icon mb-3">
+                    <i class="bi bi-bus-front"></i>
+                </div>
+                <h5 class="text-muted">No hay un viaje activo</h5>
+                <p class="mb-0 text-muted small">
+                    Cuando exista un viaje en curso, aquí se mostrarán los detalles del recorrido
+                    y el estado del traslado de su hijo.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna derecha: Personal asignado (rediseñado con tarjetitas de estadísticas) -->
+    <div class="col-lg-6">
+        <div class="tm-card h-100">
+            <div class="tm-card-header">
+                <i class="bi bi-id-badge me-2"></i>
+                <span>Personal asignado</span>
+            </div>
+            <div class="tm-card-body">
+                <!-- Dos mini tarjetas de estadística para Conductor y Ayudante -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <div class="tm-stat-card tm-stat-card-sm">
+                            <div class="tm-stat-icon secondary">
+                                <i class="bi bi-person-badge-fill"></i>
+                            </div>
+                            <div class="tm-stat-content">
+                                <div class="tm-stat-label">Conductor</div>
+                                <div class="tm-stat-value small">
+                                    @if (Model?.Conductor != null)
+                                    {
+                                        @Model.Conductor.NombreCompleto
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No asignado</span>
+                                    }
+                                </div>
+                                @if (Model?.Conductor?.Telefono != null)
+                                {
+                                    <div class="tm-stat-detail">
+                                        <i class="bi bi-telephone-fill me-1"></i>@Model.Conductor.Telefono
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="tm-stat-card tm-stat-card-sm">
+                            <div class="tm-stat-icon accent">
+                                <i class="bi bi-person-badge-fill"></i>
+                            </div>
+                            <div class="tm-stat-content">
+                                <div class="tm-stat-label">Ayudante</div>
+                                <div class="tm-stat-value small">
+                                    @if (Model?.Ayudante != null)
+                                    {
+                                        @Model.Ayudante.NombreCompleto
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No asignado</span>
+                                    }
+                                </div>
+                                @if (Model?.Ayudante?.Telefono != null)
+                                {
+                                    <div class="tm-stat-detail">
+                                        <i class="bi bi-telephone-fill me-1"></i>@Model.Ayudante.Telefono
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* <!-- Lista de estudiantes transportados -->
+                <div class="mt-2 pt-2 border-top">
+                    <span class="fw-semibold d-flex align-items-center">
+                        <i class="bi bi-people-fill me-2"></i>Estudiantes transportados
+                    </span>
+                    @if (Model?.Hijos != null && Model.Hijos.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            @foreach (var hijo in Model.Hijos)
+                            {
+                                <span class="tm-badge tm-badge-light">
+                                    <i class="bi bi-person-circle me-1"></i>@hijo.NombreEstudiante
+                                </span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0 mt-2 small">Aún no hay estudiantes asociados</p>
+                    }
+                </div> *@
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== HORARIO MENSUAL Y CAMBIOS ========== -->
+<div class="tm-card mt-4">
+    <div class="tm-card-header">
+        <i class="bi bi-calendar-week-fill me-2"></i>
+        <span>Horario mensual y cambios</span>
+    </div>
+    <div class="tm-card-body">
+        @if (Model?.Hijos != null && Model.Hijos.Any())
+        {
+            <div class="vstack gap-4">
+                @foreach (var hijo in Model.Hijos)
+                {
+                    <div class="tm-child-schedule-card">
+                        <div class="tm-child-schedule-header">
+                            <div class="tm-child-info">
+                                <h5 class="tm-child-name">
+                                    @hijo.NombreEstudiante
+                                    <small class="text-muted">(@hijo.Institucion)</small>
+                                </h5>
+                            </div>
+                            @* <button class="tm-btn tm-btn-sm tm-btn-primary"
+                                    onclick="abrirModalCambioHorario(@hijo.IdEstudiante, '@hijo.NombreEstudiante')">
+                                <i class="bi bi-pencil-square me-1"></i>Solicitar cambio
+                            </button> *@
+                        </div>
+
+                        @if (hijo.HorarioAnual != null && hijo.HorarioAnual.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm tm-table tm-table-horario align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Día</th>
+                                            <th>Entrada</th>
+                                            <th>Salida</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var dia in hijo.HorarioAnual.OrderBy(d => d.DiaSemana))
+                                        {
+                                            string nombreDia = dia.DiaSemana switch
+                                            {
+                                                1 => "Lunes",
+                                                2 => "Martes",
+                                                3 => "Miércoles",
+                                                4 => "Jueves",
+                                                5 => "Viernes",
+                                                6 => "Sábado",
+                                                7 => "Domingo",
+                                                _ => "Día"
+                                            };
+                                            <tr>
+                                                <td><span class="fw-medium">@nombreDia</span></td>
+                                                <td>@(dia.HoraEntrada?.ToString(@"hh\:mm") ?? "—")</td>
+                                                <td>@(dia.HoraSalida?.ToString(@"hh\:mm") ?? "—")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-light text-muted mb-0 py-2 small">
+                                <i class="bi bi-info-circle me-1"></i>
+                                No hay horario anual registrado para este estudiante.
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="tm-placeholder-icon mb-3">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+                <p class="text-muted mb-0">Aún no hay hijos registrados para este usuario.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ========== MODAL: REGISTRAR CAMBIO DE HORARIO ========== -->
+<div class="modal fade" id="cambioHorarioModal" tabindex="-1" aria-labelledby="cambioHorarioModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cambioHorarioModalLabel">
+                    <i class="bi bi-pencil-square me-2"></i>Registrar cambio de horario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form id="formCambioHorario">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" id="IdEstudianteCambio" name="idEstudiante" />
 
                     <div class="mb-3">
                         <label class="form-label">Estudiante</label>
@@ -215,13 +294,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="FechaCambio" required />
+                        <label class="form-label">Fecha <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="FechaCambio" name="fecha" required />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Tipo</label>
-                        <select class="form-select" id="TipoCambio" required>
+                        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                        <select class="form-select" id="TipoCambio" name="tipo" required>
                             <option value="">Seleccione</option>
                             <option value="Entrada">Entrada</option>
                             <option value="Salida">Salida</option>
@@ -230,78 +309,34 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Hora ajustada</label>
-                        <input type="time" class="form-control" id="HoraAjustadaCambio" required />
+                        <label class="form-label">Hora ajustada <span class="text-danger">*</span></label>
+                        <input type="time" class="form-control" id="HoraAjustadaCambio" name="horaAjustada" required />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Motivo</label>
-                        <textarea class="form-control" id="MotivoCambio" rows="3"
-                                  placeholder="Ejemplo: cita médica, actividad escolar, retraso, etc."
-                                  required></textarea>
+                        <label class="form-label">Motivo <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="MotivoCambio" name="motivo" rows="3"
+                                  placeholder="Ejemplo: cita médica, actividad escolar, retraso, etc." required></textarea>
                     </div>
-
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Guardar cambio</button>
+                    <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="tm-btn tm-btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>Guardar cambio
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Footer (opcional, dentro del layout) -->
+<!-- ... (el footer se hereda del layout) ... -->
+
 @section Scripts {
-    
-
-    <script>
-        function abrirModalCambioHorario(idEstudiante, nombre) {
-            document.getElementById('IdEstudianteCambio').value = idEstudiante;
-            document.getElementById('NombreEstudianteCambio').value = nombre;
-            document.getElementById('FechaCambio').value = '';
-            document.getElementById('TipoCambio').value = '';
-            document.getElementById('HoraAjustadaCambio').value = '';
-            document.getElementById('MotivoCambio').value = '';
-
-            var modal = new bootstrap.Modal(document.getElementById('cambioHorarioModal'));
-            modal.show();
-        }
-
-        document.getElementById('formCambioHorario').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            var idEstudiante = document.getElementById('IdEstudianteCambio').value;
-            var fecha = document.getElementById('FechaCambio').value;
-            var tipo = document.getElementById('TipoCambio').value;
-            var horaAjustada = document.getElementById('HoraAjustadaCambio').value;
-            var motivo = document.getElementById('MotivoCambio').value;
-
-            if (!idEstudiante || !fecha || !tipo || !horaAjustada || !motivo) {
-                alert("Complete todos los campos.");
-                return;
-            }
-
-            var tabla = document.querySelector('table[data-id-hijo="' + idEstudiante + '"] tbody');
-
-            var tr = document.createElement('tr');
-            tr.innerHTML =
-                '<td>' + new Date(fecha).toLocaleDateString() + '</td>' +
-                '<td>' + tipo + '</td>' +
-                '<td class="text-muted">Horario regular</td>' +
-                '<td>' + horaAjustada + '</td>' +
-                '<td>' + motivo + '</td>';
-
-            var filaVacia = tabla.querySelector('tr td[colspan="5"]');
-            if (filaVacia) {
-                filaVacia.parentElement.remove();
-            }
-
-            tabla.appendChild(tr);
-
-            var modal = bootstrap.Modal.getInstance(document.getElementById('cambioHorarioModal'));
-            modal.hide();
-
-            
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
+    <script src="~/js/padres/portal-padres.js" asp-append-version="true"></script>
 }

@@ -1,56 +1,66 @@
 ﻿@model ProyectoTransportesMana.Models.EditarHorarioEstudianteViewModel
 
 <form asp-action="EditarHorario" method="post">
+    @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.IdEstudiante)
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Día</th>
-                <th>Hora entrada</th>
-                <th>Hora salida</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.Horario.Count; i++)
-            {
+    <div class="table-responsive">
+        <table class="table tm-table tm-table-horario align-middle mb-3">
+            <thead>
                 <tr>
-                    @Html.HiddenFor(m => m.Horario[i].IdHorario)
-                    @Html.HiddenFor(m => m.Horario[i].DiaSemana)
-
-                    <td>
-                        @{
-                            var dia = Model.Horario[i].DiaSemana;
-                            string nombreDia = dia switch
-                            {
-                                1 => "Lunes",
-                                2 => "Martes",
-                                3 => "Miércoles",
-                                4 => "Jueves",
-                                5 => "Viernes",
-                                6 => "Sábado",
-                                7 => "Domingo",
-                                _ => "Día"
-                            };
-                        }
-                        @nombreDia
-                    </td>
-
-                    <td>
-                        <input type="time" class="form-control"
-                               name="Horario[@i].HoraEntrada"
-                               value="@(Model.Horario[i].HoraEntrada?.ToString(@"hh\:mm"))" />
-                    </td>
-
-                    <td>
-                        <input type="time" class="form-control"
-                               name="Horario[@i].HoraSalida"
-                               value="@(Model.Horario[i].HoraSalida?.ToString(@"hh\:mm"))" />
-                    </td>
+                    <th>Día</th>
+                    <th>Hora entrada</th>
+                    <th>Hora salida</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Horario.Count; i++)
+                {
+                    <tr>
+                        @Html.HiddenFor(m => m.Horario[i].IdHorario)
+                        @Html.HiddenFor(m => m.Horario[i].DiaSemana)
 
-    <button type="submit" class="btn btn-success">Guardar horario</button>
+                        <td>
+                            <span class="fw-medium">
+                                @{
+                                    var dia = Model.Horario[i].DiaSemana;
+                                    string nombreDia = dia switch
+                                    {
+                                        1 => "Lunes",
+                                        2 => "Martes",
+                                        3 => "Miércoles",
+                                        4 => "Jueves",
+                                        5 => "Viernes",
+                                        6 => "Sábado",
+                                        7 => "Domingo",
+                                        _ => "Día"
+                                    };
+                                }
+                                @nombreDia
+                            </span>
+                        </td>
+
+                        <td>
+                            <input type="time" class="form-control form-control-sm"  name="Horario[@i].HoraEntrada"
+                                   value="@(Model.Horario[i].HoraEntrada?.ToString(@"hh\:mm"))" />
+                        </td>
+
+                        <td>
+                            <input type="time" class="form-control form-control-sm"                     name="Horario[@i].HoraSalida"
+                                   value="@(Model.Horario[i].HoraSalida?.ToString(@"hh\:mm"))" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+            Cancelar
+        </button>
+        <button type="submit" class="tm-btn tm-btn-primary">
+            <i class="bi bi-check-lg me-1"></i>Guardar horario
+        </button>
+    </div>
 </form>
