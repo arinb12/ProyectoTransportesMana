@@ -94,7 +94,7 @@ For detailed information on implementation patterns and conventions:
 - **Database Schema** - (Create when needed: `.claude/docs/database_schema.md`)
 
 ## Adding New Features or Fixing Bugs
-**IMPORTANT**: When you work on a new feature or bug, create a git branch first. Then work on changes in that branch for the remainder of the session.
+**IMPORTANT**: When you work on a new feature or bug, create an entire plan first before doing any change/implementation. Ask all the questions required before doing the plan. Include questions that could improve the requested feature/bug fix so it includes best practices
 
 
 ## Quick Reference

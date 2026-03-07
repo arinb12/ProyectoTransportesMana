@@ -1,0 +1,613 @@
+/* ============================================
+           MODAL CUSTOMIZATION
+   ============================================ */
+#modalBuseta .modal-header,
+#modalAsignaciones .modal-header {
+    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light) 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: calc(var(--tm-radius-lg) - 1px) calc(var(--tm-radius-lg) - 1px) 0 0;
+}
+
+    #modalBuseta .modal-header .modal-title,
+    #modalAsignaciones .modal-header .modal-title {
+        font-weight: 600;
+    }
+
+    #modalBuseta .modal-header .btn-close,
+    #modalAsignaciones .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+        #modalBuseta .modal-header .btn-close:hover,
+        #modalAsignaciones .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+#modalBuseta .modal-content,
+#modalAsignaciones .modal-content {
+    border: none;
+    border-radius: var(--tm-radius-lg);
+    box-shadow: var(--tm-shadow-xl);
+}
+
+#modalBuseta .modal-footer,
+#modalAsignaciones .modal-footer {
+    background-color: var(--tm-bg);
+    border-top: 1px solid var(--tm-border);
+    border-radius: 0 0 calc(var(--tm-radius-lg) - 1px) calc(var(--tm-radius-lg) - 1px);
+}
+
+/* ============================================
+           FORM ENHANCEMENTS
+   ============================================ */
+#busetaForm .form-label {
+    font-weight: 500;
+    color: var(--tm-text);
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+}
+
+#busetaForm .form-control,
+#busetaForm .form-select {
+    border-color: var(--tm-border);
+    font-size: 0.9375rem;
+}
+
+    #busetaForm .form-control:focus,
+    #busetaForm .form-select:focus {
+        border-color: var(--tm-secondary);
+        box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+    }
+
+    #busetaForm .form-control::placeholder {
+        color: var(--tm-text-light);
+    }
+
+#busetaForm .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+}
+
+    #busetaForm .form-check-input:checked {
+        background-color: var(--tm-secondary);
+        border-color: var(--tm-secondary);
+    }
+
+#busetaForm .form-check-label {
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+/* ============================================
+           TABLE ENHANCEMENTS
+   ============================================ */
+#tablaBusetas thead th {
+    background-color: var(--tm-bg);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--tm-text-muted);
+    border-bottom: 2px solid var(--tm-border);
+    white-space: nowrap;
+    padding: 0.75rem;
+}
+
+#tablaBusetas tbody td {
+    vertical-align: middle;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--tm-text);
+    border-bottom: 1px solid var(--tm-border-light);
+}
+
+#tablaBusetas tbody tr:hover {
+    background-color: var(--tm-bg);
+}
+
+#tablaBusetas tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Switch Styling */
+#tablaBusetas .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+    #tablaBusetas .form-check-input:checked {
+        background-color: var(--tm-success);
+        border-color: var(--tm-success);
+    }
+
+    #tablaBusetas .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.25);
+    }
+
+/* ============================================
+           OCCUPANCY MINI BAR
+   ============================================ */
+.tm-occupancy-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 100px;
+}
+
+.tm-occupancy-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--tm-border-light, #e2e8f0);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.tm-occupancy-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.tm-occupancy-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--tm-text-muted);
+    white-space: nowrap;
+}
+
+/* ============================================
+           4TH STAT CARD COLOR VARIANT (INFO)
+   ============================================ */
+.tm-stat-icon.info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+/* ============================================
+           ASSIGNMENT MODAL SPECIFICS
+   ============================================ */
+.tm-bus-info-summary {
+    background: var(--tm-bg);
+    border: 1px solid var(--tm-border-light);
+    border-radius: var(--tm-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tm-capacity-bar-container {
+    padding: 0 0.25rem;
+}
+
+.tm-add-assignment-form .input-group-text {
+    background: var(--tm-surface);
+    border-color: var(--tm-border);
+    color: var(--tm-text-muted);
+}
+
+.tm-add-assignment-form .form-control {
+    border-color: var(--tm-border);
+}
+
+    .tm-add-assignment-form .form-control:focus {
+        border-color: var(--tm-secondary);
+        box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+    }
+
+#tablaAsignaciones thead th {
+    background-color: var(--tm-bg);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--tm-text-muted);
+    border-bottom: 2px solid var(--tm-border);
+    padding: 0.625rem;
+}
+
+#tablaAsignaciones tbody td {
+    vertical-align: middle;
+    padding: 0.625rem;
+    font-size: 0.875rem;
+}
+
+/* ============================================
+           MOBILE VIEW - DESKTOP/MOBILE TOGGLE
+   ============================================ */
+.tm-busetas-mobile {
+    display: none;
+}
+
+/* ============================================
+           MOBILE BUSETA CARDS
+   ============================================ */
+.tm-buseta-cards {
+    padding: 0.5rem;
+}
+
+.tm-buseta-card {
+    background: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius);
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    transition: all var(--tm-transition);
+    animation: fadeInUp 0.3s ease-out;
+}
+
+    .tm-buseta-card:hover {
+        box-shadow: var(--tm-shadow-sm);
+    }
+
+    .tm-buseta-card.active {
+        border-left: 3px solid var(--tm-success);
+    }
+
+    .tm-buseta-card.inactive {
+        border-left: 3px solid var(--tm-danger);
+        opacity: 0.85;
+    }
+
+/* Buseta Card Header */
+.tm-buseta-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    transition: background var(--tm-transition);
+    gap: 0.75rem;
+}
+
+    .tm-buseta-card-header:hover {
+        background: var(--tm-bg);
+    }
+
+/* Buseta Main Info */
+.tm-buseta-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tm-buseta-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tm-buseta-name {
+    font-weight: 600;
+    color: var(--tm-text);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.tm-buseta-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--tm-text-muted);
+}
+
+.tm-buseta-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+    .tm-buseta-meta-item i {
+        font-size: 0.6875rem;
+    }
+
+.tm-buseta-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.tm-buseta-card-header[aria-expanded="true"] .tm-expand-icon {
+    transform: rotate(180deg);
+}
+
+/* Buseta Card Body (Expanded) */
+.tm-buseta-card-body {
+    padding: 1rem;
+    background: var(--tm-bg);
+    border-top: 1px solid var(--tm-border-light);
+    animation: expandIn 0.2s ease-out;
+}
+
+.tm-buseta-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--tm-surface);
+    border-radius: var(--tm-radius-sm);
+    border: 1px solid var(--tm-border-light);
+}
+
+.tm-buseta-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tm-buseta-detail-label {
+    font-size: 0.6875rem;
+    color: var(--tm-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.tm-buseta-detail-value {
+    font-size: 0.8125rem;
+    color: var(--tm-text);
+    font-weight: 500;
+}
+
+/* Buseta Actions */
+.tm-buseta-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--tm-border-light);
+}
+
+.tm-buseta-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tm-buseta-actions-right {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Staggered animation for cards */
+.tm-buseta-card:nth-child(1) { animation-delay: 0.05s; }
+.tm-buseta-card:nth-child(2) { animation-delay: 0.1s; }
+.tm-buseta-card:nth-child(3) { animation-delay: 0.15s; }
+.tm-buseta-card:nth-child(4) { animation-delay: 0.2s; }
+.tm-buseta-card:nth-child(5) { animation-delay: 0.25s; }
+
+/* ============================================
+           RESPONSIVE: TABLET AND BELOW
+   ============================================ */
+@media (max-width: 991.98px) {
+    .tm-busetas-mobile {
+        display: block;
+    }
+
+    .tm-busetas-desktop {
+        display: none !important;
+    }
+}
+
+/* ============================================
+           RESPONSIVE: MOBILE
+   ============================================ */
+@media (max-width: 767.98px) {
+
+    /* Modal adjustments */
+    #modalBuseta .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    #modalBuseta .modal-header {
+        padding: 0.875rem 1rem;
+    }
+
+    #modalBuseta .modal-title {
+        font-size: 1rem;
+    }
+
+    #modalBuseta .modal-body {
+        padding: 1rem;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    #modalBuseta .modal-footer {
+        padding: 0.875rem 1rem;
+        flex-direction: column-reverse;
+    }
+
+        #modalBuseta .modal-footer .tm-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    /* Assignment modal mobile */
+    #modalAsignaciones .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    #modalAsignaciones .modal-body {
+        padding: 0.75rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .tm-bus-info-summary {
+        padding: 0.75rem;
+    }
+
+        .tm-bus-info-summary .row > div {
+            margin-bottom: 0.5rem;
+        }
+
+    .tm-add-assignment-form .input-group {
+        flex-direction: column;
+    }
+
+        .tm-add-assignment-form .input-group > * {
+            border-radius: var(--tm-radius-sm) !important;
+            margin-bottom: 0.25rem;
+        }
+
+    /* Buseta cards */
+    .tm-buseta-card-header {
+        padding: 0.75rem;
+        min-height: 56px;
+    }
+
+    .tm-buseta-name {
+        font-size: 0.875rem;
+    }
+
+    .tm-buseta-meta {
+        font-size: 0.6875rem;
+    }
+
+    .tm-buseta-card-body {
+        padding: 0.75rem;
+    }
+
+    .tm-buseta-details {
+        gap: 0.5rem;
+        padding: 0.625rem;
+    }
+
+    .tm-buseta-detail-label {
+        font-size: 0.625rem;
+    }
+
+    .tm-buseta-detail-value {
+        font-size: 0.75rem;
+    }
+
+    .tm-buseta-card-header {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+        .tm-buseta-card-header:active {
+            background: var(--tm-border-light);
+        }
+}
+
+/* ============================================
+           RESPONSIVE: SMALL MOBILE (430px and below)
+   ============================================ */
+@media (max-width: 430px) {
+    .tm-buseta-cards {
+        padding: 0.375rem;
+    }
+
+    .tm-buseta-card {
+        margin-bottom: 0.375rem;
+    }
+
+    .tm-buseta-card-header {
+        padding: 0.625rem 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .tm-buseta-name {
+        font-size: 0.8125rem;
+    }
+
+    .tm-buseta-meta {
+        font-size: 0.625rem;
+        gap: 0.375rem;
+    }
+
+    .tm-buseta-card-body {
+        padding: 0.625rem;
+    }
+
+    .tm-buseta-details {
+        gap: 0.375rem;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .tm-buseta-detail-label {
+        font-size: 0.5625rem;
+    }
+
+    .tm-buseta-detail-value {
+        font-size: 0.6875rem;
+    }
+
+    .tm-buseta-actions {
+        padding-top: 0.625rem;
+        gap: 0.375rem;
+        flex-direction: column;
+    }
+
+    .tm-buseta-actions-left,
+    .tm-buseta-actions-right {
+        width: 100%;
+    }
+
+    .tm-buseta-actions-right {
+        justify-content: flex-end;
+    }
+
+    .tm-buseta-actions .tm-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+           RESPONSIVE: VERY SMALL (374px and below)
+   ============================================ */
+@media (max-width: 374.98px) {
+    .tm-buseta-details {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+           PRINT STYLES
+   ============================================ */
+@media print {
+    .tm-page-header button,
+    .tm-action-buttons,
+    .tm-buseta-actions,
+    .form-check-input,
+    .modal,
+    .tm-mobile-controls,
+    .tm-mobile-pagination,
+    .tm-busetas-mobile {
+        display: none !important;
+    }
+
+    .tm-busetas-desktop {
+        display: block !important;
+    }
+
+    .tm-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    #tablaBusetas {
+        font-size: 10pt;
+    }
+
+        #tablaBusetas th {
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+}

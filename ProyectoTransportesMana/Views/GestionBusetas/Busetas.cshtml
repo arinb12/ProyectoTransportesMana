@@ -1,0 +1,321 @@
+@{
+    ViewData["Title"] = "Gestión Busetas";
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/principal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/busetas/gestion-busetas.css" asp-append-version="true" />
+}
+
+<!-- Loading Overlay -->
+<div class="tm-loading-overlay" id="loading-overlay">
+    <div class="tm-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 tm-text-muted">Cargando busetas...</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="tm-page-header">
+    <h1 class="tm-page-title">
+        <i class="bi bi-bus-front"></i>
+        Gestión de Busetas
+    </h1>
+    <button class="tm-btn tm-btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuseta" onclick="nuevaBuseta()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Nueva Buseta
+    </button>
+</div>
+
+<!-- Stats Cards -->
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon primary">
+            <i class="bi bi-bus-front"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-total-busetas">0</div>
+            <div class="tm-stat-label">Total Busetas</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon secondary">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-busetas-activas">0</div>
+            <div class="tm-stat-label">Busetas Activas</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon accent">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-estudiantes-asignados">0</div>
+            <div class="tm-stat-label">Estudiantes Asignados</div>
+        </div>
+    </div>
+    <div class="tm-stat-card">
+        <div class="tm-stat-icon info">
+            <i class="bi bi-bar-chart-fill"></i>
+        </div>
+        <div class="tm-stat-content">
+            <div class="tm-stat-value" id="stats-ocupacion-general">0%</div>
+            <div class="tm-stat-label">Ocupación General</div>
+        </div>
+    </div>
+</div>
+
+<!-- Desktop: Busetas Table Card -->
+<div class="tm-card tm-busetas-desktop">
+    <div class="tm-card-header">
+        <span><i class="bi bi-table me-2"></i>Listado de Busetas</span>
+    </div>
+    <div class="tm-card-body">
+        <table id="tablaBusetas" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Placa</th>
+                    <th>Conductor</th>
+                    <th>Cédula</th>
+                    <th class="text-center">Capacidad</th>
+                    <th>Jornada</th>
+                    <th>Horario</th>
+                    <th class="text-center">Ocupación</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyBusetas">
+                <!-- Data loaded via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mobile: Busetas Cards View -->
+<div class="tm-card tm-busetas-mobile">
+    <div class="tm-card-header">
+        <span><i class="bi bi-bus-front me-2"></i>Listado de Busetas</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="tm-mobile-controls">
+        <div class="tm-mobile-search">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="mobileSearchBusetas"
+                       placeholder="Buscar buseta...">
+            </div>
+        </div>
+        <div class="tm-mobile-filter">
+            <select class="form-select" id="mobileFilterEstadoBusetas">
+                <option value="">Todos</option>
+                <option value="activo">Activas</option>
+                <option value="inactivo">Inactivas</option>
+            </select>
+            <select class="form-select" id="mobilePageSizeBusetas">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Buseta Cards Container -->
+    <div class="tm-buseta-cards" id="busetaCardsContainer">
+        <!-- Cards will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Mobile Pagination -->
+    <div class="tm-mobile-pagination" id="mobilePaginationBusetas">
+        <div class="tm-pagination-info">
+            Mostrando <strong>1-10</strong> de <strong>0</strong> busetas
+        </div>
+        <div class="tm-pagination-controls">
+            <button class="tm-page-btn tm-page-prev" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="tm-page-numbers">
+                <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="tm-page-btn tm-page-next" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nueva/Editar Buseta -->
+<div class="modal fade" id="modalBuseta" tabindex="-1" aria-labelledby="modalBusetaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBusetaLabel">
+                    <i class="bi bi-bus-front me-2"></i>
+                    Registrar Buseta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="busetaForm" class="row g-3" novalidate>
+                    <input type="hidden" id="IdBuseta" value="0" />
+
+                    <!-- Placa -->
+                    <div class="col-md-6">
+                        <label for="Placa" class="form-label">
+                            Placa <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="Placa" class="form-control"
+                               placeholder="Ej: ABC123" required />
+                    </div>
+
+                    <!-- Cédula Conductor -->
+                    <div class="col-md-6">
+                        <label for="CedulaConductor" class="form-label">
+                            Cédula Conductor <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="CedulaConductor" class="form-control"
+                               placeholder="Número de cédula" required />
+                    </div>
+
+                    <!-- Nombre Conductor -->
+                    <div class="col-md-6">
+                        <label for="NombreConductor" class="form-label">
+                            Nombre Conductor <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="NombreConductor" class="form-control"
+                               placeholder="Nombre completo del conductor" required />
+                    </div>
+
+                    <!-- Capacidad -->
+                    <div class="col-md-6">
+                        <label for="Capacidad" class="form-label">
+                            Capacidad <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" id="Capacidad" class="form-control"
+                               min="1" max="100" placeholder="Ej: 30" required />
+                    </div>
+
+                    <!-- Jornada -->
+                    <div class="col-md-6">
+                        <label for="Jornada" class="form-label">
+                            Jornada <span class="text-danger">*</span>
+                        </label>
+                        <select id="Jornada" class="form-select" required>
+                            <option value="">Seleccione una jornada</option>
+                            <option value="Mañana">Mañana</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noche">Noche</option>
+                            <option value="Completa">Completa</option>
+                        </select>
+                    </div>
+
+                    <!-- Horario Servicio -->
+                    <div class="col-md-6">
+                        <label for="HorarioServicio" class="form-label">
+                            Horario de Servicio <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="HorarioServicio" class="form-control"
+                               placeholder="Ej: 6:00 AM - 2:00 PM" required />
+                    </div>
+
+                    <!-- Activa -->
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="Activa" checked />
+                            <label class="form-check-label" for="Activa">Activa</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" form="busetaForm" class="tm-btn tm-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar Buseta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Asignaciones -->
+<div class="modal fade" id="modalAsignaciones" tabindex="-1" aria-labelledby="modalAsignacionesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAsignacionesLabel">
+                    <i class="bi bi-people me-2"></i>
+                    Asignaciones - <span id="asignacionPlaca"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Bus Info Summary -->
+                <div class="tm-bus-info-summary" id="busInfoSummary">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Capacity Progress Bar -->
+                <div class="tm-capacity-bar-container mb-3" id="capacityBarContainer">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Add Assignment Form -->
+                <div class="tm-add-assignment-form mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person-plus"></i>
+                        </span>
+                        <input type="number" class="form-control" id="nuevoIdEstudiante"
+                               placeholder="ID del Estudiante" min="1" />
+                        <button class="tm-btn tm-btn-primary" type="button" id="btnAgregarAsignacion">
+                            <i class="bi bi-plus-lg me-1"></i>Asignar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Assignments Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover" id="tablaAsignaciones">
+                        <thead>
+                            <tr>
+                                <th>ID Asignación</th>
+                                <th>ID Estudiante</th>
+                                <th>Fecha Asignación</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyAsignaciones">
+                            <!-- Data loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tm-btn tm-btn-outline" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
+    <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
+    <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
+    <script src="~/js/busetas/gestion-busetas.js" asp-append-version="true"></script>
+}
