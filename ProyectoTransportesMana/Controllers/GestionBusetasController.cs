@@ -108,6 +108,20 @@ namespace ProyectoTransportesMana.Controllers
             return NoContent();
         }
 
+        // ---- Student lookup proxy ----
+
+        [HttpGet]
+        public async Task<IActionResult> EstudiantesLookup()
+        {
+            var res = await _http.GetAsync("api/v1/estudiantes/lookup-activos");
+            var json = await res.Content.ReadAsStringAsync();
+
+            if (!res.IsSuccessStatusCode)
+                return StatusCode((int)res.StatusCode, json);
+
+            return Content(json, "application/json");
+        }
+
         // ---- Assignment proxy endpoints ----
 
         [HttpGet]

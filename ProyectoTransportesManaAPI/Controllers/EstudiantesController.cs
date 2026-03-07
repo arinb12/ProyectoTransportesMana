@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using ProyectoTransportesMana.Contracts.Busetas;
 using ProyectoTransportesMana.Contracts.Estudiantes;
 using System.Data;
 
@@ -166,8 +167,9 @@ namespace ProyectoTransportesManaAPI.Controllers
         {
             using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
             var ids = await con.QueryAsync<int>(
-                "SELECT id_buseta FROM asignacion_estudiantes_buseta WHERE id_estudiante = @Id",
-                new { Id = id }
+                "sp_estudiante_busetas_obtener",
+                new { IdEstudiante = id },
+                commandType: CommandType.StoredProcedure
             );
             return Ok(ids);
         }
@@ -193,6 +195,17 @@ namespace ProyectoTransportesManaAPI.Controllers
                 commandType: CommandType.StoredProcedure
             );
 
+            return Ok(data);
+        }
+
+        [HttpGet("lookup-activos")]
+        public async Task<ActionResult<IEnumerable<EstudianteLookupResponse>>> GetLookupActivos()
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("BDConnection"));
+            var data = await con.QueryAsync<EstudianteLookupResponse>(
+                "sp_estudiantes_lookup_activos",
+                commandType: CommandType.StoredProcedure
+            );
             return Ok(data);
         }
 

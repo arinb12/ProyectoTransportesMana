@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="~/css/components/datatables.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/components/gestion-common.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/busetas/gestion-busetas.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 }
 
 <!-- Loading Overlay -->
@@ -274,15 +276,20 @@
 
                 <!-- Add Assignment Form -->
                 <div class="tm-add-assignment-form mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-person-plus"></i>
-                        </span>
-                        <input type="number" class="form-control" id="nuevoIdEstudiante"
-                               placeholder="ID del Estudiante" min="1" />
-                        <button class="tm-btn tm-btn-primary" type="button" id="btnAgregarAsignacion">
-                            <i class="bi bi-plus-lg me-1"></i>Asignar
-                        </button>
+                    <div class="row g-2 align-items-end">
+                        <div class="col">
+                            <label for="selectEstudiante" class="form-label">
+                                <i class="bi bi-person-plus me-1"></i>Asignar Estudiante
+                            </label>
+                            <select id="selectEstudiante" class="form-select">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button class="tm-btn tm-btn-primary" type="button" id="btnAgregarAsignacion">
+                                <i class="bi bi-plus-lg me-1"></i>Asignar
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -291,10 +298,9 @@
                     <table class="table table-hover" id="tablaAsignaciones">
                         <thead>
                             <tr>
-                                <th>ID Asignación</th>
-                                <th>ID Estudiante</th>
-                                <th>Fecha Asignación</th>
-                                <th class="text-center">Estado</th>
+                                <th>Estudiante</th>
+                                <th>Sección</th>
+                                <th>Institución</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -317,5 +323,6 @@
     <script src="~/js/utilitarios/utilitarios.js" asp-append-version="true"></script>
     <script src="~/js/utilitarios/swal-helpers.js" asp-append-version="true"></script>
     <script src="~/js/shared/gestion-common.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="~/js/busetas/gestion-busetas.js" asp-append-version="true"></script>
 }

@@ -21,6 +21,9 @@
     // Occupancy data from con-asignaciones endpoint
     let occupancyMap = {};
 
+    // Cached student lookup data
+    let estudiantesLookup = [];
+
     // DOM Elements (cached on init)
     const DOM = {
         modal: null,
@@ -76,18 +79,17 @@
             if (!busetasRes.ok) throw new Error('No se pudieron cargar busetas');
             const busetas = await busetasRes.json();
 
-            // Build occupancy map from con-asignaciones data
+            // Build occupancy map from con-asignaciones data (flat DTO)
             occupancyMap = {};
             if (asignacionesRes.ok) {
                 try {
                     const asignacionesData = await asignacionesRes.json();
                     if (Array.isArray(asignacionesData)) {
                         asignacionesData.forEach(item => {
-                            const id = item.id || item.Id || (item.buseta && (item.buseta.id || item.buseta.Id));
+                            const id = item.id || item.Id;
                             if (id != null) {
                                 occupancyMap[id] = {
-                                    totalAsignaciones: item.totalAsignaciones || item.TotalAsignaciones || 0,
-                                    estudiantesAsignados: item.estudiantesAsignados || item.EstudiantesAsignados || []
+                                    totalAsignaciones: item.totalAsignaciones || item.TotalAsignaciones || 0
                                 };
                             }
                         });
@@ -743,6 +745,58 @@
     window.cambiarEstadoBuseta = cambiarEstadoBuseta;
 
     // ============================================
+    // STUDENT LOOKUP & SELECT2
+    // ============================================
+
+    async function cargarEstudiantesLookup() {
+        if (estudiantesLookup.length > 0) return estudiantesLookup;
+
+        try {
+            const res = await fetch('/GestionBusetas/EstudiantesLookup');
+            if (!res.ok) throw new Error('Error al cargar estudiantes');
+            estudiantesLookup = await res.json();
+        } catch (err) {
+            console.error('Error loading student lookup:', err);
+            estudiantesLookup = [];
+        }
+        return estudiantesLookup;
+    }
+
+    function initEstudianteSelect2(currentAssignments) {
+        const $select = $('#selectEstudiante');
+
+        // Destroy existing Select2 instance if present
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.select2('destroy');
+        }
+
+        // Clear existing options
+        $select.empty().append('<option value=""></option>');
+
+        // Get IDs of already-assigned students
+        const assignedIds = new Set((currentAssignments || []).map(a => a.idEstudiante));
+
+        // Populate with available students
+        estudiantesLookup.forEach(est => {
+            if (!assignedIds.has(est.idEstudiante)) {
+                const label = est.nombreCompleto +
+                    (est.seccion ? ' — ' + est.seccion : '') +
+                    (est.institucion ? ' (' + est.institucion + ')' : '');
+                $select.append(new Option(label, est.idEstudiante, false, false));
+            }
+        });
+
+        // Initialize Select2
+        $select.select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Buscar estudiante...',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#modalAsignaciones')
+        });
+    }
+
+    // ============================================
     // ASSIGNMENTS MODAL
     // ============================================
 
@@ -753,7 +807,8 @@
         try {
             const [busetaRes, asigRes] = await Promise.all([
                 fetch(`/GestionBusetas/Obtener?id=${idBuseta}`),
-                fetch(`/GestionBusetas/Asignaciones?idBuseta=${idBuseta}`)
+                fetch(`/GestionBusetas/Asignaciones?idBuseta=${idBuseta}`),
+                cargarEstudiantesLookup()
             ]);
 
             if (!busetaRes.ok) throw new Error('No se pudo obtener la buseta');
@@ -775,6 +830,9 @@
 
             // Render assignments table
             renderAssignmentsTable(asignaciones);
+
+            // Init student dropdown (filter out already-assigned)
+            initEstudianteSelect2(asignaciones);
 
             // Open modal
             const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAsignaciones'));
@@ -846,7 +904,7 @@
         if (!asignaciones || asignaciones.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
+                    <td colspan="4" class="text-center text-muted py-4">
                         <i class="bi bi-person-x fs-3 d-block mb-2"></i>
                         No hay estudiantes asignados a esta buseta
                     </td>
@@ -856,17 +914,11 @@
         }
 
         tbody.innerHTML = asignaciones.map(a => {
-            const fecha = a.fechaAsignacion
-                ? new Date(a.fechaAsignacion).toLocaleDateString('es-CR')
-                : '—';
-            const estadoBadge = GestionCommon.createStatusBadgeHtml(a.activa, STATUS_LABELS);
-
             return `
                 <tr data-id="${a.idAsignacion}">
-                    <td>${a.idAsignacion}</td>
-                    <td>${a.idEstudiante}</td>
-                    <td>${fecha}</td>
-                    <td class="text-center">${estadoBadge}</td>
+                    <td>${escapeHtml(a.nombreEstudiante || 'ID: ' + a.idEstudiante)}</td>
+                    <td>${escapeHtml(a.seccion || '—')}</td>
+                    <td>${escapeHtml(a.nombreInstitucion || '—')}</td>
                     <td class="text-center">
                         <button class="tm-btn tm-btn-sm tm-btn-danger"
                                 title="Eliminar asignación"
@@ -880,11 +932,11 @@
     }
 
     async function agregarAsignacion() {
-        const input = document.getElementById('nuevoIdEstudiante');
-        const idEstudiante = parseInt(input.value);
+        const $select = $('#selectEstudiante');
+        const idEstudiante = parseInt($select.val());
 
         if (!idEstudiante || idEstudiante < 1) {
-            showNotification('warning', 'ID inválido', 'Ingrese un ID de estudiante válido');
+            showNotification('warning', 'Seleccione un estudiante', 'Debe seleccionar un estudiante de la lista');
             return;
         }
 
@@ -907,7 +959,7 @@
                 throw new Error(errText || 'Error al crear asignación');
             }
 
-            input.value = '';
+            $select.val(null).trigger('change');
             showNotification('success', 'Asignación creada', 'El estudiante fue asignado correctamente.', true);
 
             // Refresh assignments in modal
@@ -969,6 +1021,9 @@
             renderBusInfoSummary(buseta, asignaciones.length);
             renderCapacityBar(buseta, asignaciones.length);
             renderAssignmentsTable(asignaciones);
+
+            // Re-init Select2 to remove newly-assigned student from dropdown
+            initEstudianteSelect2(asignaciones);
         } catch (err) {
             console.error('Error refreshing assignments:', err);
         }
@@ -1022,7 +1077,11 @@
 
     function onAsignacionesModalHidden() {
         currentAssignmentBusetaId = null;
-        document.getElementById('nuevoIdEstudiante').value = '';
+        const $select = $('#selectEstudiante');
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.select2('destroy');
+        }
+        $select.empty().append('<option value=""></option>');
     }
 
     // ============================================
@@ -1080,17 +1139,6 @@
         const btnAgregar = document.getElementById('btnAgregarAsignacion');
         if (btnAgregar) {
             btnAgregar.addEventListener('click', agregarAsignacion);
-        }
-
-        // Enter key on assignment input
-        const inputEstudiante = document.getElementById('nuevoIdEstudiante');
-        if (inputEstudiante) {
-            inputEstudiante.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    agregarAsignacion();
-                }
-            });
         }
 
         // Attach mobile event handlers

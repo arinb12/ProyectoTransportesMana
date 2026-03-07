@@ -196,8 +196,9 @@ namespace ProyectoTransportesManaAPI.Controllers
                 newId,
                 request.IdEstudiante,
                 request.IdBuseta,
-                DateTime.Now,
-                true
+                string.Empty,
+                null,
+                null
             );
             return CreatedAtAction(nameof(GetAsignaciones), new { id = idBuseta }, response);
         }

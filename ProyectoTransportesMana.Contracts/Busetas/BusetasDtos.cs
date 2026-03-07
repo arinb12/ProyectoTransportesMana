@@ -47,8 +47,9 @@
         int IdAsignacion,
         int IdEstudiante,
         int IdBuseta,
-        DateTime FechaAsignacion,
-        bool Activa
+        string NombreEstudiante,
+        string? Seccion,
+        string? NombreInstitucion
     );
 
     public record AsignacionEstudianteBusetaCreateRequest(
@@ -57,8 +58,21 @@
     );
 
     public record BusetaConAsignacionesResponse(
-        BusetaResponse Buseta,
-        int TotalAsignaciones,
-        List<int> EstudiantesAsignados
+        int Id,
+        string Placa,
+        int Capacidad,
+        string NombreConductor,
+        string Jornada,
+        string HorarioServicio,
+        bool Activa,
+        string CedulaConductor,
+        int TotalAsignaciones
+    );
+
+    public record EstudianteLookupResponse(
+        int IdEstudiante,
+        string NombreCompleto,
+        string? Seccion,
+        string? Institucion
     );
 }
